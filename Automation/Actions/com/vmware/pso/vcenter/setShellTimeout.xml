@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setShellTimeout" result-type="void" api-version="6.0.0" id="ff84e8a5-29fc-4427-9194-06dd30bb393a" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter" memory-limit="512000000">
+  <param n="vcfqdn" t="string"><![CDATA[vCenter/ESXI hostname]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter/ESXI Username]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter/ESXI Password]]></param>
+  <param n="shellTimeout" t="string"><![CDATA[Shell timeout value]]></param>
+  <param n="shellInteractiveTimeout" t="string"><![CDATA[Sehll Interactive timeout value]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[Ignore powershell SSL connection errors]]></param>
+  <script encoded="false"><![CDATA[var assignResult = System.getModule("com.vmware.pso.vcenter.powercli.host").setShellTimeout(vcfqdn, vcuser, vcpassword, shellTimeout, shellInteractiveTimeout, ignoreSSLCertificate)
+
+var assignStatus = assignResult.get("status");
+System.debug("setShellTimeout completed with status: " + assignStatus);
+if (assignStatus != "success") {
+    throw "setShellTimeout failed with error: " + assignResult.get("error");
+}
+]]></script>
+</dunes-script-module>

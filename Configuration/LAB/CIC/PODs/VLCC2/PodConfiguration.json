@@ -1,0 +1,146 @@
+{
+	"podID": "vlcc2",
+	"SDDCManager": {
+		"VMName": "",
+		"Hostname": "vlcc2-sddc.ntec.wellsfargo.net",
+		"LocalUser": "",
+		"LocalPassword": "",
+		"SSOAdminUser": "",
+		"SSOAdminPassword": "",
+		"EnableCeip": false,
+		"VenafiPolicyDN": "\\VED\\Policy\\EIT-Tech Infrastructure-VE (Ansible) - PKI Admins\\EIT-Tech Infrastructure-VE (Ansible)\\SSL WF Enterprise CA05 G2 (SHA-256) 1-year\\wave-vlcc2",
+		"Domains": []
+	},
+	"vCenter": {
+		"DumpPort": "6500",
+		"SolutionUserPolicyDN": "\\VED\\Policy\\EIT-Tech Infrastructure-VE (Ansible) - PKI Admins\\EIT-Tech Infrastructure-VE (Ansible)\\SSL WF Enterprise CA05 G2 (SHA-256) 1-year\\wave-vlcc2",
+		"mgmtvCenter": {
+			"VCFDomain": "",
+			"Hostname": "",
+			"VMName": "",
+			"IPAddress": "",
+			"SSOAdminUser": "",
+			"SSOAdminPassword": "",
+			"RootPassword": "",
+			"vdsName": "",
+			"vSanClusterName": [""]
+		},
+		"wldvCenters": [
+			{
+				"VCFDomain": "",
+				"Hostname": "",
+				"VMName": "",
+				"IPAddress": "",
+				"SSOAdminUser": "",
+				"SSOAdminPassword": "",
+				"RootPassword": "",
+				"vSanClusterNames": [""]
+			}
+		]
+	},
+	"ESXi": {
+		"esxiPolicyDN": "\\VED\\Policy\\EIT-Tech Infrastructure-VE (Ansible) - PKI Admins\\EIT-Tech Infrastructure-VE (Ansible)\\SSL WF Enterprise CA05 G2 (SHA-256) 1-year\\wave-vlcc2",		
+		"Hosts": [
+			{
+				"Hostname": "",
+				"IPAddress": "",
+				"User": "",
+				"Password": ""
+			}
+		]
+	},
+	"NSXT": {
+		"UsingExternalLB": false,
+		"EnablevIDM": true,
+		"LDAPUsersOrGroups": [
+			{
+				"Name": "ru790739@ent.wfb.bank.qa",
+				"isGroup": "false",
+				"RoleName": "enterprise_admin"
+			},
+			{
+				"Name": "ru776530@ent.wfb.bank.qa",
+				"isGroup": "false",
+				"RoleName": "enterprise_admin"
+			}
+		],
+		"mgmtNSXT":	{
+			"VCFDomain": "",
+			"ManagerVIP": "",
+			"ManagerHostnames": [],
+			"AdminUser": "",
+			"AdminPassword": "",
+			"RootPassword": ""
+		},
+		"wldNSXT": [
+			{
+				"VCFDomain": "",
+				"ManagerVIP": "",
+				"ManagerHostnames": [],
+				"AdminUser": "",
+				"AdminPassword": "",
+				"RootPassword": "",
+				"vdiSegments": [
+					{
+						"Name": "VDI Guest 01",
+						"VLAN": "1031"
+					},
+					{
+						"Name": "VDI Guest 02",
+						"VLAN": "1032"
+					},
+					{
+						"Name": "VDI Guest 03",
+						"VLAN": "1033"
+					},
+					{
+						"Name": "VDI Guest 04",
+						"VLAN": "1034"
+					},
+					{
+						"Name": "VDI Guest 05",
+						"VLAN": "1035"
+					}
+				]
+			}
+		]
+	},
+	"AutomationSwitches": {
+		"SDDCManager": {
+			"Opt out of CEIP": false,
+			"Trust Root Cert": false, 
+			"Configure Proxy": false,
+			"Update Managed Certs": false,
+			"Configure Backup": false
+		},
+		"vCenter": {
+			"Update Solution User Certs": false,
+			"Configure Proxy": false, 				 
+			"Set ESXi Cert Mode": false,
+			"Set Stats and Logging Level": false,
+			"Enable Dump Collector": false, 
+			"Configure Hzn and vRZ Port Groups": false,
+			"Add NFS Storage": false,
+			"Create VDI Folder": false,
+			"Configure AD Settings": false,				
+			"Create and Assign Roles": false 			
+		},
+		"ESXi": {
+			"Rotate Host Certs": false,
+			"Set Shell Timeout": false,
+			"Set Welcome Banner": false,
+			"Set Dump Collector": false
+		},
+		"vSAN": {
+			"Set Kms Provider": false,
+			"Enable vSan Encryption": false,
+			"Create Storage Policy": false
+		},
+		"NSXT": {
+			"Enable IPv6": false,
+			"Create VDI Segments": false,
+			"Configure Syslog": false,
+			"Configure AD Settings": false
+		}
+	}
+}

@@ -1,0 +1,33 @@
+{13:963:scriptContent=string#$tempPath = "[tpath]"
+$url= "[durl]"
+$token = "[gtoken]"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+$wc = New-Object System.Net.WebClient
+$output = "$tempPath\gitrepo.zip"
+$wc.Headers["Authorization"] = $token
+$extractPath = "$tempPath\repofolder"
+if(!(Test-Path $extractPath))
+   { mkdir $extractPath}
+$wc.DownloadFile($url,$output);
+Expand-Archive $output -DestinationPath $extractPath
+$shell = New-Object -com shell.application
+$zip = $shell.NameSpace($output)
+$parentFolderName
+foreach($item in $zip.Items()){if($item.GetFolder -ne $null){$parentFolderName = $item.Name;}}
+$provisionerPath = "$tempPath\vm_provisioner"
+if(!(Test-Path $provisionerPath))
+   { mkdir $provisionerPath}
+Copy-Item  $extractPath\$parentFolderName\vm_provisioner\* -Destination "$tempPath\vm_provisioner"
+Remove-Item $output
+Remove-Item  $extractPath -Recurse
+13:12:scriptTimeOut=number#120.0
+22:7:scriptWorkingDirectory=string#
+17:11:scriptRefreshTime=number#15.0
+22:12:deleteResourceAfterRun=boolean#true
+10:17:scriptType=string#powershell
+21:13:resourceSearchReplace=boolean#false
+24:13:scriptInteractiveSession=boolean#false
+14:126:resourceToCopy=ResourceElement#dunes://service.dunes.ch/ResourceElement?id='0bb7f894-a673-481d-9cb9-66a80ab816e9'&dunesName='ResourceElement'
+12:13:copyResource=boolean#false
+}

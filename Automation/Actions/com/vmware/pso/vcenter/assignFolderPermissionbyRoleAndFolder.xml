@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="assignFolderPermissionbyRoleAndFolder" result-type="void" api-version="6.0.0" id="15b1d607-13f7-4f7d-a8b2-c77fb1cfb459" version="0.0.2" category-name="com.vmware.pso.vcenter">
+  <description><![CDATA[Assign AD user(s) or group(s) to custom role in vCenter.]]></description>
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="adUsers" t="Array/string"><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="adGroups" t="Array/string"><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="roleName" t="string"><![CDATA[]]></param>
+  <param n="folderName" t="string"><![CDATA[]]></param>
+  <param n="folderType" t="string"><![CDATA[The valid values are VM, HostAndCluster, Datastore, Network, and Datacenter]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(roleName,"Input var: roleName");
+dbc.ensureNotNullOrEmpty(folderName,"Input var: folderName");
+dbc.ensureIsOneOf(folderType, ["VM","HostAndCluster","Datastore","Network","Datacenter"], "Input var: folderType");
+if (dbc.isNullOrEmpty(adUsers) && dbc.isNullOrEmpty(adGroups)) {
+    throw "One of input vars 'adUsers' or 'adGroups' must not be NULL";
+}
+
+
+var propogatePermissions = true;
+var assignResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").addFolderPermission(vCenterFQDN,vCenterUser,vCenterPassword,adUsers,adGroups,roleName,propogatePermissions,folderType,folderName,ignoreSSLCertificate);
+var assignStatus = assignResult.get("status");
+System.log("addFolderPermission completed with status: " + assignStatus);
+if (assignStatus != "success") {
+    throw "assignFolderPermissionbyRoleAndFolder failed with error: " + assignResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

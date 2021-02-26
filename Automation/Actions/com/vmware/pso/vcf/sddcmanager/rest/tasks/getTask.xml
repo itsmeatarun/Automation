@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getTask" result-type="SecureString" api-version="6.0.0" id="e36cb3f6-d324-4f13-b2a3-6f53ede08323" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.vcf.sddcmanager.rest.tasks">
+  <param n="host" t="string"><![CDATA[CB Host]]></param>
+  <param n="token" t="string"><![CDATA[CB Bearer Token]]></param>
+  <param n="taskId" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"host");
+dbc.ensureNotNullOrEmpty(token,"token");
+
+var restHost = System.getModule("com.vmware.pso.vcf.sddcmanager.rest").getTransientSDDCManagerHost(host);
+dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+return main();
+
+function main() { 
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	headers.put("Authorization", token);
+	var url = "/v1/tasks";
+	if ( !!taskId ) {
+	    url += "/" + taskId;
+	}
+	
+	var method = "GET";
+	var content = taskId;
+	
+	var inParametersValues = null;
+	
+	var retries = 5;
+	for (var retry = 0; retry <= retries; retry++) {
+		try {
+			var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+			break;
+		} catch (e) {
+			if ((retry+1) == retries) throw e;
+			System.error("Get SDDC tasks failed with error: " + e);
+			System.sleep(5000);
+			System.debug("Trying Get SDDC tasks " + (retries - (retry + 1)) + " more times.");
+		}
+	}
+	
+	System.debug(actionName + ": Task status response '" + JSON.stringify(response) + "'");	
+	
+	return JSON.stringify(response);
+}]]></script>
+</dunes-script-module>

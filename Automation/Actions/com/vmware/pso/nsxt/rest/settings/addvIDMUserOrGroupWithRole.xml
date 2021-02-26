@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addvIDMUserOrGroupWithRole" result-type="void" api-version="6.0.0" id="9317db90-1b81-4784-bcb8-e67b52e6167e" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.nsxt.rest.settings">
+  <description><![CDATA[Possible Roles:
+enterprise_admin
+security_engineer
+network_op
+vpn_admin
+auditor
+gi_partner_admin
+security_op
+lb_auditor
+network_engineer
+lb_admin
+netx_partner_admin]]></description>
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="usergroup" t="string"><![CDATA[User or Group name as it is displayed in vIDM. Capitalization matters.]]></param>
+  <param n="role" t="string"><![CDATA[See action description for options]]></param>
+  <param n="isGroup" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(usergroup,"Input var: usergroup");
+dbc.ensureNotNullOrEmpty(role,"Input var: role");
+dbc.ensureNotNullOrEmpty(isGroup,"Input var: isGroup");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+var url = "/policy/api/v1/aaa/role-bindings";
+
+var type = "remote_user";
+if (isGroup) {
+	type = "remote_group"; 
+}
+
+var body = {
+  "name": usergroup,
+  "type": type,
+  "roles": [
+    {
+      "role": role
+    }
+  ]
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

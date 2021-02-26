@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="restartVAMI" result-type="string" api-version="6.0.0" id="538b9a72-e779-413f-87b2-b13d9a896520" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="hostVcenterFQDN" t="string"><![CDATA[]]></param>
+  <param n="hostVcenterUser" t="string"><![CDATA[]]></param>
+  <param n="hostVcenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="targetVMName" t="string"><![CDATA[]]></param>
+  <param n="guestUser" t="string"><![CDATA[]]></param>
+  <param n="guestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(hostVcenterFQDN,"Input var: hostVcenterFQDN");
+dbc.ensureNotNullOrEmpty(hostVcenterUser,"Input var: user");
+dbc.ensureNotNullOrEmpty(hostVcenterPassword,"Input var: hostVcenterPassword");
+dbc.ensureNotNullOrEmpty(targetVMName,"Input var: targetVMName");
+dbc.ensureNotNullOrEmpty(guestUser,"Input var: guestUser");
+dbc.ensureNotNullOrEmpty(guestPassword,"Input var: guestPassword");
+
+var script = "/sbin/service vami-lighttp restart"
+
+System.getModule("com.vmware.pso.remoteScript").runRemoteScript([targetVMName], hostVcenterFQDN, hostVcenterUser, hostVcenterPassword, script, guestUser, guestPassword, ignoreSSLCertificate);
+]]></script>
+</dunes-script-module>

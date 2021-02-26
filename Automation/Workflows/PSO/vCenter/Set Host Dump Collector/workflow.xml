@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="bf9c2601-f738-4b6d-8014-336c5a4be1ab" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set Host Dump Collector]]></display-name>
+  <position y="50.0" x="101.0"/>
+  <input>
+    <param name="vcfqdn" type="string"/>
+    <param name="vcuser" type="string"/>
+    <param name="vcpassword" type="SecureString"/>
+    <param name="hostVNic" type="string"/>
+    <param name="networkServerIP" type="string"/>
+    <param name="networkServerPort" type="number"/>
+    <param name="ignoreSSLCertificate" type="boolean"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="324.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/setDumpCollector">
+    <display-name><![CDATA[setDumpCollector]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").setDumpCollector(vcfqdn,vcuser,vcpassword,hostVNic,networkServerIP,networkServerPort,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vcfqdn" type="string" export-name="vcfqdn"/>
+      <bind name="vcuser" type="string" export-name="vcuser"/>
+      <bind name="vcpassword" type="SecureString" export-name="vcpassword"/>
+      <bind name="hostVNic" type="string" export-name="hostVNic"/>
+      <bind name="networkServerIP" type="string" export-name="networkServerIP"/>
+      <bind name="networkServerPort" type="number" export-name="networkServerPort"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="174.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

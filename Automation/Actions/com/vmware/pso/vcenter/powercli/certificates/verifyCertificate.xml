@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="verifyCertificate" result-type="Properties" api-version="6.0.0" id="4e2e2f1c-5de1-44a6-ab48-48dca830a142" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.certificates" memory-limit="512000000" timeout="900">
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <param n="type" t="string"><![CDATA[]]></param>
+  <param n="store" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var command = ""
+command += "/usr/lib/vmware-vmafd/bin/vecs-cli entry list --store " + store + " | certtool -i > /tmp/certinfo-instore.txt;"
+command += "cat /tmp/certs/" + type + ".pub | certtool -i > /tmp/certinfo-infile.txt;"
+command += "diff /tmp/certinfo-instore.txt /tmp/certinfo-infile.txt"
+
+System.debug("command: '" + command + "'");
+
+var response = System.getModule("com.vmware.pso.remoteScript").runRemoteScript(
+    [vcVM],
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    command,
+    vcGuestUser, 
+    vcGuestPassword, 
+    ignoreSSLCertificate
+);
+
+if(response["status"] == "failed") {
+    throw response["error"] ;
+}
+]]></script>
+</dunes-script-module>

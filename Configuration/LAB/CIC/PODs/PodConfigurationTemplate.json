@@ -1,0 +1,87 @@
+{
+	"podID": "",
+	"SDDCManager": {
+		"VMName": "",
+		"Hostname": "sddc-manager.pso.vsphere.local",
+		"LocalUser": "",
+		"LocalPassword": "",
+		"SSOAdminUser": "administrator@vsphere.local",
+		"SSOAdminPassword": "",
+		"EnableCeip": false,
+		"VenafiPolicyDN": "",
+		"Domains": []
+	},
+	"vCenter": {
+		"DumpPort": "",
+		"SolutionUserPolicyDN": "",
+		"mgmtvCenter": {
+			"VCFDomain": "",
+			"Hostname": "",
+			"VMName": "",
+			"IPAddress": "",
+			"SSOAdminUser": "",
+			"SSOAdminPassword": "",
+			"RootPassword": "",
+			"vdsName": "",
+			"vSanClusterName": ""
+		},
+		"wldvCenters": [
+			{
+				"VCFDomain": "",
+				"Hostname": "",
+				"VMName": "",
+				"IPAddress": "",
+				"SSOAdminUser": "",
+				"SSOAdminPassword": "",
+				"RootPassword": "",
+				"vdiSegmentName": "",
+				"vdiSegmentVLAN": "",
+				"vSanClusterName": ""
+			}
+		]
+	},
+	"ESXi": {
+		"WelcomeBanner": "",
+		"DumpvNIC": "",
+		"Hosts": [
+			{
+				"Hostname": "",
+				"IPAddress": "",
+				"User": "",
+				"Password": ""
+			}
+		]
+	},
+	"iDRAC": {
+		"User": "",
+		"Password": "",
+		"CertificatePolicyDN": "",
+		"Hostnames": [
+			{
+				"FQDN": "",
+				"CertificateSANs": []
+			}
+		]
+	},
+	"NSXT": {
+		"UsingExternalLB": false,
+		"EnablevIDM": true,
+		"vIDMUsersOrGroups": [
+			{
+				"Name": "",
+				"isGroup": "",
+				"RoleName": ""
+			}
+		],
+		"wldNSXT": [
+			{
+				"VCFDomain": "",
+				"ManagerVIP": "",
+				"ManagerHostnames": [],
+				"AdminUser": "",
+				"AdminPassword": "",
+				"RootPassword": ""
+			}
+		]
+	}
+}

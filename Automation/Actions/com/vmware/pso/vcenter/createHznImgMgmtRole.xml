@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createHznImgMgmtRole" result-type="void" api-version="6.0.0" id="ff8c17b8-0083-4995-92e9-c04529a7744c" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <description><![CDATA[Create custom role for Horizon Image Management in specified vCenter.]]></description>
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(roleName,"Input var: roleName");
+
+var role = {
+  "name": roleName,
+  "privileges": [
+    "System.Anonymous",
+    "System.View",
+    "System.Read",
+    "Folder.Create",
+    "Folder.Delete",
+    "Datastore.Browse",
+    "Datastore.DeleteFile",
+    "Datastore.FileManagement",
+    "Datastore.AllocateSpace",
+    "Datastore.UpdateVirtualMachineFiles",
+    "Datastore.UpdateVirtualMachineMetadata",
+    "Network.Assign",
+    "VirtualMachine.Inventory.Create",
+    "VirtualMachine.Inventory.CreateFromExisting",
+    "VirtualMachine.Inventory.Register",
+    "VirtualMachine.Inventory.Delete",
+    "VirtualMachine.Inventory.Unregister",
+    "VirtualMachine.Inventory.Move",
+    "VirtualMachine.Interact.PowerOn",
+    "VirtualMachine.Interact.PowerOff",
+    "VirtualMachine.Interact.Suspend",
+    "VirtualMachine.Interact.Reset",
+    "VirtualMachine.Interact.Pause",
+    "VirtualMachine.Interact.AnswerQuestion",
+    "VirtualMachine.Interact.ConsoleInteract",
+    "VirtualMachine.Interact.DeviceConnection",
+    "VirtualMachine.Interact.SetCDMedia",
+    "VirtualMachine.Interact.SetFloppyMedia",
+    "VirtualMachine.Interact.ToolsInstall",
+    "VirtualMachine.Interact.GuestControl",
+    "VirtualMachine.Interact.DefragmentAllDisks",
+    "VirtualMachine.Interact.CreateSecondary",
+    "VirtualMachine.Interact.TurnOffFaultTolerance",
+    "VirtualMachine.Interact.MakePrimary",
+    "VirtualMachine.Interact.TerminateFaultTolerantVM",
+    "VirtualMachine.Interact.DisableSecondary",
+    "VirtualMachine.Interact.EnableSecondary",
+    "VirtualMachine.Interact.Record",
+    "VirtualMachine.Interact.Replay",
+    "VirtualMachine.Interact.Backup",
+    "VirtualMachine.Interact.CreateScreenshot",
+    "VirtualMachine.Interact.PutUsbScanCodes",
+    "VirtualMachine.Interact.SESparseMaintenance",
+    "VirtualMachine.Interact.DnD",
+    "VirtualMachine.GuestOperations.Query",
+    "VirtualMachine.GuestOperations.Modify",
+    "VirtualMachine.GuestOperations.Execute",
+    "VirtualMachine.GuestOperations.QueryAliases",
+    "VirtualMachine.GuestOperations.ModifyAliases",
+    "VirtualMachine.Config.Rename",
+    "VirtualMachine.Config.Annotation",
+    "VirtualMachine.Config.AddExistingDisk",
+    "VirtualMachine.Config.AddNewDisk",
+    "VirtualMachine.Config.RemoveDisk",
+    "VirtualMachine.Config.RawDevice",
+    "VirtualMachine.Config.HostUSBDevice",
+    "VirtualMachine.Config.CPUCount",
+    "VirtualMachine.Config.Memory",
+    "VirtualMachine.Config.AddRemoveDevice",
+    "VirtualMachine.Config.EditDevice",
+    "VirtualMachine.Config.Settings",
+    "VirtualMachine.Config.Resource",
+    "VirtualMachine.Config.UpgradeVirtualHardware",
+    "VirtualMachine.Config.ResetGuestInfo",
+    "VirtualMachine.Config.ToggleForkParent",
+    "VirtualMachine.Config.AdvancedConfig",
+    "VirtualMachine.Config.DiskLease",
+    "VirtualMachine.Config.SwapPlacement",
+    "VirtualMachine.Config.DiskExtend",
+    "VirtualMachine.Config.ChangeTracking",
+    "VirtualMachine.Config.QueryUnownedFiles",
+    "VirtualMachine.Config.ReloadFromPath",
+    "VirtualMachine.Config.QueryFTCompatibility",
+    "VirtualMachine.Config.MksControl",
+    "VirtualMachine.Config.ManagedBy",
+    "VirtualMachine.State.CreateSnapshot",
+    "VirtualMachine.State.RevertToSnapshot",
+    "VirtualMachine.State.RemoveSnapshot",
+    "VirtualMachine.State.RenameSnapshot",
+    "VirtualMachine.Provisioning.Customize",
+    "VirtualMachine.Provisioning.Clone",
+    "VirtualMachine.Provisioning.PromoteDisks",
+    "VirtualMachine.Provisioning.CreateTemplateFromVM",
+    "VirtualMachine.Provisioning.DeployTemplate",
+    "VirtualMachine.Provisioning.CloneTemplate",
+    "VirtualMachine.Provisioning.MarkAsTemplate",
+    "VirtualMachine.Provisioning.MarkAsVM",
+    "VirtualMachine.Provisioning.ReadCustSpecs",
+    "VirtualMachine.Provisioning.ModifyCustSpecs",
+    "VirtualMachine.Provisioning.DiskRandomAccess",
+    "VirtualMachine.Provisioning.DiskRandomRead",
+    "VirtualMachine.Provisioning.FileRandomAccess",
+    "VirtualMachine.Provisioning.GetVmFiles",
+    "VirtualMachine.Provisioning.PutVmFiles",
+    "Resource.AssignVMToPool",
+    "Task.Create",
+    "Task.Update",
+    "VApp.Export",
+    "VApp.Import"
+  ]
+};
+var roleJSON = JSON.stringify(role);
+var overwriteExisting = true;
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").createRole(vCenterFQDN,vCenterUser,vCenterPassword,roleJSON,overwriteExisting,ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+System.log("createRole completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createHznImgMgmtRole failed with error: " + createResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

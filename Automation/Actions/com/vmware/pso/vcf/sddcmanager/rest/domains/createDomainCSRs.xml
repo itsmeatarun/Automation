@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createDomainCSRs" result-type="string" api-version="6.0.0" id="99a1f349-528c-403a-8a08-b30c5f873b65" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.rest.domains">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <param n="domain" t="string"><![CDATA[]]></param>
+  <param n="country" t="string"><![CDATA[]]></param>
+  <param n="locality" t="string"><![CDATA[]]></param>
+  <param n="organization" t="string"><![CDATA[]]></param>
+  <param n="organizationUnit" t="string"><![CDATA[]]></param>
+  <param n="email" t="string"><![CDATA[]]></param>
+  <param n="keySize" t="number"><![CDATA[]]></param>
+  <param n="keyAlgorithm" t="string"><![CDATA[]]></param>
+  <param n="state" t="string"><![CDATA[]]></param>
+  <param n="resources" t="Array/Properties"><![CDATA[{"fqdn": "vcenter-vi01.pso.vsphere.local", "type": "VCENTER"}]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"host");
+dbc.ensureNotNullOrEmpty(token,"token");
+dbc.ensureNotNullOrEmpty(domain,"domain");
+dbc.ensureNotNullOrEmpty(country,"country");
+dbc.ensureNotNullOrEmpty(locality,"locality");
+dbc.ensureNotNullOrEmpty(organization,"organization");
+dbc.ensureNotNullOrEmpty(organizationUnit,"organizationUnit");
+dbc.ensureNotNullOrEmpty(keySize,"keySize");
+dbc.ensureNotNullOrEmpty(keyAlgorithm,"keyAlgorithm");
+dbc.ensureNotNullOrEmpty(state,"state");
+dbc.ensureNotNullOrEmpty(resources,"resources");
+
+var restHost = System.getModule("com.vmware.pso.vcf.sddcmanager.rest").getTransientSDDCManagerHost(host);
+dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+return main();
+
+function main() { 
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	headers.put("Authorization", token);
+	var url = "/v1/domains/" + domain + "/csrs";
+	
+	var method = "PUT";
+    var content = 
+    {
+        "csrGenerationSpec": {
+            "country": country,
+            "state": state,
+            "locality": locality,
+            "organization": organization,
+            "organizationUnit": organizationUnit,
+            "email": email,
+            "keySize": keySize,
+            "keyAlgorithm": keyAlgorithm
+        },
+        "resources": resources
+    };
+
+    var inParametersValues = null;
+	
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, JSON.stringify(content), url, headers);
+	
+	System.debug("createCSRs response '" + JSON.stringify(response) + "'");	
+	
+	return JSON.stringify(response);
+}]]></script>
+</dunes-script-module>

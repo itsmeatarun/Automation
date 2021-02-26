@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="6e14f691-e880-4f61-a60e-a3600e3684bc" version="0.2.0">
+  <display-name><![CDATA[Guest Operations]]></display-name>
+  <description><![CDATA[Configuration with guest operations (username ,passwords, path, etc.)]]></description>
+  <atts>
+    <att name="vmLinuxUserName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[root]]></value>
+    </att>
+    <att name="vmLinuxUserPassword" type="SecureString" read-only="false"/>
+    <att name="vmWindowsUserName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[administrator]]></value>
+    </att>
+    <att name="vmWindowsUserPassword" type="SecureString" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+    <att name="virtualEnvPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/var/lib/iaas/venv/bin/python]]></value>
+    </att>
+    <att name="vmLinuxGuestPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/var/tmp/cloud/vm_provisioner/]]></value>
+      <description><![CDATA[path should end with "/"]]></description>
+    </att>
+    <att name="vmWindowsGuestPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[C:\Temp\Cloud\vm_provisioner\]]></value>
+      <description><![CDATA[path should end witrh "\"]]></description>
+    </att>
+    <att name="rebuildLinuxPrepScript" type="string" read-only="false">
+      <value encoded="n"><![CDATA[touch /var/tmp/cloud/.infoblox_registration ;]]></value>
+    </att>
+    <att name="rebuildWinPrepScript" type="string" read-only="false">
+      <value encoded="n"><![CDATA[type nul > C:\\Temp\\cloud\\.infoblox_registration ;]]></value>
+    </att>
+    <att name="cpCompletedKey" type="string" read-only="false">
+      <value encoded="n"><![CDATA[.provision_completed]]></value>
+    </att>
+    <att name="cpFailedKey" type="string" read-only="false">
+      <value encoded="n"><![CDATA[.provision_failed]]></value>
+    </att>
+    <att name="cpMaxTimeOutTry" type="number" read-only="false">
+      <value encoded="n"><![CDATA[21600.0]]></value>
+    </att>
+    <att name="cpLockFileBasePath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/var/tmp/cloud/]]></value>
+    </att>
+    <att name="cpKeys" type="string" read-only="false">
+      <value encoded="n"><![CDATA[.provision_completed,.provision_failed]]></value>
+    </att>
+    <att name="cpWinLockFileBasePath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[C:\\Temp\\Cloud\\]]></value>
+    </att>
+    <att name="cpLinLockFileBasePath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/var/tmp/cloud/]]></value>
+    </att>
+  </atts>
+</config-element>

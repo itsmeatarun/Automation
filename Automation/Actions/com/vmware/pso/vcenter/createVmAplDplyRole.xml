@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createVmAplDplyRole" result-type="void" api-version="6.0.0" id="a10f7a17-bb2a-4126-bec3-43fd3afc5143" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <description><![CDATA[Create custom role for VM Appliance Deployment in specified vCenter.]]></description>
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+
+var role = {
+  "name": "VM Appliance Deployment",
+  "privileges": [
+    "System.Anonymous",
+    "System.View",
+    "System.Read",
+    "Global.SetCustomField",
+    "Folder.Create",
+    "Folder.Rename",
+    "Datastore.Browse",
+    "Datastore.AllocateSpace",
+    "Network.Assign",
+    "VirtualMachine.Inventory.Create",
+    "VirtualMachine.Inventory.CreateFromExisting",
+    "VirtualMachine.Inventory.Register",
+    "VirtualMachine.Inventory.Delete",
+    "VirtualMachine.Inventory.Unregister",
+    "VirtualMachine.Inventory.Move",
+    "VirtualMachine.Interact.PowerOn",
+    "VirtualMachine.Interact.PowerOff",
+    "VirtualMachine.Interact.Reset",
+    "VirtualMachine.Interact.AnswerQuestion",
+    "VirtualMachine.Interact.ConsoleInteract",
+    "VirtualMachine.Interact.DeviceConnection",
+    "VirtualMachine.Interact.SetCDMedia",
+    "VirtualMachine.Interact.SetFloppyMedia",
+    "VirtualMachine.Config.Rename",
+    "VirtualMachine.Config.AddExistingDisk",
+    "VirtualMachine.Config.AddNewDisk",
+    "VirtualMachine.Config.RemoveDisk",
+    "VirtualMachine.Config.CPUCount",
+    "VirtualMachine.Config.Memory",
+    "VirtualMachine.Config.AddRemoveDevice",
+    "VirtualMachine.Config.EditDevice",
+    "VirtualMachine.Config.Settings",
+    "VirtualMachine.Config.Resource",
+    "VirtualMachine.Config.UpgradeVirtualHardware",
+    "VirtualMachine.Config.ResetGuestInfo",
+    "VirtualMachine.Config.AdvancedConfig",
+    "VirtualMachine.Provisioning.Customize",
+    "VirtualMachine.Provisioning.Clone",
+    "VirtualMachine.Provisioning.CreateTemplateFromVM",
+    "VirtualMachine.Provisioning.DeployTemplate",
+    "VirtualMachine.Provisioning.CloneTemplate",
+    "VirtualMachine.Provisioning.MarkAsTemplate",
+    "VirtualMachine.Provisioning.MarkAsVM",
+    "VirtualMachine.Provisioning.ReadCustSpecs",
+    "VirtualMachine.Provisioning.DiskRandomAccess",
+    "VirtualMachine.Provisioning.DiskRandomRead",
+    "VirtualMachine.Provisioning.GetVmFiles",
+    "VirtualMachine.Provisioning.PutVmFiles",
+    "Resource.AssignVMToPool",
+    "VApp.Import"
+  ]
+};
+var roleJSON = JSON.stringify(role);
+var overwriteExisting = true;
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").createRole(vCenterFQDN,vCenterUser,vCenterPassword,roleJSON,overwriteExisting,ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+var roleID = createResult.get("roleId");
+System.log("createRole completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createVmAplDplyRole failed with error: " + createResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

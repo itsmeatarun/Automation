@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="importCertificalteFromURL" result-type="string" api-version="6.0.0" id="c90fe6ab-2f8e-4179-acb6-2d90598fff0d" version="0.1.1" allowed-operations="evf" category-name="com.vmware.pso.ssl.util">
+  <param n="url" t="string"><![CDATA[URL or just host:port for non-HTTPS SSL services:]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var ld = Config.getKeystores().getImportCAFromUrlAction();
+var model = ld.getModel();
+
+ld.setCertificateAlias("");
+
+var model = ld.getModel();
+model.value = url;
+
+var certValidationResult = ld.validateCertificates();
+var certInfo = ld.getCertInfo();
+
+//System.debug(certInfo);
+if (certValidationResult.isCertificateExpired() == true)   throw "Certificate is expired. \n " + certInfo;
+//if (certValidationResult.isNotValid() == true)   throw "Certificate is not valid. \n " + certInfo;
+	
+var error = ld.execute();
+if (error != null) throw error;
+
+return "success";]]></script>
+</dunes-script-module>

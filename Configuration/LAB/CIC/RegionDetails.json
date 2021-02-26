@@ -1,0 +1,151 @@
+{
+	"CertificateDetails": {
+		"RootCertificate": "LAB/-PKI/rootDEV01G2.crt",
+		"City": "San Francisco",
+		"State": "CA",
+		"Locality": "San Francisco"
+	},
+	"ActiveDirectory": {
+		"LCMAlias": "ActiveDirectoryCreds",
+		"DomainFQDN": "ent.wfb.bank.qa",
+		"DomainBaseDN": "DC=ent,DC=wfb,DC=bank,DC=qa",
+		"ADJoinUser": "",
+		"ADJoinPassword": "",
+		"ADOrgUnit": "OU=LAB VDI-T,OU=Lab POC Objects,OU=Lab Testing,OU=Virtual Engineering,OU=Delegated OUs,OU=EHS,OU=ENT,DC=ent,DC=wfb,DC=bank,DC=qa"
+	},
+	"vRLCM": {
+		"Hostname": "vtsl1-vlcm1.wellsfargo.net"
+	},
+	"WebProxy": {
+		"Hostname": "proxy.wellsfargo.com",
+		"Port": "8080",
+		"User": "",
+		"Password": ""
+	},
+	"SDDCManager": {
+		"LCMBackupAlias": "SDDCManagerBackupCreds",
+		"LCMSSOAdminAlias": "DefaultSDDCManagerSSOCreds",
+		"LCMLocalUserAlias": "DefaultSDDCManagerRootCreds",
+		"BackupHostname": "10.0.0.152",
+		"BackupHostPort": "22",
+		"BackupHostUsername": "",
+		"BackupHostPassword": "",
+		"BackupHostDirectoryPath": "/tmp",
+		"BackupHostSSHFingerPrint": "SHA256:6DaNMbiKRBdvm5rNsORtRzWuODKYr/hT/V0g4kM67Gw",
+		"RootCertKeystoreAlias": "rootcert"
+	},
+	"vCenter": {
+		"KMS": {
+			"LCMAlias": "KmsPassword",
+			"ProviderName": "SafeNet",
+			"KmsPassword": "",
+			"KmsServers": [
+				{
+					"FriendlyName": "snetks-dev-cic01",
+					"Hostname": "snetks-dev-cic01.wellsfargo.com",
+					"Port": "5697"
+				},
+				{
+					"FriendlyName": "snetks-dev-cic02",
+					"Hostname": "snetks-dev-cic02.wellsfargo.com",
+					"Port": "5697"
+				},
+				{
+					"FriendlyName": "snetks-dev-azte01",
+					"Hostname": "snetks-dev-azte01.wellsfargo.com",
+					"Port": "5697"
+				},
+				{
+					"FriendlyName": "snetks-dev-azte02",
+					"Hostname": "snetks-dev-azte02.wellsfargo.com",
+					"Port": "5697"
+				}
+			]
+		},
+		"CustomStoragePolicyDiskStripes": "5",
+		"CustomStoragePolicyFTT": "2",
+		"SyslogPort": "1514",
+		"SyslogProtocol": "TLS",
+		"noProxyHosts": [],
+		"NFSDatastoreName": "NFS01",
+		"NFSHostnameIP": "10.0.0.10",
+		"NFSSharePath": "/netshare",
+		"Access": {
+			"vRealizeRoles": {
+				"LCMADGroupsUsers": ["QA-ENT\\PRV_TIS_SA_SRV_ENGSUPPORT"],
+				"vRLIADGroupsUsers": ["QA-ENT\\PRV_TIS_SA_SRV_ENGSUPPORT"],
+				"vROPSADGroupsUsers": ["QA-ENT\\PRV_TIS_SA_SRV_ENGSUPPORT"],
+				"vRAADGroupsUsers": ["QA-ENT\\PRV_TIS_SA_SRV_ENGSUPPORT"]
+			},
+			"HorizonRoles": {
+				"Appliance_Deployment": {
+					"RoleName": "VM Appliance Deployment",
+					"ADGroups": ["QA-ENT\\PRV_CPS_SA_SRV_OSSDServerAdmin"]
+				},
+				"Hzn_vC_Admin": {
+					"RoleName": "Horizon vCenter Admin",
+					"ADGroups": [
+						"QA-ENT\\PRV_EFO_SA_SRV_HZ_ADMIN"
+					]
+				},
+				"Hzn_vC_Infra_Admin": {
+					"RoleName": "Horizon vCenter Infra Admin",
+					"ADGroups": [
+						"QA-ENT\\PRV_EFO_SA_SRV_HZ_ADMIN",
+						"QA-ENT\\PRV_EFO_SA_SRV_WAVEP_ADMIN"
+					]
+				},
+				"Hzn_Img_Mgmt": {
+					"RoleName": "Horizon Image Management",
+					"ADGroups": ["QA-ENT\\DTCS_EFO_HZ_DEV_ImageManagers"]
+				},
+				"App_Vol_vC_Admin_DisabledWaitingonGroup": {
+					"RoleName": "App Volumes vCenter Admin",
+					"ADGroups": ["QA-ENT\\euceng_vc_av_dev"]
+				},
+				"App_Vol_Pckg_Mgmt": {
+					"RoleName": "App Volumes Package Management",
+					"ADGroups": ["QA-ENT\\DTCS_EFO_HZ_VMPackager"]
+				},
+				"App_Vol_Dist_Mgmt": {
+					"RoleName": "App Volumes Distribution Management",
+					"ADGroups": ["QA-ENT\\DTCS_EFO_HZ_VMDistribution"]
+				},
+				"Content_Lib_Admin": {
+					"RoleName": "com.vmware.Content.Admin",
+					"ADGroups": ["QA-ENT\\DTCS_EFO_HZ_DEV_ContentLibRW"]
+				},
+				"No_Access": {
+					"RoleName": "NoAccess",
+					"ADGroups": [
+						"QA-ENT\\DTCS_EFO_HZ_DEV_ImageManagers",
+						"QA-ENT\\DTCS_EFO_HZ_VMPackager",
+						"QA-ENT\\DTCS_EFO_HZ_VMDistribution"
+					]
+				},
+				"Read_Only": {
+					"RoleName": "ReadOnly",
+					"ADGroups": ["QA-ENT\\DTCS_EFO_WAVE_VC_RO"]
+				},
+				"DTO_Lvl1_Vxrail": {
+					"RoleName": "DTO-Level1-Vxrail",
+					"ADGroups": [
+						"QA-ENT\\PRV_OPS_SA_SRV_DTO_ServerSupport_QA"
+					]
+				}
+			}
+		}
+	},
+	"vRLI": {
+		"LCMAlias": "vtsl1-vrli",
+		"Hostname": "vtsl1-vrli.wellsfargo.net",
+		"User": "",
+		"Password": ""
+	},
+	"vIDM": {
+		"LCMAlias": "vIDMClientId",
+		"Hostname": "vtsl1-vidm1.wellsfargo.net",
+		"AutomationClientID": "",
+		"AutomationClientSecret": ""
+	}
+}

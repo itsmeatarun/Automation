@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="parseCSRResourcesFromJson" result-type="Properties" api-version="6.0.0" id="0b906d20-58b6-4095-a290-c5dc8dd21f65" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="dataString" t="string"><![CDATA[]]></param>
+  <param n="getMgmtResources" t="boolean"><![CDATA[]]></param>
+  <param n="getvCenterResources" t="boolean"><![CDATA[]]></param>
+  <param n="getNSXTResources" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var data = JSON.parse(dataString);
+
+var resourcesByDomain = new Properties();
+
+if(getMgmtResources) {
+    createManagementResources();
+}
+if(getvCenterResources) {
+    createvCenterResources();
+}
+if(getNSXTResources) {
+    createNSXTResources();
+}
+
+return resourcesByDomain;
+
+
+function createNSXTResources() {
+    var wldNSXTs = data.NSXT.wldNSXT;
+
+    for each (var wldNSXT in wldNSXTs) {
+        if(!resourcesByDomain.get(wldNSXT.VCFDomain)) {
+            resourcesByDomain.put(wldNSXT.VCFDomain, {"type" : "VI", "resources" : new Array()})
+        }
+
+        resourcesByDomain.get(wldNSXT.VCFDomain).resources.push(
+            createResource(
+                wldNSXT.ManagerVIP,
+                "NSXT_MANAGER"
+            ) 
+        )
+
+        for each (var ManagerHostname in wldNSXT.ManagerHostnames) {
+            resourcesByDomain.get(wldNSXT.VCFDomain).resources.push(   
+                createResource(
+                    ManagerHostname,
+                    "NSXT_MANAGER"
+                )                 
+            )
+        }
+    }
+}
+
+function createvCenterResources() {
+    var wlvdvCenters = data.vCenter.wldvCenters;
+
+    for each (var wlvdvCenter in wlvdvCenters) {
+        if(!resourcesByDomain.get(wlvdvCenter.VCFDomain)) {
+            resourcesByDomain.put(wlvdvCenter.VCFDomain, {"type" : "VI", "resources" : new Array()})
+        }
+
+        resourcesByDomain.get(wlvdvCenter.VCFDomain).resources.push(
+            createResource(
+                wlvdvCenter.Hostname,
+                "VCENTER"
+            )        
+        )
+    }
+}
+
+function createManagementResources() {
+    resourcesByDomain.put(data.vCenter.mgmtvCenter.VCFDomain, {"type" : "MANAGEMENT", "resources" : new Array()});
+
+    if(getvCenterResources) {
+        resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+            createResource(
+                data.vCenter.mgmtvCenter.Hostname,
+                "VCENTER"
+            )
+        );
+    }
+
+    resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+        createResource(
+            data.SDDCManager.Hostname,
+            "SDDC_MANAGER"
+        )
+    );
+
+    if(getNSXTResources) {
+        resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+            createResource(
+                data.NSXT.mgmtNSXT.ManagerVIP,
+                "NSXT_MANAGER"
+            )
+        );
+
+        for each (var ManagerHostname in data.NSXT.mgmtNSXT.ManagerHostnames) {
+            resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+                createResource(
+                    ManagerHostname,
+                    "NSXT_MANAGER"
+                )                 
+            )
+        }
+    }
+}
+
+function createResource(fqdn, type) {
+    return {
+        "fqdn" : fqdn,
+        "type" : type
+    }
+}]]></script>
+</dunes-script-module>

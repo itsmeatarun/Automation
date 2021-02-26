@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addGlobalPermission" result-type="Properties" api-version="6.0.0" id="1b04cfd7-fd4f-471a-8a1e-d34ea41f84b5" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.vcenter.powercli.accesscontrol" memory-limit="256000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleuser" t="Array/string"><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="rolegroup" t="Array/string"><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="roleid" t="string"><![CDATA[Id of roll to apply]]></param>
+  <param n="propogate" t="string"><![CDATA["true"/'false" propogate permissions]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        $roleusers = $inputs.roleuser
+        $rolegroups = $inputs.rolegroup
+        [ValidateNotNullorEmpty()]
+        $roleid = $inputs.roleid
+        [ValidateNotNullorEmpty()]
+        $propogate = $inputs.propogate
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if ($roleusers -ne $null -And $roleusers.count -gt 0) {
+            Write-Host "Creating new global user permission(s) now."
+            New-GlobalPermission -vc_server $vcfqdn -vc_username $vcuser -vc_password $vcpassword -vc_users_groups $roleusers -isGroup "false" -vc_role_id $roleid -propagate $propogate
+            Write-Host "Global user permission(s) creation successful."
+        }
+        if ($rolegroups -ne $null -And $rolegroups.count -gt 0) {
+            Write-Host "Creating new global group permission(s) now."
+            New-GlobalPermission -vc_server $vcfqdn -vc_username $vcuser -vc_password $vcpassword -vc_users_groups $rolegroups -isGroup "true" -vc_role_id $roleid -propagate $propogate
+            Write-Host "Global group permission(s) creation successful."
+        }
+    } catch {
+        Write-Host "Failed creating new global permission(s). Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+    
+    $output.add("status","success")
+    return $output
+}
+
+Function New-GlobalPermission {
+<#
+    .DESCRIPTION Script to add vSphere Global Permission
+    .NOTES  Adapted from script written by William Lam
+#>
+    param(
+        [Parameter(Mandatory=$true)][string]$vc_server,
+        [Parameter(Mandatory=$true)][String]$vc_username,
+        [Parameter(Mandatory=$true)][String]$vc_password,
+        [Parameter(Mandatory=$true)][String[]]$vc_users_groups,
+        [Parameter(Mandatory=$true)][String]$isGroup,
+        [Parameter(Mandatory=$true)][String]$vc_role_id,
+        [Parameter(Mandatory=$true)][String]$propagate
+    )
+
+    $secpasswd = ConvertTo-SecureString $vc_password -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential($vc_username, $secpasswd)
+
+    # vSphere MOB URL to private enableMethods
+    $mob_url = "https://$vc_server/invsvc/mob3/?moid=authorizationService&method=AuthorizationService.AddGlobalAccessControlList"
+
+    # Initial login to vSphere MOB using GET and store session using $vmware variable
+    if($ignoreSSLCertificate) {
+        $results = Invoke-WebRequest -Uri $mob_url -SessionVariable vmware -Credential $credential -Method GET -SkipCertificateCheck
+    } else {
+        $results = Invoke-WebRequest -Uri $mob_url -SessionVariable vmware -Credential $credential -Method GET
+    }
+
+    # Extract hidden vmware-session-nonce which must be included in future requests to prevent CSRF error
+    # Credit to https://blog.netnerds.net/2013/07/use-powershell-to-keep-a-cookiejar-and-post-to-a-web-form/ for parsing vmware-session-nonce via Powershell
+    if($results.StatusCode -eq 200) {
+        $null = $results -match 'name="vmware-session-nonce" type="hidden" value="?([^\s^"]+)"'
+        $sessionnonce = $matches[1]
+    } else {
+        throw "Failed to login to vSphere MOB; StatusCode: $($results.StatusCode)"
+    }
+
+    # Escape username
+    $vc_users_groups_escaped = $vc_users_groups | ForEach-Object{ [uri]::EscapeUriString($_) }
+
+    foreach ($entity in $vc_users_groups_escaped) {
+        # The POST data payload must include the vmware-session-nonce variable + URL-encoded
+        $body = @"
+vmware-session-nonce=$sessionnonce&permissions=%3Cpermissions%3E%0D%0A+++%3Cprincipal%3E%0D%0A++++++%3Cname%3E$entity%3C%2Fname%3E%0D%0A++++++%3Cgroup%3E$isGroup%3C%2Fgroup%3E%0D%0A+++%3C%2Fprincipal%3E%0D%0A+++%3Croles%3E$vc_role_id%3C%2Froles%3E%0D%0A+++%3Cpropagate%3E$propagate%3C%2Fpropagate%3E%0D%0A%3C%2Fpermissions%3E
+"@
+        # Second request using a POST and specifying our session from initial login + body request
+        Write-Host "Adding Global Permission for $([uri]::UnescapeDataString($entity)) ..."
+        if($ignoreSSLCertificate) {
+            $results = Invoke-WebRequest -Uri $mob_url -WebSession $vmware -Method POST -Body $body -SkipCertificateCheck
+        } else {
+            $results = Invoke-WebRequest -Uri $mob_url -WebSession $vmware -Method POST -Body $body
+        }
+        if($results.StatusCode -ne 200) {
+            throw "Failed to add Global Permission; StatusCode: $($results.StatusCode)"
+        }
+    }
+    # Logout out of vSphere MOB
+    $mob_logout_url = "https://$vc_server/invsvc/mob3/logout"
+    if($ignoreSSLCertificate) {
+        $results = Invoke-WebRequest -Uri $mob_logout_url -WebSession $vmware -Method GET -SkipCertificateCheck
+    } else {
+        $results = Invoke-WebRequest -Uri $mob_logout_url -WebSession $vmware -Method GET
+    }
+}
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="buildPodJSON" result-type="Array/string" api-version="6.0.0" id="de03679f-d246-4dff-b9b2-755f9a3f91a1" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.json">
+  <param n="configName" t="string"><![CDATA[]]></param>
+  <param n="configPath" t="string"><![CDATA[]]></param>
+  <param n="environment" t="string"><![CDATA[]]></param>
+  <param n="region" t="string"><![CDATA[]]></param>
+  <param n="podID" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(configPath,"Input var: configPath");
+dbc.ensureNotNullOrEmpty(configName,"Input var: configName");
+//dbc.ensureNotNullOrEmpty(environment,"Input var: environment");
+//dbc.ensureNotNullOrEmpty(region,"Input var: region");
+//dbc.ensureNotNullOrEmpty(podID,"Input var: podID");
+if (dbc.isNullOrEmpty(configName) || dbc.isNullOrEmpty(configPath) || dbc.isNullOrEmpty(environment) || dbc.isNullOrEmpty(region) || dbc.isNullOrEmpty(podID)) {
+    System.log("configName and configPath and environment and region and podID cannot be null.");
+    return [""];
+}
+
+var configElement = System.getModule("com.vmware.pso.configurations").getConfigurationElementSimple(configName,configPath);
+var githubHost = configElement.getAttributeWithKey("GitHost").value;
+var githubUser = configElement.getAttributeWithKey("GitUser").value;
+var githubToken = configElement.getAttributeWithKey("GitUserToken").value;
+var baseURL = configElement.getAttributeWithKey("GitRepoContentURL").value;
+var lcmUser = configElement.getAttributeWithKey("lcmApiUser").value;
+var lcmPassword = configElement.getAttributeWithKey("lcmApiPassword").value;
+var lcmRootPassword = configElement.getAttributeWithKey("lcmRootPassword").value;
+
+podJSON = System.getModule("com.vmware.pso.github").getPodJSON(githubHost,githubUser,githubToken,baseURL,environment,region,podID);
+var podConfig = JSON.parse(podJSON);
+var lcmHost = podConfig.vRLCM.Hostname;
+
+podJSON = System.getModule("com.vmware.pso.wellsfargo.json").updateCredentialsFromLCM(lcmHost, lcmUser, lcmPassword, lcmRootPassword, podJSON);
+podJSON = System.getModule("com.vmware.pso.wellsfargo.json").updateJsonFromSddcManager(podJSON);
+//System.log(JSON.stringify(JSON.parse(podJSON),null,2));
+return [podJSON];]]></script>
+</dunes-script-module>

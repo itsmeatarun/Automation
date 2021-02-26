@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createSegment" result-type="string" api-version="6.0.0" id="4dda8803-df92-4b6a-981b-63598af4ace6" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt.rest.segments">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="segmentName" t="string"><![CDATA[]]></param>
+  <param n="transportZonePath" t="string"><![CDATA[]]></param>
+  <param n="vlanID" t="number"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(segmentName,"Input var: segmentName");
+dbc.ensureNotNullOrEmpty(transportZonePath,"Input var: transportZonePath");
+dbc.ensureNotNullOrEmpty(vlanID,"Input var: vlanID");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+
+var segmentId = segmentName.replace(/ /g,"_");
+var url = "/policy/api/v1/infra/segments/" + segmentId + "?force=true";
+
+var body = {
+    "display_name": segmentName,
+    "replication_mode": "MTEP",
+    "transport_zone_path": transportZonePath,
+    "vlan_ids": [
+        vlanID
+    ],
+    "admin_state": "UP",
+    "advanced_config": {
+        "address_pool_paths": [],
+        "connectivity": "ON"
+    }
+};
+
+var method = "PATCH";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return segmentId;]]></script>
+</dunes-script-module>

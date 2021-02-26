@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvCenterSyslog" result-type="void" api-version="6.0.0" id="3aac4ff0-81f7-4b5d-b0ba-6d9ca6e5aaed" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterHostname" t="string"><![CDATA[FQDN of vCenter on which to set the Proxy Host.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[User with priv to auth to vCenter.]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="syslogHost" t="string"><![CDATA[]]></param>
+  <param n="syslogPort" t="string"><![CDATA[]]></param>
+  <param n="syslogProtocol" t="string"><![CDATA[One of "TCP", "TLS", "UDP"]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHostname,"Input var: vCenterHostname");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(syslogHost,"Input var: syslogHost");
+dbc.ensureNotNullOrEmpty(syslogPort,"Input var: syslogPort");
+dbc.ensureNotNullOrEmpty(syslogProtocol,"Input var: syslogProtocol");
+
+var sessionToken = System.getModule("com.vmware.pso.vcenter.rest").getvCenterSessionToken(vCenterHostname,vCenterUser,vCenterPassword)
+
+var status = System.getModule("com.vmware.pso.vcenter.rest.appliance").setSyslog(vCenterHostname,sessionToken,syslogHost,syslogPort,syslogProtocol);
+
+var testResult = false;
+for (var i=0; i<5; i++) {
+    System.sleep(5000); //Sleep for 5 seconds to let connection to syslog establish.
+    testResult = System.getModule("com.vmware.pso.vcenter.rest.appliance").testSyslog(vCenterHostname,sessionToken);
+    if(testResult) {
+        break;
+    }
+}
+
+if(!testResult) {
+    System.getModule("com.vmware.pso.vcenter.rest").endvCenterSession(vCenterHostname,sessionToken);
+    throw "Syslog test failed. Exiting.";
+}
+
+System.getModule("com.vmware.pso.vcenter.rest").endvCenterSession(vCenterHostname,sessionToken);
+
+System.log("setvCenterSyslog completed with status: '" + status + "'");
+return;]]></script>
+</dunes-script-module>

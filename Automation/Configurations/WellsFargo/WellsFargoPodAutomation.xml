@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="d9fef8ff-69ec-41ee-8856-5386601fddb3" version="0.0.3">
+  <display-name><![CDATA[WellsFargoPodAutomation]]></display-name>
+  <atts>
+    <att name="GitHost" type="string" read-only="false">
+      <value encoded="n"><![CDATA[github.wellsfargo.com/api/v3]]></value>
+    </att>
+    <att name="GitUser" type="string" read-only="false">
+      <value encoded="n"><![CDATA[u790739]]></value>
+    </att>
+    <att name="GitUserToken" type="SecureString" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+    <att name="GitRepoContentURL" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/repos/pce-eng/VRAInfraConfiguration/contents]]></value>
+    </att>
+    <att name="lcmApiUser" type="string" read-only="false">
+      <value encoded="n"><![CDATA[admin@local]]></value>
+    </att>
+    <att name="lcmApiPassword" type="SecureString" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+    <att name="lcmRootPassword" type="SecureString" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+  </atts>
+</config-element>

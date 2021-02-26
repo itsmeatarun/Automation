@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setCEIP" result-type="void" api-version="6.0.0" id="8e417780-47b7-4c35-8e97-19c01861a252" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="user" t="string"><![CDATA[SDDC Manager user]]></param>
+  <param n="password" t="SecureString"><![CDATA[SDDC Manager password]]></param>
+  <param n="host" t="string"><![CDATA[SDDC Manager host]]></param>
+  <param n="enable" t="boolean"><![CDATA[CEIP Enable/Disable]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(user,"Input var: user");
+dbc.ensureNotNullOrEmpty(password,"Input var: password");
+dbc.ensureNotNullOrEmpty(host,"Input var: host");
+
+var token = System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tokens").getBearerToken(user, password, host);
+
+if(enable) {
+	status = "ENABLE";
+} else {
+	status = "DISABLE";
+}
+System.log("Requesting CEIP status change to '" + status + "'");
+var response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.system.ceip").patchCEIP(host, token, status));
+
+var taskId = response.id;
+
+response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+
+var retryMax = 120;
+var retryCount = 0;
+var retryWait = 5000;
+while(response.status == "In Progress") {
+	if(retryCount > retryMax) {
+		throw "Maximum retry attempts, " + retryMax + " reached waiting for CEIP task: '" + taskId + "'";
+	}
+	System.log("Got status: '" + response.status + "', Waiting " + retryWait + " millis to check CEIP update status.");
+	System.sleep(retryWait);
+	response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+	retryCount++;
+}
+
+if(response.status.toLowerCase() == "failed") {
+	throw "Update CEIP status failed";
+}
+
+System.log("Completed with status: '" + response.status + "'");]]></script>
+</dunes-script-module>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getvCenterSessionToken" result-type="string" api-version="6.0.0" id="1f1532f7-0920-43ef-98ed-f1e755365bf3" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.rest">
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vCenterHost,"Input var: vCenterHost");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(vCenterUser + ":" + vCenterPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-use-header-authn", "null");
+headers.put("vmware-api-session-id", "null");
+headers.put("Authorization","Basic " + auth);
+var url = "/com/vmware/cis/session";
+
+var method = "POST";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+dbc.ensureNotNullOrEmpty(response.value,"Session Token");
+return response.value;]]></script>
+</dunes-script-module>

@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="postvSphereIntegration" result-type="void" api-version="6.0.0" id="ecc801da-9778-4985-85f1-8111c16ed7b6" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vrli.rest">
+  <param n="vrliHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vrliSessionId" t="string"><![CDATA[]]></param>
+  <param n="vcHostname" t="string"><![CDATA[]]></param>
+  <param n="vcUsername" t="string"><![CDATA[]]></param>
+  <param n="vcPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="acceptCert" t="boolean"><![CDATA[Automatically accept not trusted vCenter Server certificates.]]></param>
+  <param n="syslogProtocol" t="string"><![CDATA["udp","tcp","ssl"]]></param>
+  <param n="vsphereEventsEnabled" t="boolean"><![CDATA[]]></param>
+  <param n="autoConfigEsxiHosts" t="boolean"><![CDATA[Configure ESXi hosts and turn on auto-configuration. Auto-configuration will periodically try to configure ESXi hosts that are not configured yet.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vrliHost,"Input var: vrliHost");
+dbc.ensureNotNullOrEmpty(vrliSessionId,"Input var: vrliSessionId");
+dbc.ensureNotNullOrEmpty(vcHostname,"Input var: vcHostname");
+dbc.ensureNotNullOrEmpty(vcUsername,"Input var: vcUsername");
+dbc.ensureNotNullOrEmpty(vcPassword,"Input var: vcPassword");
+dbc.ensureNotNullOrEmpty(acceptCert,"Input var: acceptCert");
+dbc.ensureNotNullOrEmpty(vsphereEventsEnabled,"Input var: vsphereEventsEnabled");
+dbc.ensureNotNullOrEmpty(autoConfigEsxiHosts,"Input var: autoConfigEsxiHosts");
+dbc.ensureIsOneOf(syslogProtocol, ["udp","tcp","ssl"], "Input var: syslogProtocol");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(vrliHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Bearer "+ vrliSessionId);
+
+var url = "/api/v1/vsphere";
+
+var body = {
+    "acceptCert": acceptCert,
+    "hostname": vcHostname,
+    "username": vcUsername,
+    "password": vcPassword,
+    "syslogProtocol": syslogProtocol,
+    "vsphereEventsEnabled": vsphereEventsEnabled,
+    "configureEsxiHostsAutomatically": autoConfigEsxiHosts
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+System.log(response);
+return;]]></script>
+</dunes-script-module>

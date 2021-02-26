@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="fb3dd25a-8671-4a4a-8ca7-91b45430a96b" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create NFS Datastore]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="vCenterFQDN" type="string"/>
+    <param name="vCenterUser" type="string"/>
+    <param name="vCenterPassword" type="SecureString"/>
+    <param name="datastoreName" type="string"/>
+    <param name="nfsServer" type="string"/>
+    <param name="nfsSharePath" type="string"/>
+  </input>
+  <attrib name="ignoreSSLCertificate" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/createAndMountNFSDatastore">
+    <display-name><![CDATA[createAndMountNFSDatastore]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAndMountNFSDatastore(vCenterFQDN,vCenterUser,vCenterPassword,datastoreName,nfsServer,nfsSharePath,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="datastoreName" type="string" export-name="datastoreName"/>
+      <bind name="nfsServer" type="string" export-name="nfsServer"/>
+      <bind name="nfsSharePath" type="string" export-name="nfsSharePath"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="170.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

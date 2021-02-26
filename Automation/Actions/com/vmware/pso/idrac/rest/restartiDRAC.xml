@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="restartiDRAC" result-type="void" api-version="6.0.0" id="9b3c19a5-6c80-40fe-ac18-78156c0fa191" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.idrac.rest">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="idracAuthToken" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(idracAuthToken,"Input var: idracAuthToken");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(idracHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("X-Auth-Token",idracAuthToken);
+var url = "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Manager.Reset";
+
+var body = {
+    "ResetType": "GracefulRestart"
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

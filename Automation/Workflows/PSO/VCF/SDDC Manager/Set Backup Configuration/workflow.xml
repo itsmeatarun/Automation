@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="7c370077-4ba9-41a1-9e53-cc1fbd4f9534" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set Backup Configuration]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="user" type="string"/>
+    <param name="password" type="SecureString"/>
+    <param name="host" type="string"/>
+    <param name="backupHost" type="string"/>
+    <param name="backupHostPassword" type="SecureString"/>
+    <param name="backupHostPort" type="number"/>
+    <param name="backupHostUsername" type="string"/>
+    <param name="backupHostDirectoryPath" type="string"/>
+    <param name="backupHostSSHFingerPrint" type="string"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="348.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcf.sddcmanager/setBackup_Configuration">
+    <display-name><![CDATA[Set Backup Configuration]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcf.sddcmanager").setBackup_Configuration(user,password,host,backupHost,backupHostPassword,backupHostPort,backupHostUsername,backupHostDirectoryPath,backupHostSSHFingerPrint);
+]]></script>
+    <in-binding>
+      <bind name="user" type="string" export-name="user"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+      <bind name="host" type="string" export-name="host"/>
+      <bind name="backupHost" type="string" export-name="backupHost"/>
+      <bind name="backupHostPassword" type="SecureString" export-name="backupHostPassword"/>
+      <bind name="backupHostPort" type="number" export-name="backupHostPort"/>
+      <bind name="backupHostUsername" type="string" export-name="backupHostUsername"/>
+      <bind name="backupHostDirectoryPath" type="string" export-name="backupHostDirectoryPath"/>
+      <bind name="backupHostSSHFingerPrint" type="string" export-name="backupHostSSHFingerPrint"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="179.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

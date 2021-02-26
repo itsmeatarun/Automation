@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="requestCertificate" result-type="string" api-version="6.0.0" id="9557bb5f-76e3-4f9f-a2d2-81fcdbb2064b" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi.rest.certificate.request">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="apiKey" t="string"><![CDATA[]]></param>
+  <param n="policyDN" t="string"><![CDATA[]]></param>
+  <param n="objectName" t="string"><![CDATA[]]></param>
+  <param n="subject" t="string"><![CDATA[]]></param>
+  <param n="organizationalUnit" t="string"><![CDATA[Optional]]></param>
+  <param n="organization" t="string"><![CDATA[Optional]]></param>
+  <param n="city" t="string"><![CDATA[Optional]]></param>
+  <param n="state" t="string"><![CDATA[Optional]]></param>
+  <param n="country" t="string"><![CDATA[Optional]]></param>
+  <param n="subjectAltNames" t="Array/Properties"><![CDATA[{ "Name": "altname", "TypeName": "DNS"}]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(apiKey, "apiKey");
+dbc.ensureNotNullOrEmpty(policyDN, "policyDN");
+dbc.ensureNotNullOrEmpty(objectName, "objectName");
+dbc.ensureNotNullOrEmpty(subject, "subject");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.venafi.rest").getTransientRESTHost(host);
+	dbc.ensureNotNullOrEmpty(restHost,"restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+    headers.put("x-venafi-api-key", apiKey);
+	var url = "/certificates/Request";
+	
+	var method = "POST";
+	var content = {
+        "PolicyDN": policyDN,
+        "ObjectName": objectName,
+        "DisableAutomaticRenewal": false,
+        "CertificateType": "Server Certificate",
+        "Subject": subject,
+        "OrganizationalUnit": organizationalUnit,
+        "Organization": organization, 
+        "City": city,
+        "State": state,
+        "Country": country
+    }
+
+    System.debug("Certificate request data: " + JSON.stringify(content))
+
+    if(subjectAltNames != undefined) {
+        content.SubjectAltNames = subjectAltNames;
+    }
+
+    var inParametersValues = null;
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, JSON.stringify(content), url, headers);
+	
+	System.debug(actionName + ": Certificate request request response '" + JSON.stringify(response) + "'");
+	
+	return JSON.stringify(response);
+}
+	]]></script>
+</dunes-script-module>

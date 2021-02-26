@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="7d6e37e4-dfbd-4286-83ed-3c376ebeacb2" version="0.0.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get SDDC Manager Credentials]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <attrib name="user" type="string" read-only="false">
+    <value encoded="n"><![CDATA[administrator@vsphere.local]]></value>
+    <description><![CDATA[SDDC Manager username]]></description>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false">
+    <value encoded="n"><![CDATA[12BR56L4DS77G61N72V65X31X32N33Y34J35H21PAC7671DPE2ACF85UC39363BZ514082FS3F0EFEETC145C08S928D26AXCFCF224NA760866I48881DFO7DA312CZ774EDAAWCA7EDB7I4DC147CGDF73F0BXF36202DY8FF0616HF25BAEBX5C5B955QFA2FA1BX]]></value>
+    <description><![CDATA[SDDC Manager password]]></description>
+  </attrib>
+  <attrib name="host" type="string" read-only="false">
+    <value encoded="n"><![CDATA[sddc-manager.pso.vsphere.local]]></value>
+    <description><![CDATA[SDDC Manager host]]></description>
+  </attrib>
+  <attrib name="credentials" type="Array/Properties" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="400.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.vmware.pso.vcf.sddcmanager/getCredentials">
+    <display-name><![CDATA[Action element]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.vcf.sddcmanager").getCredentials(user,password,host);
+]]></script>
+    <in-binding>
+      <bind name="user" type="string" export-name="user">
+        <description><![CDATA[SDDC Manager username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[SDDC Manager password]]></description>
+      </bind>
+      <bind name="host" type="string" export-name="host">
+        <description><![CDATA[SDDC Manager host]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/Properties" export-name="credentials"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[System.log(JSON.stringify(credentials));]]></script>
+    <in-binding>
+      <bind name="credentials" type="Array/Properties" export-name="credentials"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="280.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

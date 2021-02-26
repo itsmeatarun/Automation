@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="downloadAndInstallSolutionUserCertificates" result-type="void" api-version="6.0.0" id="8323e07f-ae5f-4b06-b2d6-208055bb1b67" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="targetVcFQDN" t="string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <param n="logDir" t="string"><![CDATA[]]></param>
+  <param n="certAdminUser" t="string"><![CDATA[]]></param>
+  <param n="certAdminPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="venafiPolicyDN" t="string"><![CDATA[]]></param>
+  <param n="venafiHost" t="string"><![CDATA[]]></param>
+  <param n="venafiUser" t="string"><![CDATA[]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").clearTempCertificateDir(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate);
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates.solutionuser").downloadSolutionUserCertificates(venafiPolicyDN, targetVcFQDN, venafiHost, venafiUser, venafiPassword, vcVM, vcfqdn, vcuser, vcpassword, vcGuestUser, vcGuestPassword, ignoreSSLCertificate);
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates.solutionuser").installSolutionUserCertificates(vcVM, vcfqdn, vcuser, vcpassword, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, logDir, certAdminUser, certAdminPassword);
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates.solutionuser").verifySolutionUserCertificates(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate);
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").clearTempCertificateDir(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate);]]></script>
+</dunes-script-module>

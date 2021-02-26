@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getRoleIdByRoleName" result-type="string" api-version="6.0.0" id="d0fc37ce-d1e9-4fa9-8594-33ec5e177716" version="0.1.2" category-name="com.vmware.pso.vcenter.powercli.accesscontrol" memory-limit="256000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleName" t="string"><![CDATA[Name of roll to apply]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $roleName = $inputs.roleName
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        $vcRole = Get-VIRole -Name $roleName
+
+        if ($vcRole) {
+            $roleId = $vcRole.Id.ToString()
+            Write-Host "Found Role $roleName. Returning ID: $roleId"
+        }
+        else {
+            throw "No role found by name $roleName"
+        }
+        
+    } catch {
+        Write-Host "Failed to find Role Id for $roleName. Exiting."
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Error: $($_.Exception.Message)"
+    } 
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+    
+    return $roleId
+}
+]]></script>
+</dunes-script-module>

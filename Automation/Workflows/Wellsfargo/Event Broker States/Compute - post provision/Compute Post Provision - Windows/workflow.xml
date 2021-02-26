@@ -1,0 +1,355 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="8873ca93-a834-4721-9ca9-908f41bfc65c" version="0.1.2" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Compute Post Provision - Windows]]></display-name>
+  <description><![CDATA[Workflow for running specific Windows based tasks during post provision subscription.]]></description>
+  <error-handler name="item8">
+    <position y="10.0" x="310.0"/>
+  </error-handler>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="jsonObj" type="Any"/>
+    <param name="diskDetails" type="string"/>
+    <param name="isNeedImageBuild" type="boolean"/>
+    <param name="gitRepoZipDownloadUrl" type="string"/>
+    <param name="gitZipExtractPath" type="string"/>
+    <param name="gitZipFileName" type="string"/>
+    <param name="rhelVersion" type="string"/>
+    <param name="tempRepoName" type="string"/>
+    <param name="pipFolderPath" type="string"/>
+    <param name="scriptTimeout" type="number"/>
+    <param name="scriptRefreshTime" type="number"/>
+    <param name="scriptWorkingDirectory" type="string"/>
+    <param name="interactiveSession" type="boolean"/>
+    <param name="virtualEnvPath" type="string"/>
+  </input>
+  <attrib name="vmUsername" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="vmWindowsUserName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vmPassword" type="SecureString" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="vmWindowsUserPassword"/>
+  <attrib name="dirPath" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="vmWindowsGuestPath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="finalJson" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vcoPath" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="guestFilePath" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vcoFileExists" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="createParents" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="folderCreated" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="overwrite" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="fileCopied" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="vcoFolder" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitAPIBaseUrl" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="gitBaseUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitToken" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="gitAccessToken">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitBranch" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="gitBranchName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cloudProvisionerFileName" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="winProvisionerFileName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="osType" type="string" read-only="false">
+    <value encoded="n"><![CDATA[windows]]></value>
+  </attrib>
+  <attrib name="scriptType" type="string" read-only="false">
+    <value encoded="n"><![CDATA[batch]]></value>
+  </attrib>
+  <attrib name="isEnableForADCreation" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="adCreationResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="isRebuild" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="cmInstallerName" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="cmInstallername">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cmInstallerRepo" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="cmInstallerRepo">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cmInstallerFilePath" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="cmInstallerFilePath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="machineId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="615.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[Add Disk Details]]></display-name>
+    <script encoded="false"><![CDATA[var diskObject = JSON.parse(diskDetails);
+var diskSection = [];
+var devices = vm.config.hardware.device;
+for each (disk in devices) {
+    var is_disk = disk instanceof VcVirtualDisk;
+    if (is_disk) {
+        var controller = disk.controllerKey - 1000;
+        var disknumber = disk.unitNumber;
+        var diskJson = {
+            "disklabel" : disk.deviceInfo.label,
+            "deviceid" : "(" + controller + ":" + disknumber + ")",
+            "name" : diskObject[disk.key].name,
+            "key" : disk.key,
+            "serialnumber" : disk.backing.uuid.replace(/-/g, ''),
+            "disksizegb" : diskObject[disk.key].capacityInGb,
+            "status" : diskObject[disk.key].status,
+            "attributes" : diskObject[disk.key].customProperties
+        }
+        diskSection.push(diskJson);
+    }
+}
+
+var finalJson = jsonObj;
+finalJson["diskdetails"] = diskSection;
+]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="diskDetails" type="string" export-name="diskDetails"/>
+    </in-binding>
+    <out-binding>
+      <bind name="finalJson" type="Any" export-name="finalJson"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task">
+    <display-name><![CDATA[Create Local File]]></display-name>
+    <script encoded="false"><![CDATA[mimeAttachment = new MimeAttachment();
+//mimeAttachment.name = vm.name + ".json";
+// Always needed this name for json file, 
+// Corey is looking for this name in his cloud provisioner
+mimeAttachment.name =  "metadata.json"; 
+mimeAttachment.mimeType = "application/json";
+mimeAttachment.content = JSON.stringify(finalJson, "", 1);
+
+var filename = "metadata.json";
+var vcoFolder = System.getTempDirectory() + "/" + System.nextUUID();
+
+mimeAttachment.write(vcoFolder,filename);
+var vcoPath = vcoFolder + "/" + filename;
+System.log("Wrote metadata file to " + vcoPath);
+
+var guestFilePath = dirPath + "\\" + filename;
+var vcoFileExists = true;]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="finalJson" type="Any" export-name="finalJson"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vcoPath" type="string" export-name="vcoPath"/>
+      <bind name="guestFilePath" type="string" export-name="guestFilePath"/>
+      <bind name="vcoFileExists" type="boolean" export-name="vcoFileExists"/>
+      <bind name="vcoFolder" type="string" export-name="vcoFolder"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" catch-name="item10" throw-bind-name="errorCode" type="link" linked-workflow-id="C88080808080808080808080808080809880808001322751030482b80adf61e7c">
+    <display-name><![CDATA[Create directory in guest]]></display-name>
+    <in-binding>
+      <bind name="vmUsername" type="string" export-name="vmUsername"/>
+      <bind name="vmPassword" type="SecureString" export-name="vmPassword"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="createParents" type="boolean" export-name="createParents"/>
+    </in-binding>
+    <out-binding>
+      <bind name="result" type="boolean" export-name="folderCreated"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="185.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="link" linked-workflow-id="C78080808080808080808080808080809480808001322751030482b80adf61e7c">
+    <display-name><![CDATA[Copy file from vCO to guest]]></display-name>
+    <in-binding>
+      <bind name="vmUsername" type="string" export-name="vmUsername"/>
+      <bind name="vmPassword" type="SecureString" export-name="vmPassword"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="vcoPath" type="string" export-name="vcoPath"/>
+      <bind name="guestFilePath" type="string" export-name="guestFilePath"/>
+      <bind name="overwrite" type="boolean" export-name="overwrite"/>
+    </in-binding>
+    <out-binding>
+      <bind name="result" type="boolean" export-name="fileCopied"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="295.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item16" type="task">
+    <display-name><![CDATA[Delete Temp File]]></display-name>
+    <script encoded="false"><![CDATA[System.log("File copied to: " + guestFilePath);
+
+var uniqueScriptFile = new File(vcoPath);
+var uniqueScriptFolder = new File(uniqueScriptFile.directory);
+uniqueScriptFile.deleteFile();
+uniqueScriptFolder.deleteFile();
+
+System.log("Deleted temp vCO file " + vcoPath);]]></script>
+    <in-binding>
+      <bind name="vcoPath" type="string" export-name="vcoPath"/>
+      <bind name="vcoFolder" type="string" export-name="vcoFolder"/>
+      <bind name="guestFilePath" type="string" export-name="guestFilePath"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="350.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item6" throw-bind-name="errorCode" type="end" end-mode="1">
+    <in-binding/>
+    <position y="175.0" x="310.0"/>
+  </workflow-item>
+  <workflow-item name="item7" throw-bind-name="errorCode" type="end" end-mode="1">
+    <in-binding/>
+    <position y="120.0" x="180.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item9" type="condition" alt-out-name="item7" comparator="0">
+    <display-name><![CDATA[Cleanup vCO File?]]></display-name>
+    <script encoded="false"><![CDATA[// Generated by the system, cannot be edited
+return (vcoFileExists === true);]]></script>
+    <in-binding>
+      <bind name="vcoFileExists" type="boolean" export-name="vcoFileExists"/>
+    </in-binding>
+    <out-binding/>
+    <condition name="vcoFileExists" type="boolean" comparator="0" label="null"/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="65.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item6" type="task">
+    <display-name><![CDATA[Delete Temp File]]></display-name>
+    <script encoded="false"><![CDATA[System.warn("Exception copying file to: " + guestFilePath);
+
+var uniqueScriptFile = new File(vcoPath);
+var uniqueScriptFolder = new File(uniqueScriptFile.directory);
+uniqueScriptFile.deleteFile();
+uniqueScriptFolder.deleteFile();
+
+System.warn("Deleted temp vCO file " + vcoPath);]]></script>
+    <in-binding>
+      <bind name="vcoPath" type="string" export-name="vcoPath"/>
+      <bind name="vcoFolder" type="string" export-name="vcoFolder"/>
+      <bind name="guestFilePath" type="string" export-name="guestFilePath"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="130.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item4" type="task">
+    <display-name><![CDATA[Log Directory Error]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Error creating directory:" + errorCode);]]></script>
+    <in-binding>
+      <bind name="errorCode" type="string" export-name="errorCode"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="240.0" x="100.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item12" type="link" linked-workflow-id="94d60ed7-757c-4d13-8841-ad43e203983b">
+    <display-name><![CDATA[Download Cloud Provisioner]]></display-name>
+    <in-binding>
+      <bind name="gitAPIBaseUrl" type="string" export-name="gitAPIBaseUrl"/>
+      <bind name="gitToken" type="string" export-name="gitToken"/>
+      <bind name="gitBranch" type="string" export-name="gitBranch"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="vmUserName" type="string" export-name="vmUsername"/>
+      <bind name="vmPassword" type="SecureString" export-name="vmPassword"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="isNeedImageBuild" type="boolean" export-name="isNeedImageBuild"/>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitZipExtractPath" type="string" export-name="gitZipExtractPath"/>
+      <bind name="gitZipFileName" type="string" export-name="gitZipFileName"/>
+      <bind name="rhelVersion" type="string" export-name="rhelVersion"/>
+      <bind name="tempRepoName" type="string" export-name="tempRepoName"/>
+      <bind name="pipFolderPath" type="string" export-name="pipFolderPath"/>
+      <bind name="scriptType" type="string" export-name="scriptType"/>
+      <bind name="scriptTimeout" type="number" export-name="scriptTimeout"/>
+      <bind name="scriptRefreshTime" type="number" export-name="scriptRefreshTime"/>
+      <bind name="scriptWorkingDirectory" type="string" export-name="scriptWorkingDirectory"/>
+      <bind name="interactiveSession" type="boolean" export-name="interactiveSession"/>
+      <bind name="cloudProvisionerFileName" type="string" export-name="cloudProvisionerFileName"/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vcoFileExists" type="boolean" export-name="vcoFileExists"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="460.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item15" type="link" linked-workflow-id="a00ca446-0945-4aae-b37c-a755b9dc47d6">
+    <display-name><![CDATA[Execute Cloud provisioner]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="username" type="string" export-name="vmUsername"/>
+      <bind name="password" type="SecureString" export-name="vmPassword"/>
+      <bind name="scriptType" type="string" export-name="scriptType"/>
+      <bind name="scriptTimeout" type="number" export-name="scriptTimeout"/>
+      <bind name="scriptRefreshTime" type="number" export-name="scriptRefreshTime"/>
+      <bind name="scriptWorkingDirectory" type="string" export-name="scriptWorkingDirectory"/>
+      <bind name="interactiveSession" type="boolean" export-name="interactiveSession"/>
+      <bind name="cloudProvisionerFileName" type="string" export-name="cloudProvisionerFileName"/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="osType" type="string" export-name="osType"/>
+      <bind name="isRebuild" type="boolean" export-name="isRebuild"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="515.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item15" out-name="item0" type="link" linked-workflow-id="ca56988e-42e6-4692-b3bb-c0b97da21945">
+    <display-name><![CDATA[Validate Cloud Provisioner Execution]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="username" type="string" export-name="vmUsername"/>
+      <bind name="password" type="SecureString" export-name="vmPassword"/>
+      <bind name="osType" type="string" export-name="osType"/>
+      <bind name="machineId" type="string" export-name="machineId"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="570.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item16" out-name="item11" type="task">
+    <display-name><![CDATA[Prepare for Provisioner]]></display-name>
+    <script encoded="false"><![CDATA[machineId = finalJson.resourceIds[0];]]></script>
+    <in-binding>
+      <bind name="finalJson" type="Any" export-name="finalJson"/>
+    </in-binding>
+    <out-binding>
+      <bind name="machineId" type="string" export-name="machineId"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="405.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

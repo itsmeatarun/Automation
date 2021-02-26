@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="57524e50-d634-4da5-83f7-fbfa90970160" editor-version="2.0" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
+    <display-name>test</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <attrib name="props" type="Properties">
+        <value encoded="n">{22:11:Configure System Proxy=string#true
+26:11:Update Solution User Certs=string#true
+34:12:Configure ESXi Cert Mode to Custom=string#false
+}</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="400.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">System.log(JSON.stringify(props));
+
+var newProps = {
+  "Configure System Proxy": true,
+  "Update Solution User Certs": true,
+  "Configure ESXi Cert Mode to Custom": false
+}
+
+System.log(JSON.stringify(newProps));</script>
+        <in-binding>
+            <bind name="props" type="Properties" export-name="props"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="task" script-module="" comparator="0">
+        <display-name>Action element</display-name>
+        <script encoded="false"></script>
+        <in-binding/>
+        <out-binding/>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="270.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

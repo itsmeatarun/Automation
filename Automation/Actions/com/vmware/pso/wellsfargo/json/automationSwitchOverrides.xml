@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="automationSwitchOverrides" result-type="Properties" api-version="6.0.0" id="39b2d1b6-cfdb-4fa0-a16c-41bdbc92b3d8" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.json">
+  <param n="configName" t="string"><![CDATA[]]></param>
+  <param n="configPath" t="string"><![CDATA[]]></param>
+  <param n="environment" t="string"><![CDATA[]]></param>
+  <param n="region" t="string"><![CDATA[]]></param>
+  <param n="podID" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(configName,"Input var: configName");
+dbc.ensureNotNullOrEmpty(configPath,"Input var: configPath");
+if (dbc.isNullOrEmpty(environment) || dbc.isNullOrEmpty(region) || dbc.isNullOrEmpty(podID)) {
+    System.log("environment and region and podID cannot be null.");
+    return (new Properties());
+}
+
+var configElement = System.getModule("com.vmware.pso.configurations").getConfigurationElementSimple(configName,configPath);
+var githubHost = configElement.getAttributeWithKey("GitHost").value;
+var githubUser = configElement.getAttributeWithKey("GitUser").value;
+var githubToken = configElement.getAttributeWithKey("GitUserToken").value;
+var baseURL = configElement.getAttributeWithKey("GitRepoContentURL").value;
+
+
+podJSON = System.getModule("com.vmware.pso.github").getPodJSON(githubHost,githubUser,githubToken,baseURL,environment,region,podID);
+var podConfig = JSON.parse(podJSON);
+
+return podConfig.AutomationSwitches;]]></script>
+</dunes-script-module>

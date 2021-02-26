@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='af577945-e9ab-4c6c-8813-d79f028c3d1d'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='1357a69e-fe0c-4f64-b6cf-6bd3f9dd4c21'&dunesName='Action'&name='deleteCloudProvisionerRecordOnVMRemoval'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='db30e90c-bf5c-4e3f-8f46-53c829eab102'&dunesName='Action'&name='executeTransientRESTOperationWithTimeOut'&category='com.vmware.pso.rest']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='f145a186-ddd5-4d83-a055-e77d82751e1b'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='d7af3828-0e44-40e9-b66a-8a46aea53d8b'&dunesName='Action'&name='getContainerOuForRequestedVM'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='8a0419e9-b8ea-4de1-9a88-470ce7f33aae'&dunesName='Action'&name='getADHostByContainerOU'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='5a7cab36-27d3-4e4e-825c-058ba636176c'&dunesName='Action'&name='getComputerByADHostAndName'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='194a25be-3335-4af8-9cb6-22ed72f8d759'&dunesName='Action'&name='setComputerEnbaleByFlag'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/ConfigurationElement?id='9e4618dd-49b7-4d18-b23d-31271c2b45ed'&dunesName='ConfigurationElement']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/ConfigurationElement?id='a0f69683-24a1-4a01-86d4-bab1c0aba634'&dunesName='ConfigurationElement']]></elm>
+<used-plugin name='AD' version='3.0.10' />
+</package>

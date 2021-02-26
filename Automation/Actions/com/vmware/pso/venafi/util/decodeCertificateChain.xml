@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="decodeCertificateChain" result-type="Properties" api-version="6.0.0" id="2a7ab6e6-279e-472f-adbe-7beb91b468c5" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi.util">
+  <runtime><![CDATA[node:12]]></runtime>
+  <param n="certificateChain" t="string"><![CDATA[]]></param>
+  <param n="passphrase" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[exports.handler = (context, inputs, callback) => {
+    var CRYPTO = require("crypto");
+    
+
+    var certificateChain = Buffer.from(inputs.certificateChain, "base64").toString('ascii');
+    
+    certificateChain = certificateChain.replace(/(.|\n|\r)*?-----BEGIN CERTIFICATE-----/m,"-----BEGIN CERTIFICATE-----");
+    certificateChain = certificateChain.replace(/-----END CERTIFICATE-----(.|\n|\r)*?-----BEGIN CERTIFICATE-----/gm,"-----END CERTIFICATE-----\r\n-----BEGIN CERTIFICATE-----");
+    certificateChain = certificateChain.replace(/-----END CERTIFICATE-----\r\n/gm,"-----END CERTIFICATE-----\r\n<<<break>>>");
+
+    var certificates = certificateChain.trim().split('<<<break>>>').map(cert => cert);
+    
+    var privateKey = undefined;
+    if(certificates[certificates.length-1].includes('-----BEGIN RSA PRIVATE KEY----')) {
+        certificates.pop();
+
+        privateKey = CRYPTO.createPrivateKey({
+           'key': certificateChain,
+           'passphrase': inputs.passphrase
+        }).export({
+            'type': 'pkcs1',
+            'format': 'pem'
+        });
+    } else if(certificates[certificates.length-1] == "") {
+        certificates.pop();
+    }
+
+    callback(
+        undefined, 
+        {
+            privateKey: privateKey,
+            certificates: certificates
+        }
+    );   
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getBearerToken" result-type="string" api-version="6.0.0" id="ab913a4a-c180-42cd-95b4-84b7ea6dea6a" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.vcf.sddcmanager.rest.tokens">
+  <param n="user" t="string"><![CDATA[]]></param>
+  <param n="password" t="SecureString"><![CDATA[]]></param>
+  <param n="host" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(user, "user");
+dbc.ensureNotNullOrEmpty(password, "password");
+dbc.ensureNotNullOrEmpty(host, "host");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.vcf.sddcmanager.rest").getTransientRESTHost(host);
+	dbc.ensureNotNullOrEmpty(restHost,"restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	var url = "/v1/tokens";
+	
+	var method = "POST";
+	var content = JSON.stringify(
+		{
+			"username": user,
+			"password": password
+		}
+	);
+	
+	var inParametersValues = null;
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": Bearer token request response '" + JSON.stringify(response) + "'");
+	
+	return "Bearer " + response.accessToken;
+}
+	]]></script>
+</dunes-script-module>

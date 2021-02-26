@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createMachineCertificate" result-type="Properties" api-version="6.0.0" id="e5f54b5c-ce80-4f8a-af87-5f460a4c2550" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="hcmHost" t="string"><![CDATA[]]></param>
+  <param n="hcmProject" t="string"><![CDATA[]]></param>
+  <param n="serverFQDN" t="string"><![CDATA[]]></param>
+  <param n="serverIPAddress" t="string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+return System.getModule("com.vmware.pso.vcenter.powercli.certificates.solutionuser").createMachineCertificates(hcmHost, hcmProject, serverFQDN, serverIPAddress, vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate);]]></script>
+</dunes-script-module>

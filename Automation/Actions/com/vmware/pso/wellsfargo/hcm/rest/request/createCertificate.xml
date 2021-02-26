@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createCertificate" result-type="string" api-version="6.0.0" id="75fe0b1e-5588-4dbf-9a59-0bcbdb35e8a8" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.hcm.rest.request">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="project" t="string"><![CDATA[]]></param>
+  <param n="serverName" t="string"><![CDATA[]]></param>
+  <param n="instance" t="string"><![CDATA[]]></param>
+  <param n="format" t="string"><![CDATA[]]></param>
+  <param n="stripPasswd" t="boolean"><![CDATA[]]></param>
+  <param n="altNames" t="string"><![CDATA[]]></param>
+  <param n="includeChain" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(project, "project");
+dbc.ensureNotNullOrEmpty(serverName, "serverName");
+dbc.ensureNotNullOrEmpty(instance, "instance");
+dbc.ensureNotNullOrEmpty(format, "format");
+
+return main();
+
+function main() { 
+    var restHost = System.getModule("com.vmware.pso.wellsfargo.hcm.rest").getTransientHCMRESTHost(host);
+    dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+	var headers = new Properties();
+	headers.put("Accept","text/plain");
+
+	var url = "";
+    url += "/Venafi/Certs/request.php?";
+    url += "Project={project}";
+    url += "&Server_Name={serverName}";
+    url += "&Instance={instance}";
+    url += "&Format={format}";
+    if(stripPasswd) {url += "&StripPasswd"};
+    if(altNames != null) {url += "&AltNames=" + altNames};
+    if(includeChain) {url += "&IncludeChain"}
+
+	var method = "GET";
+    var content = null;
+	var inParametersValues = [project,serverName,instance,format];
+	
+	var response = System.getModule("com.vmware.pso.wellsfargo.hcm.rest").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+
+    System.debug("Response: " + response);
+	
+	return response;
+}]]></script>
+</dunes-script-module>

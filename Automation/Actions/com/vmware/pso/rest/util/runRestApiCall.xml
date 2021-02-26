@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="runRestApiCall" result-type="Any" api-version="6.0.0" id="857cb324-e918-49d0-8b3e-029ff9240765" version="1.1.3" allowed-operations="evf" category-name="com.vmware.pso.rest.util">
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="inParams" t="Array/string"><![CDATA[]]></param>
+  <param n="method" t="string"><![CDATA[]]></param>
+  <param n="content" t="string"><![CDATA[]]></param>
+  <param n="restUrl" t="string"><![CDATA[]]></param>
+  <param n="headers" t="Properties"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+System.debug("====== Begin Action " + arguments.callee.name.substr(6) + " ======");
+System.debug("Calling REST API...");
+
+// var headers = new Properties();
+var applicationSlashJson = "application/json";
+var	response = System.getModule("com.vmware.pso.rest.util").executeRestOperation(restUrl, method, content, inParams, applicationSlashJson, headers, restHost);
+var responseContentAsString = response.contentAsString;
+System.debug(arguments.callee.name.substr(6) + " Status Code: " + response.statusCode);
+
+var	responseJson = "";
+if ( responseContentAsString != null && responseContentAsString != "") {
+    try{
+		responseJson = JSON.parse(responseContentAsString);
+	} catch (e) {
+		System.debug("Response is not valid JSON. Returning raw content.")
+        responseJson = responseContentAsString;
+	}
+} else {
+    System.debug("No response body received.");
+}
+
+switch(response.statusCode)
+{
+	case 200:
+	case 201:
+	case 202:
+    case 203:
+    case 204:
+    case 205:
+    case 206:
+		break;
+	default:
+		if (responseJson != null && responseJson.error != null && responseJson.error.message != null && responseJson.error.detail != null) {
+			throw ['Error: ', responseJson.error.message, ', Detail: ', responseJson.error.detail].join('');
+		} else {
+			throw ('Error: ' + responseContentAsString);
+		}
+}
+
+return responseJson;]]></script>
+</dunes-script-module>

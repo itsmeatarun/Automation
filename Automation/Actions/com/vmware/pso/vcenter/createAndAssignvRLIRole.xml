@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createAndAssignvRLIRole" result-type="void" api-version="6.0.0" id="46b89a51-67da-4fb3-a1d9-b09e25b94cf2" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <description><![CDATA[Create custom role in vCenter and assign AD user(s) or group(s) to it.]]></description>
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="adUsers" t="Array/string"><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="adGroups" t="Array/string"><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+if (dbc.isNullOrEmpty(adUsers) && dbc.isNullOrEmpty(adGroups)) {
+    throw "One of input vars 'adUsers' or 'adGroups' must not be NULL";
+}
+
+var role = {
+  "name": "vRLI",
+  "description": "vRealize Log Insight",
+  "privileges": [
+    "Host.Config.AdvancedConfig",
+    "Host.Config.NetService",
+    "Host.Config.Network",
+    "Host.Config.Settings",
+    "System.Anonymous",
+    "System.Read",
+    "System.View"
+  ]
+};
+var roleJSON = JSON.stringify(role);
+var overwriteExisting = true;
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").createRole(vCenterFQDN,vCenterUser,vCenterPassword,roleJSON,overwriteExisting,ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+var roleID = createResult.get("roleId");
+System.log("createRole completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createAndAssignvRLCMRole failed with error: " + createResult.get("error");
+}
+
+var propogatePermissions = "true";
+var assignResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").addGlobalPermission(vCenterFQDN,vCenterUser,vCenterPassword,adUsers,adGroups,roleID,propogatePermissions,ignoreSSLCertificate);
+var assignStatus = assignResult.get("status");
+System.log("addGlobalPermission completed with status: " + assignStatus);
+if (assignStatus != "success") {
+    throw "createAndAssignvRLCMRole failed with error: " + assignResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

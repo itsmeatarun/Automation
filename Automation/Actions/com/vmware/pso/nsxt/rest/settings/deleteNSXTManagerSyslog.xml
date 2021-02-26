@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="deleteNSXTManagerSyslog" result-type="void" api-version="6.0.0" id="ba01b68a-d2f6-4676-b313-f4882a37736d" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt.rest.settings">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="exporterName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(exporterName,"Input var: exporterName");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+var url = "/api/v1/node/services/syslog/exporters/" + exporterName;
+
+var method = "DELETE";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

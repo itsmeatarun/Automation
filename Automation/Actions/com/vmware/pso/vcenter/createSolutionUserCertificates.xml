@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createSolutionUserCertificates" result-type="Properties" api-version="6.0.0" id="fa61a603-82bd-4612-b8ea-1015aa1c0980" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="venafiHost" t="string"><![CDATA[]]></param>
+  <param n="venafiUser" t="string"><![CDATA[]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="venafiPolicyDN" t="string"><![CDATA[]]></param>
+  <param n="organizationUnit" t="string"><![CDATA[]]></param>
+  <param n="organization" t="string"><![CDATA[]]></param>
+  <param n="city" t="string"><![CDATA[]]></param>
+  <param n="state" t="string"><![CDATA[]]></param>
+  <param n="country" t="string"><![CDATA[]]></param>
+  <param n="vcFQDN" t="string"><![CDATA[]]></param>
+  <param n="vcIPAddress" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var certificateDNs = new Properties();
+
+certificateDNs.put("hvc",createCertificate("hvc"));
+certificateDNs.put("machine", createCertificate("machine"));
+certificateDNs.put("vpxd", createCertificate("vpxd"));
+certificateDNs.put("vpxd-extension", createCertificate("vpxd-extension"));
+certificateDNs.put("wcp", createCertificate("wcp"));
+certificateDNs.put("vsphere-webclient", createCertificate("vsphere-webclient"));
+
+return certificateDNs;
+
+function createCertificate(type, subject) {
+    return System.getModule("com.vmware.pso.venafi").createAndApproveCertificate(
+        venafiHost,
+        venafiUser,
+        venafiPassword,
+        venafiPolicyDN,
+        vcFQDN + "_" + type, //objectName
+        type + "-" + vcFQDN, //subject
+        organizationUnit,
+        organization,
+        city,
+        state,
+        country,
+        [
+            {"Name": vcIPAddress, "TypeName": "IPAddress"},
+            {"Name": vcFQDN, "TypeName": "DNS"}
+        ],
+        false
+    )
+}]]></script>
+</dunes-script-module>

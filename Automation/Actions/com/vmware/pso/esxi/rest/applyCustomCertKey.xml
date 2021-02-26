@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="applyCustomCertKey" result-type="void" api-version="6.0.0" id="3e9aa9f8-63e1-4cce-abac-803124d87847" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.esxi.rest">
+  <param n="esxifqdn" t="string"><![CDATA[]]></param>
+  <param n="esxiUser" t="string"><![CDATA[]]></param>
+  <param n="esxiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="privateKey" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(esxifqdn,"Input var: esxifqdn");
+dbc.ensureNotNullOrEmpty(esxiUser,"Input var: esxiUser");
+dbc.ensureNotNullOrEmpty(esxiPassword,"Input var: esxiPassword");
+dbc.ensureNotNullOrEmpty(privateKey,"Input var: privateKey");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(esxifqdn);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(esxiUser + ":" + esxiPassword);
+var headers = new Properties();
+headers.put("Content-Type","text/plain");
+headers.put("Authorization","Basic " + auth);
+var url = "/host/ssl_key";
+
+//The following lines are idealy not necessary but will help to catch invalid special character formating
+privateKey = privateKey.replace(/ /gm,'\n');
+privateKey = privateKey.replace("-----BEGIN\nRSA\nPRIVATE\nKEY-----","-----BEGIN RSA PRIVATE KEY-----");
+privateKey = privateKey.replace("-----BEGIN\nPRIVATE\nKEY-----","-----BEGIN PRIVATE KEY-----");
+privateKey = privateKey.replace("-----END\nRSA\nPRIVATE\nKEY-----","-----END RSA PRIVATE KEY-----");
+privateKey = privateKey.replace("-----END\nPRIVATE\nKEY-----","-----END PRIVATE KEY-----");
+privateKey = privateKey.replace(/\r/gm,'');
+privateKey = privateKey.replace(/\n/gm,'\n');
+privateKey = privateKey.replace(/\\n/gm,'\n');
+
+var method = "PUT";
+var content = privateKey;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

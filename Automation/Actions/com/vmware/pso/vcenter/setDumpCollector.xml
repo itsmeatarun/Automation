@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setDumpCollector" result-type="void" api-version="6.0.0" id="6f7ec8ed-2b4e-4da7-8f58-f8cf5cbfda0f" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter" memory-limit="512000000">
+  <param n="vcfqdn" t="string"><![CDATA[vCenter / ESXI FQDN]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter / ESXI Username]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter / ESXI Password]]></param>
+  <param n="hostVNic" t="string"><![CDATA[Target vNIC for dump collector]]></param>
+  <param n="networkServerIP" t="string"><![CDATA[Dump Collector IP]]></param>
+  <param n="networkServerPort" t="number"><![CDATA[Dump Collector Port]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[Ignore powershell SSL connection errors]]></param>
+  <script encoded="false"><![CDATA[var assignResult = System.getModule("com.vmware.pso.vcenter.powercli.host").setDumpCollector(vcfqdn, vcuser, vcpassword, hostVNic, networkServerIP, networkServerPort, ignoreSSLCertificate);
+
+var assignStatus = assignResult.get("status");
+System.debug("setDumpCollector completed with status: " + assignStatus);
+if (assignStatus != "success") {
+    throw "setDumpCollector failed with error: " + assignResult.get("error");
+}]]></script>
+</dunes-script-module>

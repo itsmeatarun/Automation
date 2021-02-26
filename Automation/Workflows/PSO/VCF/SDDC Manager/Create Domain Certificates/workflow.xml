@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="34f11b2e-a2ac-4aa8-833e-81d6e531ae86" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create Domain Certificates]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="venafiHost" type="string"/>
+    <param name="venafiUser" type="string"/>
+    <param name="venafiPassword" type="SecureString"/>
+    <param name="venafiPolicyDN" type="string"/>
+    <param name="certificatesData" type="Array"/>
+  </input>
+  <output>
+    <param name="out_certificatesData" type="Properties"/>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcf.sddcmanager/createDomainCertificates">
+    <display-name><![CDATA[createDomainCertificates]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.vcf.sddcmanager").createDomainCertificates(venafiHost,venafiUser,venafiPassword,venafiPolicyDN,certificatesData);
+]]></script>
+    <in-binding>
+      <bind name="venafiHost" type="string" export-name="venafiHost">
+        <description><![CDATA[Venafi host]]></description>
+      </bind>
+      <bind name="venafiUser" type="string" export-name="venafiUser">
+        <description><![CDATA[Venafi User]]></description>
+      </bind>
+      <bind name="venafiPassword" type="SecureString" export-name="venafiPassword">
+        <description><![CDATA[Venafi Password]]></description>
+      </bind>
+      <bind name="venafiPolicyDN" type="string" export-name="venafiPolicyDN">
+        <description><![CDATA[Veanfi Policy DN]]></description>
+      </bind>
+      <bind name="certificatesData" type="Array" export-name="certificatesData">
+        <description><![CDATA[{"name": element.resource.fqdn, "csr": element.csrEncodedContent}]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Properties" export-name="out_certificatesData"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="150.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

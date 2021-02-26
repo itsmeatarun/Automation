@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="aa737378-c23e-49a9-9896-8dc6efa90c1b" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Local Command Test]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[
+cmd = "ls /";
+System.log("executing cmd: " + cmd);
+
+var command = new Command(cmd);
+command.execute(true);
+System.log("Result: " + command.result);
+System.log("Output: " + command.output)
+
+cmd = "touch /newfile.txt";
+System.log("executing cmd: " + cmd);
+
+var command = new Command(cmd);
+command.execute(true);
+System.log("Result: " + command.result);
+System.log("Output: " + command.output)
+
+cmd = "ls /";
+System.log("executing cmd: " + cmd);
+
+var command = new Command(cmd);
+command.execute(true);
+System.log("Result: " + command.result);
+System.log("Output: " + command.output)]]></script>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="150.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

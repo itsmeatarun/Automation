@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getImageMappings" result-type="Array/string" api-version="6.0.0" id="e6c1f8cc-ddce-4968-a8d1-8e7873311c79" version="0.0.1" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <description><![CDATA[Gets vRA API Access Token, followed by call to vRA API to get image mappings. Gets vRA URL from vRA API Configuration stored in web-root. Update script if this changes. Return the unique image mappings]]></description>
+  <param n="osType" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var wfObject = System.getModule("com.vmware.library.vcac").getWorkflowByName("Get Access Token");
+var wfInputs = new Properties(); 
+var token = wfObject.execute(wfInputs);
+
+System.getModule("com.vmware.library.workflow").waitForCompletion([token]);
+var outputParams = token.getOutputParameters();
+var accessToken = outputParams.get("accessToken");
+
+var category = Server.getConfigurationElementCategoryWithPath("web-root");
+for each (var c in category.configurationElements) {
+    if (c.name == "vRA API Configuration") {
+        var vraBaseUrl = c.getAttributeWithKey("vraBaseUrl").value;
+        break;
+    }
+}
+
+const opurl = "/iaas/api/images"
+const opMethod = "GET";
+
+var headers = new Properties();
+headers.put("Authorization", "Bearer " + accessToken);
+
+var opResponse  = System.getModule("com.vmware.pso.wellsfargo").executeTransientRESTOperationWithTimeOutAndApiVersion(vraBaseUrl, null, null, opMethod, opurl, null, headers, null, null, null, null);
+
+if (opResponse.statusCode >= 400) { throw "Failed to get images (" + opResponse.statusCode + " Error). Details: " + opResponse.responseString; }
+
+var responseJson = JSON.parse(opResponse.responseString);
+var imagesMappings = responseJson.content;
+var uniqueImages = [];
+var osCode = (osType.toUpperCase() == "LINUX")?"RHEL":"WIN";
+var images;
+for( var i=0; i < imagesMappings.length; i++)
+{
+    images = imagesMappings[i].mapping;
+    for(x in images)
+    {
+        System.log(x +" <=>"+ osCode);
+        if(i==0)
+        {
+            if(x.split("-").filter(IsContain,osCode) == osCode)
+            {
+                uniqueImages.push(x);
+            }
+        }
+        else if(uniqueImages.filter(IsExist,x) != x)
+        {
+            if(x.split("-").filter(IsContain,osCode) == osCode)
+            {
+                uniqueImages.push(x);
+            }
+        }   
+    }
+
+}
+
+return uniqueImages;
+
+function IsExist(image)
+{
+    return (image == this);
+}
+
+function IsContain(image)
+{
+    return (image.toUpperCase().indexOf(this.toUpperCase())>-1);
+}]]></script>
+</dunes-script-module>

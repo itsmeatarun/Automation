@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="disableCSRValidation" result-type="void" api-version="6.0.0" id="9aaca395-3cea-4ea9-a329-01ae9daf94ef" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.powercli.certificates">
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vmName" t="string"><![CDATA[]]></param>
+  <param n="remoteuser" t="string"><![CDATA[]]></param>
+  <param n="remotepassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vcfqdn, "vcfqdn");
+dbc.ensureNotNullOrEmpty(vcuser, "vcuser");
+dbc.ensureNotNullOrEmpty(vcpassword, "vcpassword");
+dbc.ensureNotNullOrEmpty(vmName, "vmName");
+dbc.ensureNotNullOrEmpty(remoteuser, "remoteuser");
+dbc.ensureNotNullOrEmpty(remotepassword, "remotepassword");
+
+var script = "";
+script += "cat << EOF > /home/vcf/feature.properties" + "\n";
+script += "feature.vcf.operationsmanager.certificatemanagement.csr_server_cert_content_validation=false" + "\n";
+script += "EOF" + "\n";
+script += "chmod 755 /home/vcf/feature.properties" + "\n";
+script += "systemctl restart operationsmanager; sleep 120";
+
+System.getModule("com.vmware.pso.remoteScript").runRemoteScript(
+    [vmName], //machineName
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    script, 
+    remoteuser, 
+    remotepassword,
+    ignoreSSLCertificate
+);]]></script>
+</dunes-script-module>

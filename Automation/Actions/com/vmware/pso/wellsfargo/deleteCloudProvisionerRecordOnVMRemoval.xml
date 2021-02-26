@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="deleteCloudProvisionerRecordOnVMRemoval" result-type="string" api-version="6.0.0" id="1357a69e-fe0c-4f64-b6cf-6bd3f9dd4c21" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="apiBaseUrl" t="string"><![CDATA[]]></param>
+  <param n="contentJson" t="Any"><![CDATA[]]></param>
+  <param n="action" t="string"><![CDATA[action e.g ptr_record_decom or ]]></param>
+  <param n="headers" t="Properties"><![CDATA[optional input for headers]]></param>
+  <script encoded="false"><![CDATA[System.log("Api to remove the infoblox dns record");
+
+const opMethod = "DELETE";
+const opUrl = action;
+const contentType = "application/json";
+
+var content = JSON.stringify(contentJson);
+
+System.log("ActionUrl : " + action);
+System.log("Body : " + content);
+
+var createOpResponse  = System.getModule("com.vmware.pso.wellsfargo").executeTransientRESTOperationWithTimeOutAndApiVersion(apiBaseUrl, null, null, opMethod, opUrl, null, headers, contentType, content, "600", null);
+
+var actionName = action.split("/")[1];
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to remove records from  " + actionName + " (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+
+var responseJson = JSON.parse(createOpResponse.responseString);
+System.debug("REST Response: " + JSON.stringify(responseJson));
+
+return JSON.stringify(responseJson);]]></script>
+</dunes-script-module>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="generateCSR" result-type="string" api-version="6.0.0" id="2e5130ee-232c-4fb2-91a7-b4f20152e07b" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.idrac.rest">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="racadmCookie" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(racadmCookie,"Input var: racadmCookie");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(idracHost);
+
+var headers = new Properties();
+headers.put("Content-Type","application/xml");
+headers.put("Cookie","sid=" + racadmCookie);
+var url = "/cgi-bin/exec";
+
+var body = "<?xml version='1.0'?><EXEC><REQ><CMDINPUT>racadm sslcsrgen -g -f fakefile.csr</CMDINPUT><MAXOUTPUTLEN>0x0fff</MAXOUTPUTLEN></REQ></EXEC>";
+
+var method = "POST";
+var content = body;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+//System.debug("response xml: " + response);
+dbc.ensureNotNullOrEmpty(response,"Response Body");
+var responseJson = System.getModule("com.vmware.library.http-rest").xml2json(response);
+//System.debug("response json: " + JSON.stringify(responseJson));
+dbc.ensureNotNullOrEmpty(responseJson.EXEC.RESP.CMDOUTPUT,"CSR");
+
+return responseJson.EXEC.RESP.CMDOUTPUT;]]></script>
+</dunes-script-module>

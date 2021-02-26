@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="rebootHostAndWait" result-type="Properties" api-version="6.0.0" id="4cb6bc4e-8924-4322-8e54-37187733bf9f" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.esxi.powercli.host" memory-limit="512000000" timeout="7500">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="esxifqdn" t="string"><![CDATA[]]></param>
+  <param n="esxiUser" t="string"><![CDATA[]]></param>
+  <param n="esxiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        $inputsString = $inputs | ConvertTo-Json -Compress
+        [ValidateNotNullorEmpty()]
+        $esxifqdn = $inputs.esxifqdn
+        [ValidateNotNullorEmpty()]
+        $esxiUser = $inputs.esxiUser
+        [ValidateNotNullorEmpty()]
+        $esxiPassword = $inputs.esxiPassword
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate        
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to ESXi Host: $esxifqdn"
+        $viConnection = Connect-VIServer $esxifqdn -User $esxiUser -Password $esxiPassword
+    } catch {
+        Write-Host "Failed connecting to ESXi Host: " + $_.Exception
+        Write-Host "Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Rebooting VM host $esxifqdn"
+        $vmHost = Get-VMHost
+        Restart-VMHost -VMHost $vmHost -confirm:$false
+        Disconnect-VIServer $viConnection -Confirm:$false
+        Start-Sleep -Seconds 60
+
+        $retry = 0
+        $retries = 240
+        $sleepSeconds = 30
+        $continue = $true
+        #wait up to 2 hours for host to complete reboot
+        While ($continue) {
+            try {
+                Write-Host "Testing $esxifqdn host state."
+                $null = Connect-VIServer $esxifqdn -User $esxiUser -Password $esxiPassword -ErrorAction Stop
+                Write-Host "$esxifqdn is almost finished rebooting."
+                $continue = $false
+            } catch {
+                #Write-host "Test connect failed with following error: $($_.Exception.Message)"
+                if ($retry -ge $retries) {
+                    throw "Failed: Timed out waiting on reboot to complete after $($retries * ($sleepSeconds/60)) minutes."
+                }
+                Write-Host "Waiting on host to finish rebooting."
+                Start-Sleep -Seconds $sleepSeconds
+            }
+            $retry += 1
+        }
+        Start-Sleep -Seconds $sleepSeconds
+        Write-Host "$esxifqdn is finished rebooting."
+
+    } catch {
+        Write-Host "Failed rebooting host. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

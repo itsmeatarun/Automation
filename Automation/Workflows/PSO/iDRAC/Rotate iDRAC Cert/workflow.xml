@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="fcf78fae-0ed3-4930-b43b-404bcb332602" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Rotate iDRAC Cert]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="idracHost" type="string"/>
+    <param name="idracUser" type="string"/>
+    <param name="idracPassword" type="SecureString"/>
+    <param name="certCommonName" type="string">
+      <description><![CDATA[<hostname>r.wellsfargo.net]]></description>
+    </param>
+    <param name="certSAN" type="string">
+      <description><![CDATA[IPv4 Address of iDRAC]]></description>
+    </param>
+    <param name="venafiHost" type="string"/>
+    <param name="venafiUser" type="string"/>
+    <param name="venafiPassword" type="SecureString"/>
+    <param name="venafiPolicyDN" type="string"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.idrac/rotateiDRACCertificate">
+    <display-name><![CDATA[rotateiDRACCertificate]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.idrac").rotateiDRACCertificate(idracHost,idracUser,idracPassword,certCommonName,certSAN,venafiHost,venafiUser,venafiPassword,venafiPolicyDN);
+]]></script>
+    <in-binding>
+      <bind name="idracHost" type="string" export-name="idracHost"/>
+      <bind name="idracUser" type="string" export-name="idracUser"/>
+      <bind name="idracPassword" type="SecureString" export-name="idracPassword"/>
+      <bind name="certCommonName" type="string" export-name="certCommonName">
+        <description><![CDATA[<hostname>r.wellsfargo.net]]></description>
+      </bind>
+      <bind name="certSAN" type="string" export-name="certSAN">
+        <description><![CDATA[IPv4 Address of iDRAC]]></description>
+      </bind>
+      <bind name="venafiHost" type="string" export-name="venafiHost"/>
+      <bind name="venafiUser" type="string" export-name="venafiUser"/>
+      <bind name="venafiPassword" type="SecureString" export-name="venafiPassword"/>
+      <bind name="venafiPolicyDN" type="string" export-name="venafiPolicyDN"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="18460cd4-2284-4dac-970a-078947b084b4" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Upload and Install Domain Certificates]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="host" type="string"/>
+    <param name="user" type="string"/>
+    <param name="password" type="string"/>
+    <param name="certificatesData" type="Array"/>
+    <param name="domain" type="string"/>
+    <param name="rootCA" type="string"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="340.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcf.sddcmanager/uploadAndInstallDomainCertificates">
+    <display-name><![CDATA[uploadAndInstallDomainCertificates]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcf.sddcmanager").uploadAndInstallDomainCertificates(host,user,password,certificatesData,domain,rootCA);
+]]></script>
+    <in-binding>
+      <bind name="host" type="string" export-name="host">
+        <description><![CDATA[SDDC Manager host]]></description>
+      </bind>
+      <bind name="user" type="string" export-name="user">
+        <description><![CDATA[SDDC Manager User]]></description>
+      </bind>
+      <bind name="password" type="string" export-name="password">
+        <description><![CDATA[SDDC Manager password]]></description>
+      </bind>
+      <bind name="certificatesData" type="Array" export-name="certificatesData">
+        <description><![CDATA[{crt, name, type}]]></description>
+      </bind>
+      <bind name="domain" type="string" export-name="domain">
+        <description><![CDATA[SDDC / VCF Domain]]></description>
+      </bind>
+      <bind name="rootCA" type="string" export-name="rootCA">
+        <description><![CDATA[Root certificate data]]></description>
+      </bind>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="175.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

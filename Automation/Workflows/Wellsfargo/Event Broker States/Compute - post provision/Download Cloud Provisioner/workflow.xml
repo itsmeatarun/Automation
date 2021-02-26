@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="94d60ed7-757c-4d13-8841-ad43e203983b" version="0.1.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Download Cloud Provisioner]]></display-name>
+  <position y="10.0" x="310.0"/>
+  <input>
+    <param name="gitAPIBaseUrl" type="string"/>
+    <param name="gitToken" type="string"/>
+    <param name="gitBranch" type="string"/>
+    <param name="dirPath" type="string"/>
+    <param name="vmUserName" type="string"/>
+    <param name="vmPassword" type="SecureString"/>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="jsonObj" type="Any"/>
+    <param name="isNeedImageBuild" type="boolean"/>
+    <param name="gitRepoZipDownloadUrl" type="string"/>
+    <param name="gitZipExtractPath" type="string"/>
+    <param name="gitZipFileName" type="string"/>
+    <param name="rhelVersion" type="string"/>
+    <param name="tempRepoName" type="string"/>
+    <param name="pipFolderPath" type="string"/>
+    <param name="scriptType" type="string"/>
+    <param name="scriptTimeout" type="number"/>
+    <param name="scriptRefreshTime" type="number"/>
+    <param name="scriptWorkingDirectory" type="string"/>
+    <param name="interactiveSession" type="boolean"/>
+    <param name="cloudProvisionerFileName" type="string"/>
+    <param name="virtualEnvPath" type="string"/>
+  </input>
+  <output>
+    <param name="vcoFileExists" type="boolean"/>
+  </output>
+  <attrib name="gitProvisionerOutPut" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vroPath" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vroFolder" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="guestFilePathForProvisioner" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="overwrite" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="gitBranchName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cpFolderName" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="cpFolderName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="repoCloudProvisionerPath" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="cloudProvisionerRepoPath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="fileExtension" type="string" read-only="false">
+    <value encoded="n"><![CDATA[zipball]]></value>
+  </attrib>
+  <attrib name="osType" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cloudProvisionerFilePath" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="cloudProvisionerFilePath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="scriptConfigurationResource" type="ResourceElement" read-only="false">
+    <value encoded="n"><![CDATA[dunes://service.dunes.ch/ResourceElement?id='525f2746-c689-4f92-9c39-b473cf3dd105'&dunesName='ResourceElement']]></value>
+  </attrib>
+  <attrib name="scriptVariables" type="Array/CompositeType(stringToReplace:string,replacingString:string):scriptVariables" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <attrib name="scriptExitCodeOut" type="number" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="scriptOutputTextOut" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="winPath" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpWinLockFileBasePath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="230.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item7" type="task">
+    <display-name><![CDATA[prepare to download cloud provisioner]]></display-name>
+    <script encoded="false"><![CDATA[
+var customProperty = jsonObj["customProperties"];
+//System.log("gitBranchName: " + JSON.parse(customProperty).gitBranchName);
+osType = customProperty.osType;
+gitBranchName = gitBranch;
+if(customProperty)
+{
+    System.log("gitBranchName: " + customProperty.gitBranchName);
+    gitBranchName = (customProperty.gitBranchName==null)? gitBranch : customProperty.gitBranchName;
+}
+
+
+
+]]></script>
+    <in-binding>
+      <bind name="gitAPIHostUrl" type="string" export-name="gitAPIBaseUrl"/>
+      <bind name="gitToken" type="string" export-name="gitToken"/>
+      <bind name="gitBranch" type="string" export-name="gitBranch"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding>
+      <bind name="gitBranchName" type="string" export-name="gitBranchName"/>
+      <bind name="osType" type="string" export-name="osType"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item6" type="end" end-mode="0">
+    <in-binding/>
+    <position y="285.0" x="180.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item8" type="custom-condition" alt-out-name="item11">
+    <display-name><![CDATA[Is Needed to Build Image]]></display-name>
+    <script encoded="false"><![CDATA[return isNeedImageBuild;]]></script>
+    <in-binding>
+      <bind name="isNeedImageBuild" type="boolean" export-name="isNeedImageBuild"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="120.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item0" type="link" linked-workflow-id="9ad2bfc3-90cf-404c-80d9-4c588c7e2d76">
+    <display-name><![CDATA[Download Git Repo as Zip File]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="username" type="string" export-name="vmUserName"/>
+      <bind name="password" type="SecureString" export-name="vmPassword"/>
+      <bind name="scriptType" type="string" export-name="scriptType"/>
+      <bind name="scriptTimeout" type="number" export-name="scriptTimeout"/>
+      <bind name="scriptRefreshTime" type="number" export-name="scriptRefreshTime"/>
+      <bind name="scriptWorkingDirectory" type="string" export-name="scriptWorkingDirectory"/>
+      <bind name="interactiveSession" type="boolean" export-name="interactiveSession"/>
+      <bind name="cloudProvisionerFileName" type="string" export-name="cloudProvisionerFileName"/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitZipExtractPath" type="string" export-name="gitZipExtractPath"/>
+      <bind name="gitZipFileName" type="string" export-name="gitZipFileName"/>
+      <bind name="gitToken" type="string" export-name="gitToken"/>
+      <bind name="gitBranchName" type="string" export-name="gitBranchName"/>
+      <bind name="rhelVersion" type="string" export-name="rhelVersion"/>
+      <bind name="tempRepoName" type="string" export-name="tempRepoName"/>
+      <bind name="pipFolderPath" type="string" export-name="pipFolderPath"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="185.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item6" type="link" linked-workflow-id="af9bfe36-aad5-4fb8-ab37-b8d6a1a8b6c2">
+    <display-name><![CDATA[Download Cloud Provisioner Folder]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="username" type="string" export-name="vmUserName"/>
+      <bind name="password" type="SecureString" export-name="vmPassword"/>
+      <bind name="scriptType" type="string" export-name="scriptType"/>
+      <bind name="scriptTimeout" type="number" export-name="scriptTimeout"/>
+      <bind name="scriptRefreshTime" type="number" export-name="scriptRefreshTime"/>
+      <bind name="scriptWorkingDirectory" type="string" export-name="scriptWorkingDirectory"/>
+      <bind name="interactiveSession" type="boolean" export-name="interactiveSession"/>
+      <bind name="cloudProvisionerFileName" type="string" export-name="cloudProvisionerFileName"/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitZipExtractPath" type="string" export-name="gitZipExtractPath"/>
+      <bind name="gitZipFileName" type="string" export-name="gitZipFileName"/>
+      <bind name="gitToken" type="string" export-name="gitToken"/>
+      <bind name="gitBranchName" type="string" export-name="gitBranchName"/>
+      <bind name="rhelVersion" type="string" export-name="rhelVersion"/>
+      <bind name="tempRepoName" type="string" export-name="tempRepoName"/>
+      <bind name="cpFolderName" type="string" export-name="cpFolderName"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="240.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item10" type="end" end-mode="0">
+    <in-binding/>
+    <position y="340.0" x="310.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item9" type="custom-condition" alt-out-name="item13">
+    <display-name><![CDATA[Decision]]></display-name>
+    <script encoded="false"><![CDATA[return (osType.toUpperCase() == "LINUX")? true : false;]]></script>
+    <in-binding>
+      <bind name="osType" type="string" export-name="osType"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="175.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item10" type="link" linked-workflow-id="24c23d4c-12be-4889-aa66-29b8a450f1cd">
+    <display-name><![CDATA[Run script in VM guest]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="vmUsername" type="string" export-name="vmUserName"/>
+      <bind name="vmPassword" type="SecureString" export-name="vmPassword"/>
+      <bind name="scriptConfigurationResource" type="ResourceElement" export-name="scriptConfigurationResource"/>
+      <bind name="scriptVariables" type="Array/CompositeType(stringToReplace:string,replacingString:string):scriptVariables" export-name="scriptVariables"/>
+    </in-binding>
+    <out-binding>
+      <bind name="scriptExitCodeOut" type="number" export-name="scriptExitCodeOut"/>
+      <bind name="scriptOutputTextOut" type="string" export-name="scriptOutputTextOut"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="295.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item12" type="task">
+    <display-name><![CDATA[Build Execution script ]]></display-name>
+    <script encoded="false"><![CDATA[scriptVariables = [];
+
+scriptVariables.push({
+    "stringToReplace" : "[tpath]",
+    "replacingString" : winPath
+});
+scriptVariables.push({
+    "stringToReplace" : "[durl]",
+    "replacingString" :  gitRepoZipDownloadUrl + "/zipball/develop"
+});
+scriptVariables.push({
+    "stringToReplace" : "[gtoken]",
+    "replacingString" : "token " + gitToken
+});
+]]></script>
+    <in-binding>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitToken" type="string" export-name="gitToken"/>
+      <bind name="winPath" type="string" export-name="winPath"/>
+    </in-binding>
+    <out-binding>
+      <bind name="scriptVariables" type="Array/CompositeType(stringToReplace:string,replacingString:string):scriptVariables" export-name="scriptVariables"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="240.0" x="270.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

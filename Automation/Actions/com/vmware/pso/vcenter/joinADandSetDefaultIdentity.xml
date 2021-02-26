@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="joinADandSetDefaultIdentity" result-type="string" api-version="6.0.0" id="90847df9-6e68-421b-ac74-ef80ac66a10e" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterVmName" t="string"><![CDATA[Name of the VM for the vCenter that is being joined to AD.]]></param>
+  <param n="parentvCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="parentvCenterUser" t="string"><![CDATA[]]></param>
+  <param n="parentvCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vCenterVmRootPassword" t="SecureString"><![CDATA[root password of the VCSA VM that is being joined to AD.]]></param>
+  <param n="adUser" t="string"><![CDATA[]]></param>
+  <param n="adPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="domainFQDN" t="string"><![CDATA[]]></param>
+  <param n="orgUnit" t="string"><![CDATA[Optional: OU Name like "infra/servers" OR full DN of OU]]></param>
+  <param n="addIdentitySrouce" t="boolean"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vCenterVmName,"Input var: vCenterVmName");
+dbc.ensureNotNullOrEmpty(parentvCenterFQDN,"Input var: parentvCenterFQDN");
+dbc.ensureNotNullOrEmpty(parentvCenterUser,"Input var: parentvCenterUser");
+dbc.ensureNotNullOrEmpty(parentvCenterPassword,"Input var: parentvCenterPassword");
+dbc.ensureNotNullOrEmpty(vCenterVmRootPassword,"Input var: vCenterVmRootPassword");
+dbc.ensureNotNullOrEmpty(adUser,"Input var: adUser");
+dbc.ensureNotNullOrEmpty(adPassword,"Input var: adPassword");
+dbc.ensureNotNullOrEmpty(addIdentitySrouce,"Input var: addIdentitySrouce");
+dbc.ensureNotNullOrEmpty(domainFQDN,"Input var: domainFQDN");
+
+var script = 'set -e\n';
+script += '/opt/likewise/bin/domainjoin-cli join --ou <ou> <domain> <user> <password>\n';
+if (addIdentitySrouce){
+    script += '/opt/vmware/bin/sso-config.sh -add_identity_source -type nativead\n';
+}
+script += "identSrc=$(/opt/vmware/bin/sso-config.sh -get_identity_sources 2>/dev/null | grep \"IdentitySourceName\" | grep -v \"localos\" | grep -v \"vsphere.local\" | sed 's/IdentitySourceName        :  //g')\n";
+script += '/opt/vmware/bin/sso-config.sh -set_default_identity_sources -i $identSrc\n';
+
+script = script.replace(/<domain>/g,domainFQDN);
+script = script.replace("<user>",adUser);
+script = script.replace("<password>",adPassword);
+
+if(dbc.isNullOrEmpty(orgUnit)) {
+    script = script.replace("--ou <ou> ","");
+} else {
+    orgUnit = System.getModule("com.vmware.pso.util").getCanonicalNameFromDistinguishedName(orgUnit);
+    script = script.replace("<ou>",("'" + orgUnit + "'"));
+}
+//System.debug(script);
+
+var scriptResult = System.getModule("com.vmware.pso.remoteScript").runRemoteScript([vCenterVmName],parentvCenterFQDN,parentvCenterUser,parentvCenterPassword,script,"root",vCenterVmRootPassword,ignoreSSLCertificate);
+
+var status = scriptResult.get("status");
+System.log("joinADandSetDefaultIdentity completed with status: " + status);
+if (status != "success") {
+    throw "joinADandSetDefaultIdentity failed with error: " + scriptResult.get("error");
+}
+
+return status;]]></script>
+</dunes-script-module>

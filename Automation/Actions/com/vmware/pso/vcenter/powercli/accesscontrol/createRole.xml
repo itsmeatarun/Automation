@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createRole" result-type="Properties" api-version="6.0.0" id="8000fcd0-46e6-4e75-8c29-04ff16c20d5e" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.accesscontrol" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleJSON" t="string"><![CDATA[]]></param>
+  <param n="overwrite" t="boolean"><![CDATA[Overwrite role with same name.]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $roleJSON = $inputs.roleJSON
+        $overwriteRole = $inputs.overwrite
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        #[ValidatePattern('^[A-Za-z ]+$')]
+        $roleName = $roleJSON | ConvertFrom-Json | select -ExpandProperty name
+        #$description = $roleJSON | ConvertFrom-Json | select -ExpandProperty description #currently not supported
+        $privilegeArray = $roleJSON | ConvertFrom-Json | select -ExpandProperty privileges
+
+        Write-Host "Checking to see if role '$roleName' exists"
+        $roleExists = Get-VIRole -Name $roleName -Server $viConnection -ErrorAction SilentlyContinue
+        if ($roleExists -And !$overwriteRole) {
+            Write-Host "Failed: Role '$roleName' already exists."
+            $output.add("status","failed")
+            $output.add("error","Role '$roleName' already exists.")
+            return $output 
+        }
+        Write-Host "Gathering priviledges from input list."
+        $privilegeList = $privilegeArray | ForEach-Object{
+            $privilege = Get-VIPrivilege -Server $viConnection -Id $_ -ErrorAction SilentlyContinue
+            if (!$privilege) {
+                Write-Host "Warning: privilege $_ not found." -ForegroundColor Yellow
+            } else {
+                $privilege
+                $privilege = $null
+            }
+        }
+
+        if ($roleExists) {
+            Write-Host "Overwriting the role '$roleName'"
+            $null = Get-VIRole -Server $viConnection -Name $roleName | Set-VIRole -Server $viConnection -RemovePrivilege *
+            $role = Get-VIRole -Server $viConnection -Name $roleName | Set-VIRole -Server $viConnection -AddPrivilege $privilegeList
+        } else {
+            Write-Host "Creating the role '$roleName'"
+            $role = New-VIRole -Server $viConnection -Name $roleName | Set-VIRole -Server $viConnection -AddPrivilege $privilegeList
+        }
+
+    } catch {
+        Write-Host "Failed creating role. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+    
+    $output.add("status","success")
+    $output.add("roleId",$role.Id.ToString())
+    return $output
+}
+]]></script>
+</dunes-script-module>

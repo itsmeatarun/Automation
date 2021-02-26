@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvCenterWebProxy" result-type="void" api-version="6.0.0" id="1f46fe25-ff97-4aa3-b48b-693925620985" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterHostname" t="string"><![CDATA[FQDN of vCenter on which to set the Proxy Host.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[User with priv to auth to vCenter.]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="proxyHost" t="string"><![CDATA[]]></param>
+  <param n="proxyPort" t="string"><![CDATA[]]></param>
+  <param n="proxyUser" t="string"><![CDATA[]]></param>
+  <param n="proxyPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="noProxyHosts" t="Array/string"><![CDATA[(Optional) Array of no proxy hostnames or IPs]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(proxyHost,"Input var: proxyHost");
+dbc.ensureNotNullOrEmpty(proxyPort,"Input var: proxyPort");
+dbc.ensureNotNullOrEmpty(vCenterHostname,"Input var: vCenterHostname");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+
+var sessionToken = System.getModule("com.vmware.pso.vcenter.rest").getvCenterSessionToken(vCenterHostname,vCenterUser,vCenterPassword)
+
+/*
+//This is commented out for now as we are not able to get any traffic to pass through the wells fargo proxy for the URLs we've tested.
+var testResult = System.getModule("com.vmware.pso.vcenter.rest.appliance.proxy").testProxy(vCenterHostname,sessionToken,proxyHost,proxyPort,proxyUser,proxyPassword);
+
+if(!testResult) {
+	System.getModule("com.vmware.pso.vcenter.rest").endvCenterSession(vCenterHostname,sessionToken);
+	throw "Web Proxy test failed. Exiting.";
+}
+*/
+var status = System.getModule("com.vmware.pso.vcenter.rest.appliance.proxy").setProxy(vCenterHostname,sessionToken,proxyHost,proxyPort,proxyUser,proxyPassword);
+
+if(dbc.isNullOrEmpty(noProxyHosts)) {
+    noProxyHosts = [];
+} 
+System.getModule("com.vmware.pso.vcenter.rest.appliance.proxy").setNoProxy(vCenterHostname,sessionToken,noProxyHosts);
+
+System.getModule("com.vmware.pso.vcenter.rest").endvCenterSession(vCenterHostname,sessionToken);
+
+System.log("setvCenterWebProxy completed with status: '" + status + "'");]]></script>
+</dunes-script-module>

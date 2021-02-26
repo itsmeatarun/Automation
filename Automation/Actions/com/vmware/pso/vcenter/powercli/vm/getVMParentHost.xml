@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getVMParentHost" result-type="string" api-version="6.0.0" id="2a2a5025-7f79-4902-b7c4-9fdefb407409" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.vm" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vmName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $vmName = $inputs.vmName
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        throw "Failed Processing Inputs. $($_.Exception.Message)."
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Failed connecting to vCenter. $($_.Exception.Message)."     
+    } 
+    try {
+        Write-Host "Looking for VM '$vmName'"
+        $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+
+        if ($vm) {
+            Write-Host "VM '$vmName' found. Returning parent '$($vm.VMHost.Name)'."
+            $vmHost = $($vm.VMHost.Name)
+        } else {
+            throw "VM '$vmName' not found. In vCenter '$vcfqdn'"
+        }
+
+    } catch {
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Failed finding VM host. $($_.Exception.Message)."
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    return $vmHost
+}
+]]></script>
+</dunes-script-module>

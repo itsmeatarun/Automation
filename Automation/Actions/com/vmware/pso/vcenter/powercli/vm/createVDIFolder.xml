@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createVDIFolder" result-type="void" api-version="6.0.0" id="14dc38de-1546-48cc-b1ef-eac909f54989" version="0.0.1" category-name="com.vmware.pso.vcenter.powercli.vm" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vdiFolderName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $vdiFolderName = $inputs.vdiFolderName
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        throw "Failed Processing Inputs. $($_.Exception.Message)."
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Failed connecting to vCenter. $($_.Exception.Message)."     
+    } 
+    try {
+        Write-Host "Looking for Folder '$vdiFolderName'"
+        $vdiFolder = Get-Folder -Name $vdiFolderName -ErrorAction SilentlyContinue
+
+        if ($vdiFolder) {
+            Write-Host "Folder '$vdiFolderName' found. Nothing to do."
+        } else {
+            Write-Host "Creating '$vdiFolderName' folder."
+            $vmFolder = Get-Folder -Type VM -Name "vm"
+            $vdiFolder = New-Folder -Name $vdiFolderName -Location $vmFolder
+        }
+
+    } catch {
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Failed finding/creating vdi folder. $($_.Exception.Message)."
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    return
+}
+]]></script>
+</dunes-script-module>

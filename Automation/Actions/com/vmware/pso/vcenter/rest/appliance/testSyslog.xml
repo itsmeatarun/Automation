@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="testSyslog" result-type="boolean" api-version="6.0.0" id="4d81bbf6-562b-413f-b93c-dc29b31fab15" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.rest.appliance">
+  <description><![CDATA[boolean response true indicates that the proxy test succeeded.]]></description>
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionToken" t="string"><![CDATA[vCenter Session Token]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHost,"Input var: vCenterHost");
+dbc.ensureNotNullOrEmpty(sessionToken,"Input var: sessionToken");
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-api-session-id", sessionToken);
+var url = "/appliance/logging/forwarding?action=test";
+
+var body = {
+  "send_test_message": true
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+dbc.ensureNotNullOrEmpty(response.value,"Invalid response for testSyslog: " + JSON.stringify(response));
+
+System.debug("Syslog test result: "+ response.value[0].hostname + " := " + response.value[0].state);
+
+return (response.value[0].state == "UP");]]></script>
+</dunes-script-module>

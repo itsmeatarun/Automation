@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="lockAndRunRemoteScript" result-type="Properties" api-version="6.0.0" id="b3459d3b-64df-4418-a701-517ac7eabbb4" version="0.1.4" allowed-operations="evf" category-name="com.vmware.pso.remoteScript" memory-limit="512000000" timeout="1200">
+  <description><![CDATA[Runs script in Guest]]></description>
+  <param n="machinenames" t="Array/string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="script" t="string"><![CDATA[]]></param>
+  <param n="remoteuser" t="string"><![CDATA[]]></param>
+  <param n="remotepassword" t="SecureString"><![CDATA[]]></param>
+  <param n="lockId" t="string"><![CDATA[]]></param>
+  <param n="lockOwner" t="string"><![CDATA[]]></param>
+  <param n="waitTime" t="number"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+System.debug("========== Executing action: " + arguments.callee.name.substr(6) + " ==========" );
+
+System.debug("Attempting to obtain lock.");
+var stolen = System.getModule("com.vmware.pso.util").lockAndSteal(lockId, lockOwner, waitTime);
+if (stolen) {
+    System.debug("Lock '" + lockId + "' had to be stolen. Proceeding with running script.");
+} else {
+    System.debug("Lock '" + lockId + "' obtained. Proceeding with running script.");
+}
+
+var result = System.getModule("com.vmware.pso.remoteScript").runRemoteScript(machinenames,vcfqdn,vcuser,vcpassword,script,remoteuser,remotepassword,ignoreSSLCertificate);
+
+LockingSystem.unlock(lockId, lockOwner);
+System.debug("Lock '" + lockId + "' released.");
+
+return result;]]></script>
+</dunes-script-module>

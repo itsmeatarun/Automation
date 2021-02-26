@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="runRestApiCall" result-type="Any" api-version="6.0.0" id="26cab2cb-9272-4405-8d02-917a87a7cb62" version="1.1.2" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.hcm.rest">
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="inParams" t="Array/string"><![CDATA[]]></param>
+  <param n="method" t="string"><![CDATA[]]></param>
+  <param n="content" t="string"><![CDATA[]]></param>
+  <param n="restUrl" t="string"><![CDATA[]]></param>
+  <param n="headers" t="Properties"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+System.debug("====== Begin Action " + arguments.callee.name.substr(6) + " ======");
+System.debug("Calling REST API...");
+
+// var headers = new Properties();
+var applicationSlashJson = "application/json";
+var	response = System.getModule("com.vmware.pso.rest.util").executeRestOperation(restUrl, method, content, inParams, applicationSlashJson, headers, restHost);
+var responseContentAsString = response.contentAsString;
+System.debug(arguments.callee.name.substr(6) + " Status Code: " + response.statusCode);
+
+switch(response.statusCode)
+{
+	case 200:
+	case 201:
+	case 202:
+		break;
+	default:
+ 		throw ('Error: ' + responseContentAsString);
+}
+
+return responseContentAsString;]]></script>
+</dunes-script-module>

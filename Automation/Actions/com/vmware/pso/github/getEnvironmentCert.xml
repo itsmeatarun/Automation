@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getEnvironmentCert" result-type="string" api-version="6.0.0" id="61bd868c-2214-4561-9a11-ecadb085fae1" version="0.0.3" category-name="com.vmware.pso.github">
+  <param n="githubHost" t="string"><![CDATA[]]></param>
+  <param n="githubUser" t="string"><![CDATA[]]></param>
+  <param n="githubToken" t="SecureString"><![CDATA[]]></param>
+  <param n="baseURL" t="string"><![CDATA[]]></param>
+  <param n="certPath" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(githubHost,"Input var: githubHost");
+dbc.ensureNotNullOrEmpty(githubUser,"Input var: githubUser");
+dbc.ensureNotNullOrEmpty(githubToken,"Input var: githubToken");
+dbc.ensureNotNullOrEmpty(baseURL,"Input var: baseURL");
+dbc.ensureNotNullOrEmpty(certPath,"Input var: certPath");
+
+var response = System.getModule("com.vmware.pso.github.rest").getRepoContent(githubHost,githubUser,githubToken,baseURL,certPath);
+var encodedContent = JSON.parse(response).content;
+var cert = System.getModule("com.vmware.pso.cryptojs").base64Decode(encodedContent);
+
+System.debug("Fetch certificate '" + certPath + "': \n" + cert);
+
+return cert;]]></script>
+</dunes-script-module>

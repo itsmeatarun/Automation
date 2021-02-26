@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="base64Decode" result-type="string" api-version="6.0.0" id="b47098b2-4cb6-4bf0-8315-ee645698c756" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.cryptojs">
+  <runtime><![CDATA[node:12]]></runtime>
+  <param n="encodedString" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[exports.handler = (context, inputs) => {  
+    var decodedString = Buffer.from(inputs.encodedString, "base64").toString('ascii');
+    //console.log('decodedString: \n' + decodedString);
+    return decodedString;
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createAndGetDomainCSRs" result-type="Array/Properties" api-version="6.0.0" id="fa95ec68-6d53-4bc6-9668-31545e0fb393" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="user" t="string"><![CDATA[SDDC Manager username]]></param>
+  <param n="password" t="SecureString"><![CDATA[SDDC Manager password]]></param>
+  <param n="host" t="string"><![CDATA[SDDC Manager host]]></param>
+  <param n="domain" t="string"><![CDATA[SDDC Manager vcf domain]]></param>
+  <param n="country" t="string"><![CDATA[CSR Country]]></param>
+  <param n="locality" t="string"><![CDATA[CSR Locality]]></param>
+  <param n="organization" t="string"><![CDATA[CSR Organization]]></param>
+  <param n="organizationUnit" t="string"><![CDATA[CSR Organization Unit]]></param>
+  <param n="email" t="string"><![CDATA[CSR email]]></param>
+  <param n="keySize" t="string"><![CDATA[CSR Key Size]]></param>
+  <param n="keyAlgorithm" t="string"><![CDATA[CSR Key Algorith]]></param>
+  <param n="state" t="string"><![CDATA[CSR State]]></param>
+  <param n="resources" t="Array/Properties"><![CDATA[{"fqdn": "vcenter-vi01.pso.vsphere.local", "type": "VCENTER"}]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(user,"Input var: user");
+dbc.ensureNotNullOrEmpty(password,"Input var: password");
+dbc.ensureNotNullOrEmpty(host,"Input var: host");
+dbc.ensureNotNullOrEmpty(domain,"Input var: domain");
+dbc.ensureNotNullOrEmpty(country,"Input var: country");
+dbc.ensureNotNullOrEmpty(locality,"Input var: locality");
+dbc.ensureNotNullOrEmpty(organization,"Input var: organization");
+dbc.ensureNotNullOrEmpty(organizationUnit,"Input var: organizationUnit");
+dbc.ensureNotNullOrEmpty(keySize,"Input var: keySize");
+dbc.ensureNotNullOrEmpty(keyAlgorithm,"Input var: keyAlgorithm");
+dbc.ensureNotNullOrEmpty(state,"Input var: state");
+dbc.ensureNotNullOrEmpty(resources,"Input var: resources");
+
+//Added for figuring out bad gateway issue.
+System.log(user + "; Input var: user");
+System.log(password + "; Input var: password");
+System.log(host + "; Input var: host");
+System.log(domain + "; Input var: domain");
+System.log(country + "; Input var: country");
+System.log(locality + "; Input var: locality");
+System.log(organization + "; Input var: organization");
+System.log(organizationUnit + "; Input var: organizationUnit");
+System.log(email + "; Input var: email");
+System.log(keySize + "; Input var: keySize");
+System.log(keyAlgorithm + "; Input var: keyAlgorithm");
+System.log(state + "; Input var: state");
+System.log(JSON.stringify(resources) + "; Input var: resources");
+
+var token = System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tokens").getBearerToken(user, password, host);
+
+System.log("Creating CSRs");
+var response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").createDomainCSRs(host, token, domain, country, locality, organization, organizationUnit, email, keySize, keyAlgorithm, state, resources));
+
+var taskId = response.id;
+
+response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+
+var retryMax = 120;
+var retryCount = 0;
+var retryWait = 5000;
+while(response.status == "IN_PROGRESS") {
+	if(retryCount > retryMax) {
+		throw "Maximum retry attempts, " + retryMax + " reached waiting for configure backup task: '" + taskId + "'";
+	}
+	System.log("Got status: '" + response.status + "', Waiting " + retryWait + " millis to check configure backup.");
+	System.sleep(retryWait);
+	response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+	retryCount++;
+}
+
+if(response.status.toLowerCase() != "successful") {
+	throw "Error creating certificates";
+}
+
+System.log("Completed with status: '" + response.status + "'");
+
+System.log("Fetching CSRs");
+response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getDomainCSRs(host, token, domain));
+
+var certificateData = new Array();
+
+var elements = response.elements;
+for(var x=0; x < elements.length; x++) {
+    var element = elements[x];
+
+    var type = getType(element.resource.fqdn);
+
+    if(type != null) {
+        certificateData.push(
+            {
+                "name": element.resource.fqdn,
+                "csr": element.csrEncodedContent,
+                "type": type
+            }
+        );
+    }    
+}
+
+return certificateData;
+
+
+function getType(fqdn) {
+    for(var x=0; x < resources.length; x++) {
+        var resource = resources[x];
+        if(resource.fqdn == fqdn) {
+            return resource.type;
+        }
+    }
+
+    return null;
+}]]></script>
+</dunes-script-module>

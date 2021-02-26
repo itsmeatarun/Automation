@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getvIDMSystemDomainAccessToken" result-type="string" api-version="6.0.0" id="395be918-4a69-4a8c-92f5-e50f1545d61c" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vidm.rest">
+  <description><![CDATA[Can only accept users in the System Domain. No AD users.]]></description>
+  <param n="vIDM_Host" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vIDM_User" t="string"><![CDATA[]]></param>
+  <param n="vIDM_Password" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vIDM_Host,"Input var: vIDM_Host");
+dbc.ensureNotNullOrEmpty(vIDM_User,"Input var: vIDM_User");
+dbc.ensureNotNullOrEmpty(vIDM_Password,"Input var: vIDM_Password");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(vIDM_Host);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+var url = "/SAAS/API/1.0/REST/auth/system/login";
+
+var body = {
+    "username" : vIDM_User,
+    "password" : vIDM_Password,
+    "issueToken" : "true"
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+dbc.ensureNotNullOrEmpty(response.sessionToken,"Access Token");
+return response.sessionToken;]]></script>
+</dunes-script-module>

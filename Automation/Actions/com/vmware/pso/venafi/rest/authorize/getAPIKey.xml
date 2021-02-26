@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getAPIKey" result-type="string" api-version="6.0.0" id="2d0cbb3b-8fd6-42b6-ad4d-cb5ce17b928f" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi.rest.authorize">
+  <param n="user" t="string"><![CDATA[]]></param>
+  <param n="password" t="SecureString"><![CDATA[]]></param>
+  <param n="host" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(user, "user");
+dbc.ensureNotNullOrEmpty(password, "password");
+dbc.ensureNotNullOrEmpty(host, "host");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.venafi.rest").getTransientRESTHost(host);
+	dbc.ensureNotNullOrEmpty(restHost,"restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	var url = "/authorize/";
+	
+	var method = "POST";
+	var content = JSON.stringify(
+		{
+			"Username": user,
+			"Password": password
+		}
+	);
+	
+	var inParametersValues = null;
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": Authorize token request response '" + JSON.stringify(response) + "'");
+
+	return  JSON.stringify(response);
+}
+	]]></script>
+</dunes-script-module>

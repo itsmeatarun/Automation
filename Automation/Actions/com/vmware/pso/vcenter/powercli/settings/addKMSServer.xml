@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addKMSServer" result-type="Properties" api-version="6.0.0" id="1a2867ec-bd89-47c5-bc08-324d338464d1" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.settings" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="kmsName" t="string"><![CDATA[]]></param>
+  <param n="kmsProviderName" t="string"><![CDATA[KMS Cluster Name]]></param>
+  <param n="kmsAddress" t="string"><![CDATA[]]></param>
+  <param n="kmsPort" t="number"><![CDATA[]]></param>
+  <param n="kmsUser" t="string"><![CDATA[]]></param>
+  <param n="kmsPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $kmsName = $inputs.kmsName
+        [ValidateNotNullorEmpty()]
+        $kmsProviderName = $inputs.kmsProviderName
+        [ValidateNotNullorEmpty()]
+        $kmsAddress = $inputs.kmsAddress
+        [ValidateNotNullorEmpty()]
+        [int]$kmsPort = $inputs.kmsPort
+        $kmsUser = $inputs.kmsUser
+        $kmsPassword = $inputs.kmsPassword
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Checking to see if KMS Server '$kmsName' exists"
+        $kms = Get-KeyManagementServer -Name $kmsName -ErrorAction SilentlyContinue
+
+        $kmsParameters = @{
+            Address = $kmsAddress
+            Port = $kmsPort
+            TrustKeyManagementServer = $true
+        }
+
+        if ($null -ne $kmsUser -and $null -ne $kmsPassword) {
+            $kmsParameters.Add("Username",$kmsUser)
+            $kmsParameters.Add("Password",$kmsPassword)
+        }
+
+        if ($kms) {
+            Write-Host "Updating KMS Server '$kmsName'."
+            $null = $kms | Set-KeyManagementServer @kmsParameters
+        } else {
+            Write-Host "Creating KMS Server '$kmsName'."
+            $kmsParameters.Add("KmsCluster",$kmsProviderName)
+            $kmsParameters.Add("Name",$kmsName)
+            #Write-Host ($kmsParameters | convertto-json -depth 4 )
+            $null = Add-KeyManagementServer @kmsParameters
+        }
+
+    } catch {
+        Write-Host "Failed creating KMS Server. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

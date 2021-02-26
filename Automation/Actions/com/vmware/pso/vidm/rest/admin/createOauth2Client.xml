@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createOauth2Client" result-type="string" api-version="6.0.0" id="eb6b4e61-b273-484a-92a3-ca225e715517" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vidm.rest.admin">
+  <description><![CDATA[action returns the client id secret for the newly created id.]]></description>
+  <param n="vIDM_Host" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionToken" t="string"><![CDATA[vCenter Session Token]]></param>
+  <param n="clientId" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vIDM_Host,"Input var: vIDM_Host");
+dbc.ensureNotNullOrEmpty(sessionToken,"Input var: sessionToken");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(vIDM_Host);
+
+var headers = new Properties();
+headers.put("Accept","application/vnd.vmware.horizon.manager.oauth2client+json");
+headers.put("Content-Type","application/vnd.vmware.horizon.manager.oauth2client+json");
+headers.put("Authorization", "HZN " + sessionToken);
+var url = "/SAAS/jersey/manager/api/oauth2clients";
+
+var body = {
+  "clientId": clientId,
+  "rememberAs": clientId,
+  "authGrantTypes": "refresh_token client_credentials",
+  "scope": "admin",
+  "refreshTokenTTL": 525600,
+  "displayUserGrant": false
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+dbc.ensureNotNullOrEmpty(response.secret,"ClientID Secret");
+return response.secret;]]></script>
+</dunes-script-module>

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getTransientRESTHost" result-type="REST:RESTHost" api-version="6.0.0" id="99cd5994-ccf0-4f10-832a-24a1c5f816fe" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vrealize.lcm.rest">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="username" t="string"><![CDATA[]]></param>
+  <param n="password" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(username, "username");
+dbc.ensureNotNullOrEmpty(password, "password");
+
+return main();
+
+function main() {
+	var url = "https://" + host;
+	System.getModule("com.vmware.pso.ssl.util").importCertificalteFromURL(url);
+	
+	var restHost = RESTHostManager.createHost("TransientRESTHost-" + host);
+    restHost.authentication = RESTAuthenticationManager.createAuthentication('Basic',  ['Shared Session', username, password]);
+
+	var transientRestHost = RESTHostManager.createTransientHostFrom(restHost);
+	transientRestHost.url = url;
+
+	return transientRestHost;
+}]]></script>
+</dunes-script-module>

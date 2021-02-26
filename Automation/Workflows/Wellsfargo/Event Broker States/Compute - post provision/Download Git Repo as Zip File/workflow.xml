@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="9ad2bfc3-90cf-404c-80d9-4c588c7e2d76" version="0.1.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Download Git Repo as Zip File]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="username" type="string"/>
+    <param name="password" type="SecureString"/>
+    <param name="scriptType" type="string"/>
+    <param name="scriptTimeout" type="number"/>
+    <param name="scriptRefreshTime" type="number"/>
+    <param name="scriptWorkingDirectory" type="string"/>
+    <param name="interactiveSession" type="boolean"/>
+    <param name="cloudProvisionerFileName" type="string"/>
+    <param name="virtualEnvPath" type="string"/>
+    <param name="dirPath" type="string"/>
+    <param name="gitRepoZipDownloadUrl" type="string"/>
+    <param name="gitZipExtractPath" type="string"/>
+    <param name="gitZipFileName" type="string"/>
+    <param name="gitToken" type="string"/>
+    <param name="gitBranchName" type="string"/>
+    <param name="rhelVersion" type="string"/>
+    <param name="tempRepoName" type="string"/>
+    <param name="pipFolderPath" type="string"/>
+    <param name="jsonObj" type="Any"/>
+  </input>
+  <attrib name="excutionScript" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="scriptExitCode" type="number" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="scriptOutputText" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="timer_date" type="Date" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="sleepTime" type="number" read-only="false">
+    <value encoded="n"><![CDATA[100.0]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="340.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[Build execution script]]></display-name>
+    <script encoded="false"><![CDATA[var imageMapping = jsonObj["customProperties"].image;
+System.log(" Image : " + imageMapping);
+var osVersionFolder = getOSVersionFolder(imageMapping);
+System.log(" folderName return : " + osVersionFolder);
+excutionScript = BuildExecutionScript(tempRepoName,pipFolderPath, osVersionFolder, gitZipFileName, gitRepoZipDownloadUrl, gitZipExtractPath, gitToken, gitBranchName);
+System.debug( "Execute Script : " + excutionScript);
+function BuildExecutionScript(downloadedRepoName, pipCopyPath, rhelFolder, filename, downloadUrl, extractionPath, gitApiToken, gitBranch)
+{
+    downloadUrl += "/tarball/"+gitBranch;
+    var script = "";
+    //rhelFolder = "rhel7";
+    script+= "mkdir /var/tmp" + extractionPath +" ;";
+    script+= "curl -H \"Authorization: token "+ gitApiToken +"\" -L " + downloadUrl + " >  /var/tmp/" + filename + " --insecure;";
+    script+= "cd /var/tmp" + extractionPath + ";";
+    script+= "tar -xvf /var/tmp/" + filename + ";";
+    script+= "rm -rf /var/tmp/"+filename+";";
+    script+= "mv pce-eng* "+ downloadedRepoName + ";";
+    script+= "cd /var/tmp" + extractionPath+ "/" + downloadedRepoName +"/instance-prep/" + rhelFolder +";";
+    script+= "./install.sh;";
+    script+= "rm -rf /var/tmp/cloud/; rm -rf /var/tmp/" + extractionPath + "/;";
+    script+= "mv /etc/hosts /etc/hosts.bak; ";
+    script+= "awk 'NR>=1 && NR<=5' /etc/hosts.bak > /etc/hosts;";
+    script+= "rm -rf /etc/hosts.bak;";
+    //script+= "shutdown;";
+    return script;
+
+}
+
+function getOSVersionFolder(imageMappingName)
+{
+    return imageMapping.toLowerCase().split('-').slice(1,3).join("").trim();
+}
+]]></script>
+    <in-binding>
+      <bind name="excutionScript" type="string" export-name="excutionScript"/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+      <bind name="cloudProvisionerFileName" type="string" export-name="cloudProvisionerFileName"/>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="gitToken" type="string" export-name="gitToken"/>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitZipExtractPath" type="string" export-name="gitZipExtractPath"/>
+      <bind name="gitZipFileName" type="string" export-name="gitZipFileName"/>
+      <bind name="gitBranchName" type="string" export-name="gitBranchName"/>
+      <bind name="rhelVersion" type="string" export-name="rhelVersion"/>
+      <bind name="tempRepoName" type="string" export-name="tempRepoName"/>
+      <bind name="pipFolderPath" type="string" export-name="pipFolderPath"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding>
+      <bind name="excutionScript" type="string" export-name="excutionScript"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="8.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="link" linked-workflow-id="f8cd5692-92a0-46b6-a98d-53ffd878d779">
+    <display-name><![CDATA[Run Script in Guest]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="username" type="string" export-name="username"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+      <bind name="scriptType" type="string" export-name="scriptType"/>
+      <bind name="script" type="string" export-name="excutionScript"/>
+      <bind name="scriptTimeout" type="number" export-name="scriptTimeout"/>
+      <bind name="scriptRefreshTime" type="number" export-name="scriptRefreshTime"/>
+      <bind name="scriptWorkingDirectory" type="string" export-name="scriptWorkingDirectory"/>
+      <bind name="interactiveSession" type="boolean" export-name="interactiveSession"/>
+    </in-binding>
+    <out-binding>
+      <bind name="scriptOutputText" type="string" export-name="scriptOutputText"/>
+      <bind name="scriptExitCode" type="number" export-name="scriptExitCode"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item5" type="task">
+    <display-name><![CDATA[Execution Result]]></display-name>
+    <script encoded="false"><![CDATA[System.log("ExitCode : " +scriptExitCode);
+System.log("Execution Output: "+scriptOutputText);
+]]></script>
+    <in-binding>
+      <bind name="scriptOutputText" type="string" export-name="scriptOutputText"/>
+      <bind name="scriptExitCode" type="number" export-name="scriptExitCode"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="185.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item0" type="link" linked-workflow-id="BD80808080808080808080808080808093C380800122528313869552e41805bb1">
+    <display-name><![CDATA[Mark as template]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="295.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item4" type="link" linked-workflow-id="BD80808080808080808080808080808075C280800122528313869552e41805bb1">
+    <display-name><![CDATA[Shut down guest OS and wait]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="240.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

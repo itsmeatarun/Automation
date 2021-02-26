@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="a6b5b7f6-b7e7-478d-a986-0d022ece4820" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[upload and install]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="390.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[var certificatesData = new Array();
+certificatesData.push(
+    {
+        "name": "vcenter-vi01.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIIDNzCCAh8CAQAwdDEnMCUGA1UEAwwedmNlbnRlci12aTAxLnBzby52c3BoZXJl\nLmxvY2FsMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQUwxCzAJBgNVBAcMAlVTMRMw\nEQYDVQQKDApXZWxsc0ZhcmdvMQ0wCwYDVQQLDARXYXZlMIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEArv+YlbvjxJdOx6bQKfywtqk77vfn77+mM/vlh+b9\nAKdHB25dfQIY0a7hYMV9gLh3zObljLoLgLU5DYbggGaK1WWDZiCSvAqVTNCG7VYl\nXr0B9ZqkTbj0jA2raBae4lD00mvDIJxtClr57IPToDkSk5WLETeANSrpgpPF/NNS\nDqdpojeD6qL0Yr8BB8GxUAh3jnsVTzkhhhjH13oi0UL5AFw2m+r3ZbeSiB6LNS3G\nJoOlz6Fz6uDPaDHcr5rZkjAr1glbLA1zGQ4QZsrurbDJf/hZPm5OQKasoEgB/E3l\nEw/HmfMhUQNRRUJhMle75N3vJMXQ5cHuxP8jX5TLbtHkSwIDAQABoH4wfAYJKoZI\nhvcNAQkOMW8wbTALBgNVHQ8EBAMCBeAwPwYDVR0RBDgwNoEUYWRtaW5Ad2VsbHNm\nYXJnby5jb22CHnZjZW50ZXItdmkwMS5wc28udnNwaGVyZS5sb2NhbDAdBgNVHQ4E\nFgQUXtX5Jxib6r6UGG46LMXSy9+lnEkwDQYJKoZIhvcNAQELBQADggEBADRzD1MJ\nBwqZo5bLBX/o43Y4MQFpISeDnn3Z5hr1P/JYeNuFpXrzOvtt2BY2j6QWkiN2SHgn\nIX0YIVPJfo/9/QJPrip+MlUiODODTQxJ2yggt1aL+GVRbxsF5xY2t3rzzgWugp75\nGWrU0SuGzhZXLjikgsmKma7Nh5qqbQIi8sd+cfz1EjLJymdhulGUFNKYcxAdKdP/\nsv2drcqhPAly5ZdUSay0f5y2zJKGsUgS/IUXUc5PwHxfq139i5g3N3TJANV2OOWv\nTuGWG7xc2YZSRt7oQx0USO3RBQ59phzxYF5dzrNR+Ij56T5vCZ2wmFF9TdXrLFl6\nUJ4kzmvQgfswFpM=\n-----END CERTIFICATE REQUEST-----",
+        "type": "VCENTER",
+        "certificateDN":"\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\vcenter-vi01.pso.vsphere.local",
+        "crt": "subject=CN=vcenter-vi01.pso.vsphere.local, OU=Wave, O=WellsFargo, L=US, S=AL, C=US\r\nissuer=CN=pod3-root-ca, DC=pso, DC=vsphere, DC=local\r\n-----BEGIN CERTIFICATE-----\r\nMIIF2zCCBMOgAwIBAgITXgAAAVQURqRTemR/TgAAAAABVDANBgkqhkiG9w0BAQsF\r\nADBcMRUwEwYKCZImiZPyLGQBGRYFbG9jYWwxFzAVBgoJkiaJk/IsZAEZFgd2c3Bo\r\nZXJlMRMwEQYKCZImiZPyLGQBGRYDcHNvMRUwEwYDVQQDEwxwb2QzLXJvb3QtY2Ew\r\nHhcNMjEwMTEyMTcwMjQwWhcNMjMwMTEyMTcwMjQwWjB0MQswCQYDVQQGEwJVUzEL\r\nMAkGA1UECBMCQUwxCzAJBgNVBAcTAlVTMRMwEQYDVQQKEwpXZWxsc0ZhcmdvMQ0w\r\nCwYDVQQLEwRXYXZlMScwJQYDVQQDEx52Y2VudGVyLXZpMDEucHNvLnZzcGhlcmUu\r\nbG9jYWwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCu/5iVu+PEl07H\r\nptAp/LC2qTvu9+fvv6Yz++WH5v0Ap0cHbl19AhjRruFgxX2AuHfM5uWMuguAtTkN\r\nhuCAZorVZYNmIJK8CpVM0IbtViVevQH1mqRNuPSMDatoFp7iUPTSa8MgnG0KWvns\r\ng9OgORKTlYsRN4A1KumCk8X801IOp2miN4PqovRivwEHwbFQCHeOexVPOSGGGMfX\r\neiLRQvkAXDab6vdlt5KIHos1LcYmg6XPoXPq4M9oMdyvmtmSMCvWCVssDXMZDhBm\r\nyu6tsMl/+Fk+bk5ApqygSAH8TeUTD8eZ8yFRA1FFQmEyV7vk3e8kxdDlwe7E/yNf\r\nlMtu0eRLAgMBAAGjggJ8MIICeDAOBgNVHQ8BAf8EBAMCBeAwHQYDVR0OBBYEFF7V\r\n+ScYm+q+lBhuOizF0svfpZxJMD8GA1UdEQQ4MDaBFGFkbWluQHdlbGxzZmFyZ28u\r\nY29tgh52Y2VudGVyLXZpMDEucHNvLnZzcGhlcmUubG9jYWwwHwYDVR0jBBgwFoAU\r\n2ugGNEdQdwQ6pDjuQMTbmM+2KOUwgdsGA1UdHwSB0zCB0DCBzaCByqCBx4aBxGxk\r\nYXA6Ly8vQ049cG9kMy1yb290LWNhLENOPVdJTi1OQzZFTk1SMU5HRCxDTj1DRFAs\r\nQ049UHVibGljJTIwS2V5JTIwU2VydmljZXMsQ049U2VydmljZXMsQ049Q29uZmln\r\ndXJhdGlvbixEQz1wc28sREM9dnNwaGVyZSxEQz1sb2NhbD9jZXJ0aWZpY2F0ZVJl\r\ndm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0aW9uUG9p\r\nbnQwgccGCCsGAQUFBwEBBIG6MIG3MIG0BggrBgEFBQcwAoaBp2xkYXA6Ly8vQ049\r\ncG9kMy1yb290LWNhLENOPUFJQSxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxD\r\nTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPXBzbyxEQz12c3BoZXJlLERD\r\nPWxvY2FsP2NBQ2VydGlmaWNhdGU/YmFzZT9vYmplY3RDbGFzcz1jZXJ0aWZpY2F0\r\naW9uQXV0aG9yaXR5MD0GCSsGAQQBgjcVBwQwMC4GJisGAQQBgjcVCIKq+V+zizmH\r\nmZkwgofyBYHPqjOBCYLviUGDkZIMAgFkAgEDMA0GCSqGSIb3DQEBCwUAA4IBAQCS\r\n+yibZsT7dYkz2FNCUaVKMzG7/kAgMMj1xkR6Lhman4svPPrDGCgGvLGZhHRWEoVv\r\nwm+XZd+N2fgZ3IpFJxUml45CY4gmG6Rk9vgnCmt/5uRgGbTlY0aUhQPV+Jo7BkUJ\r\nO9FeBojGfpmCMpXs+qN3ZG3O6PgobSURtrP1y6TVg7GfRPAHzuf8D1jL+7m5T93a\r\nGCNdPi6sI7dVCQvgPE6T+/1vRkllRyx3SnHQQLJhgriBYhwjRdl/Sz/nBjenNL6l\r\nL4M19gbvYpt8BRyqUTFNMZJJbeVZHcfCB73t/+I4JrPj0jxDYsC8GPQiClFuXscJ\r\nOY3BcXuWoKvtPVt1G0g4\r\n-----END CERTIFICATE-----\r\n"
+    }
+);
+
+var rootCA = "subject=CN=pod3-root-ca, DC=pso, DC=vsphere, DC=local\r\nissuer=CN=pod3-root-ca, DC=pso, DC=vsphere, DC=local\r\n-----BEGIN CERTIFICATE-----\r\nMIIDkzCCAnugAwIBAgIQXIcC6ypWy4FBx1HR/hVEWTANBgkqhkiG9w0BAQsFADBc\r\nMRUwEwYKCZImiZPyLGQBGRYFbG9jYWwxFzAVBgoJkiaJk/IsZAEZFgd2c3BoZXJl\r\nMRMwEQYKCZImiZPyLGQBGRYDcHNvMRUwEwYDVQQDEwxwb2QzLXJvb3QtY2EwHhcN\r\nMjAxMDI2MTgxMjA2WhcNMjUxMDI2MTgyMjA2WjBcMRUwEwYKCZImiZPyLGQBGRYF\r\nbG9jYWwxFzAVBgoJkiaJk/IsZAEZFgd2c3BoZXJlMRMwEQYKCZImiZPyLGQBGRYD\r\ncHNvMRUwEwYDVQQDEwxwb2QzLXJvb3QtY2EwggEiMA0GCSqGSIb3DQEBAQUAA4IB\r\nDwAwggEKAoIBAQDUv5gYiQ7CiyXbfwgGw7OmI8p6XqkCWGgpkC+JUiThgqb7/iqf\r\nyq5bajI6tq/lbBFlJ6bODhPMrGMBbbvZwq5be11HJrDi7Qyl6FcWqko7PmPfU9EP\r\nw6NtEQx9qE+O/Jd33Ks+aohlewaNJbMdDuN20CNedxjNdIU+lDrVqPVU8PhdO6NS\r\nS5uv7thrFlY1hq4bRBtrAM88krWrHBEx3O+2WcLWT9Que1vJ1Wi2jt2glxS3RETj\r\nfHCwO9pmWsdYnHoqD1qbwx1Ut0wUvxz360j4c1NPaeTflCIoo7rk3hSNB2gjPkfU\r\n6bBBxENYWnMSstp7MEr0Ji0CN1T6WuQA1MrJAgMBAAGjUTBPMAsGA1UdDwQEAwIB\r\nhjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTa6AY0R1B3BDqkOO5AxNuYz7Yo\r\n5TAQBgkrBgEEAYI3FQEEAwIBADANBgkqhkiG9w0BAQsFAAOCAQEAFGmp5nN8INKa\r\nJtj5fkV7YyrdB+far0/EcXWy2juE/z+c/NkVR4GBUAubV0+L/IkpeKiJVHxEft4q\r\nL5nhSRBeqtIWR+1RlOePKprt85JDNai4C65lBPKc3esM1NYmLlNAY7PwboM+vya1\r\nY5RQ2USoPbmwJIEHT748X6K8QKUjWAEkCrKmhZgwkriOrSq1j2PbHr7RZDNJHG8n\r\nntuyP4eJhQQKHkpGfIR+Fv0V2v9ZwmDiszVG3GBHA91e4Nk+rGrxO8B/+xZR/Vds\r\n2iqPMAzmRXALlxfYCmNpsGMi0KNt2hbHtvZ+ddGvXKCgq7QLZ63dqhoEPw38z0O1\r\nn2msFqtQOg==\r\n-----END CERTIFICATE-----\r\n";
+
+//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcf.sddcmanager").uploadAndInstallDomainCertificates(
+    "sddc-manager.pso.vsphere.local",
+    "administrator@vsphere.local",
+    "VMware12345!",
+    certificatesData,
+    "pso-vi01",
+    rootCA
+);
+]]></script>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="200.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

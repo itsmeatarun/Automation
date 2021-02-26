@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="ecac7508-d4dc-41e0-9898-299a4ff2ebeb" editor-version="2.0" version="0.0.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Test Venafi At WF</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <attrib name="password" type="SecureString">
+        <value encoded="n">16BN45R57H61Z6BT34H51X23S72U77N75M32V44Q6DY50P48G39W162656AG6CADB0EG4211439Z906B1CAH9C2A052Z174B4D8H4331296KB0319C5MF864B4FP50501E0TF7A1400O8F5E0C1G1436E6R274419BH82AC36FY18A84A7Y</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="340.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !&#13;
+&#13;
+var result = System.getModule("com.vmware.pso.venafi").createCertificateWithoutApproval(&#13;
+    "venafi-vedsdk.wellsfargo.net", //host,&#13;
+    "vdit.vra.venafi.d", //username,&#13;
+    password, //password,&#13;
+    "\\VED\\Policy\\EIT-Tech Infrastructure-VE (Ansible) - PKI Admins\\EIT-Tech Infrastructure-VE (Ansible)\\SSL WF Enterprise CA05 G2 (SHA-256) 1-year\\wave-vlcc2", //policyDN,&#13;
+    "sdw-test-vlcc2-cwld1-vc.ntec.wellsfargo.net", //objectName&#13;
+    "sdw-test-vlcc2-cwld1-vc.ntec.wellsfargo.net", //subject,&#13;
+    "WAVE", //organizationalUnit,&#13;
+    "Wells Fargo", //organization,&#13;
+    "San Francisco", //city,&#13;
+    "CA", //state,&#13;
+    "US", //country,&#13;
+    "" //subjectAltNames&#13;
+);&#13;
+&#13;
+System.log(JSON.stringify(result));</script>
+        <in-binding>
+            <bind name="password" type="SecureString" export-name="password"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

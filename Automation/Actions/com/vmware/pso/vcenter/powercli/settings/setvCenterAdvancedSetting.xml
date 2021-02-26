@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvCenterAdvancedSetting" result-type="Properties" api-version="6.0.0" id="3154db59-89c6-428d-849e-2dbc43189102" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.settings" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="settingName" t="string"><![CDATA[]]></param>
+  <param n="settingValue" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $settingName = $inputs.settingName
+        [ValidateNotNullorEmpty()]
+        $settingValue = $inputs.settingValue
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Setting vCenter advanced setting '$settingName'"
+        $null = $viConnection | Get-AdvancedSetting -Name $settingName | Set-AdvancedSetting -Value $settingValue -Confirm:$false
+
+    } catch {
+        Write-Host "Failed setting vCenter advanced setting. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

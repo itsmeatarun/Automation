@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="9e4618dd-49b7-4d18-b23d-31271c2b45ed" version="0.0.0">
+  <display-name><![CDATA[AD Configuration]]></display-name>
+  <atts>
+    <att name="ad-ent" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=svr,ou=ent,dc=ent,dc=wfb,dc=bank,dc=corp]]></value>
+    </att>
+    <att name="qa-ent" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=svr,ou=ent,dc=ent,dc=wfb,dc=bank,dc=qa]]></value>
+    </att>
+    <att name="xtch" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=secenv,ou=servers,dc=xtch,dc=xtrt,dc=wachovia,dc=net]]></value>
+    </att>
+    <att name="xnet" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=secenv,ou=servers,dc=xnet,dc=trzn,dc=wachovia,dc=net]]></value>
+    </att>
+    <att name="factory_ent" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=os_build]]></value>
+    </att>
+    <att name="nonfactory_ent" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=pce]]></value>
+    </att>
+    <att name="factory_x" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=staging]]></value>
+    </att>
+    <att name="nonfactory_xnet" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=pce]]></value>
+    </att>
+    <att name="nonfactory_xtch" type="string" read-only="false">
+      <value encoded="n"><![CDATA[ou=uat,ou=pce]]></value>
+    </att>
+  </atts>
+</config-element>

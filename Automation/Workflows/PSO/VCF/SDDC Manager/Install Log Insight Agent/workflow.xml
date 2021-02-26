@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="4fd626e2-c529-40fc-94f8-343ffe994adb" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Install Log Insight Agent]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="sddcManagerVmName" type="string"/>
+    <param name="sddcManagervCenterFQDN" type="string"/>
+    <param name="vCenterUser" type="string"/>
+    <param name="vCenterPassword" type="SecureString"/>
+    <param name="sddcManagerRootPass" type="SecureString"/>
+    <param name="vrliHostname" type="string"/>
+    <param name="acceptUntustedCert" type="boolean"/>
+  </input>
+  <output>
+    <param name="actionResult" type="string"/>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="120.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcf.sddcmanager/setLogInsightConfig">
+    <display-name><![CDATA[setLogInsightConfig]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.vcf.sddcmanager").setLogInsightConfig(sddcManagerVmName,sddcManagervCenterFQDN,vCenterUser,vCenterPassword,sddcManagerRootPass,vrliHostname,acceptUntustedCert);
+]]></script>
+    <in-binding>
+      <bind name="sddcManagerVmName" type="string" export-name="sddcManagerVmName"/>
+      <bind name="sddcManagervCenterFQDN" type="string" export-name="sddcManagervCenterFQDN"/>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="sddcManagerRootPass" type="SecureString" export-name="sddcManagerRootPass"/>
+      <bind name="vrliHostname" type="string" export-name="vrliHostname"/>
+      <bind name="acceptUntustedCert" type="boolean" export-name="acceptUntustedCert"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="actionResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

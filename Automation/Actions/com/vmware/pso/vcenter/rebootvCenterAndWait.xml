@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="rebootvCenterAndWait" result-type="void" api-version="6.0.0" id="4f521fb7-1579-402f-b553-bb912722e74a" version="0.0.1" allowed-operations="evf" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterHostname" t="string"><![CDATA[FQDN of vCenter to reboot.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[User with priv to reboot vCenter.]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vCenterHostname,"Input var: vCenterHostname");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+
+var sessionToken = System.getModule("com.vmware.pso.vcenter.rest").getvCenterSessionToken(vCenterHostname,vCenterUser,vCenterPassword);
+
+System.log("Rebooting vCenter " + vCenterHostname + " now.");
+System.getModule("com.vmware.pso.vcenter.rest.appliance").rebootvCenter(vCenterHostname,sessionToken);
+System.sleep(30 * 1000);
+
+var retryMax = 120;
+var retryCount = 0;
+var retryWaitSec = 30;
+while(true) {
+	if(retryCount > retryMax) {
+		throw "Maximum retry attempts, " + retryMax + " reached waiting for " + vCenterHostname + " to finish rebooting.";
+	}
+    try {
+        System.debug("Attempting healthcheck on " + vCenterHostname);
+        var sessionToken = System.getModule("com.vmware.pso.vcenter.rest").getvCenterSessionToken(vCenterHostname,vCenterUser,vCenterPassword);
+        var healthStatus = System.getModule("com.vmware.pso.vcenter.rest.appliance").getvCenterHealth(vCenterHostname,sessionToken);
+        if (healthStatus == "green") {
+            break;
+        }
+    } catch(e) {
+        System.debug(vCenterHostname + " is not quite ready.");
+    }
+	System.sleep(retryWaitSec * 1000);
+	retryCount++;
+}
+
+System.log("Reboot of vCenter " + vCenterHostname + " is complete.");
+return;]]></script>
+</dunes-script-module>

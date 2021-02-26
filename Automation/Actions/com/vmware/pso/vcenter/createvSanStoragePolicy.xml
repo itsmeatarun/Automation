@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createvSanStoragePolicy" result-type="void" api-version="6.0.0" id="c2951c0c-333b-4f08-93c4-e31abc723f98" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="storagePolicyName" t="string"><![CDATA[]]></param>
+  <param n="numDiskStripes" t="number"><![CDATA[]]></param>
+  <param n="failuresToTolerate" t="number"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(storagePolicyName,"Input var: storagePolicyName");
+dbc.ensureNotNullOrEmpty(numDiskStripes,"Input var: numDiskStripes");
+dbc.ensureNotNullOrEmpty(failuresToTolerate,"Input var: failuresToTolerate");
+
+var sPolicyDescription = "Wells Fargo vSan Storage Policy";
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.storage").createStoragePolicy(vCenterFQDN, vCenterUser, vCenterPassword,storagePolicyName,sPolicyDescription,numDiskStripes,failuresToTolerate,ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+System.log("createStoragePolicy completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createvSanStoragePolicy failed with error: " + createResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

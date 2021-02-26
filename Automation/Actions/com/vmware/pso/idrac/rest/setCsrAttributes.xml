@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setCsrAttributes" result-type="void" api-version="6.0.0" id="d4353046-e81b-4919-93e5-a30f0fa13dfd" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.idrac.rest">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="idracAuthToken" t="string"><![CDATA[]]></param>
+  <param n="idracCommonName" t="string"><![CDATA[]]></param>
+  <param n="localityName" t="string"><![CDATA[]]></param>
+  <param n="organizationName" t="string"><![CDATA[]]></param>
+  <param n="organizationUnit" t="string"><![CDATA[]]></param>
+  <param n="stateName" t="string"><![CDATA[]]></param>
+  <param n="emailAddress" t="string"><![CDATA[]]></param>
+  <param n="alternativeName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(idracAuthToken,"Input var: idracAuthToken");
+dbc.ensureNotNullOrEmpty(idracCommonName,"Input var: idracCommonName");
+dbc.ensureNotNullOrEmpty(localityName,"Input var: localityName");
+dbc.ensureNotNullOrEmpty(organizationName,"Input var: organizationName");
+dbc.ensureNotNullOrEmpty(organizationUnit,"Input var: organizationUnit");
+dbc.ensureNotNullOrEmpty(stateName,"Input var: stateName");
+dbc.ensureNotNullOrEmpty(emailAddress,"Input var: emailAddress");
+dbc.ensureNotNullOrEmpty(alternativeName,"Input var: alternativeName");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(idracHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("X-Auth-Token",idracAuthToken);
+var url = "/redfish/v1/Managers/iDRAC.Embedded.1/Attributes";
+
+var body = {
+    "Attributes": {
+        "Security.1.CsrCommonName": idracCommonName,
+        "Security.1.CsrCountryCode": "US",
+        "Security.1.CsrLocalityName": localityName,
+        "Security.1.CsrOrganizationName": organizationName,
+        "Security.1.CsrOrganizationUnit": organizationUnit,
+        "Security.1.CsrStateName": stateName,
+        "Security.1.CsrEmailAddr": emailAddress,
+        "Security.1.CsrSubjectAltName": alternativeName
+    }
+};
+
+var method = "PATCH";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

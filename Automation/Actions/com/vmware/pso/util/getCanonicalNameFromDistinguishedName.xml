@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getCanonicalNameFromDistinguishedName" result-type="string" api-version="6.0.0" id="7605764f-8e52-4d7f-b00d-0d284f9bea18" version="0.0.0" category-name="com.vmware.pso.util">
+  <runtime><![CDATA[powercli:12-powershell-7.0]]></runtime>
+  <param n="distinguishedName" t="string"><![CDATA[i.e. OU=EHS,OU=ENT,DC=ent,DC=wfb,DC=bank,DC=qa ]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    try{
+        [ValidateNotNullorEmpty()]
+        $distinguishedName = $inputs.distinguishedName
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        throw $_.Exception.Message
+    }
+
+    try{
+        $canonicalName = Get-CanonicalName $distinguishedName
+        Write-Host "Got CN: $canonicalName from DN: $distinguishedName"
+    } catch {
+        Write-Host "Failed converting DN: $distinguishedName. Exiting."
+        throw $_.Exception.Message
+    }
+
+    return $canonicalName
+}
+
+function Get-CanonicalName ([string[]]$DistinguishedName) { 
+    foreach ($dn in $DistinguishedName) { 
+        $d = $dn.Split(',') ## Split the dn string up into it's constituent parts
+        if ($d.Count -gt 1) {
+            $arr = (@(($d | Where-Object { $_ -notmatch 'DC=' }) | ForEach-Object { $_.Substring(3) })) ## get parts excluding the parts relevant to the FQDN and trim off the dn syntax 
+            [array]::Reverse($arr) ## Flip the order of the array. 
+
+            ## Create and return the string representation in canonical name format of the supplied DN 
+            $arr -join '/'
+        } else {
+            #Return the existing value as it is not a Distinguished name
+            $dn
+        }
+    }
+}]]></script>
+</dunes-script-module>

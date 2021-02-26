@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="mergeJSON" result-type="string" api-version="6.0.0" id="f99657a1-465c-42b4-8759-b0e9d610d355" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.json.util">
+  <description><![CDATA[This action takes an array of JSON strings and merges them from left to right and returns a single JSON string. When duplicate properties are encountered, the right (or bottom) most property will have precedence.]]></description>
+  <runtime><![CDATA[node:12]]></runtime>
+  <param n="toMergeArray" t="Array/string"><![CDATA[Array of JSON strings]]></param>
+  <script encoded="false"><![CDATA[	exports.handler = (context, inputs) => {
+	    var mergedObject = null;  
+	    inputs.toMergeArray.forEach(strObj => {
+	        if(mergedObject == null) {
+	            mergedObject = JSON.parse(strObj);
+	        } else {
+	            mergedObject = mergeDeep(mergedObject, JSON.parse(strObj));
+	        }
+	    });
+	    //console.log('mergedObject: \n' + JSON.stringify(mergedObject));
+	    return JSON.stringify(mergedObject);
+	}
+	
+	function isObject(item) {
+	  return (item && typeof item === 'object' && !Array.isArray(item));
+	}
+	
+	/**
+	 * Deep merge two objects.
+	 */
+	function mergeDeep(target, ...sources) {
+	  if (!sources.length) return target;
+	  const source = sources.shift();
+	
+	  if (isObject(target) && isObject(source)) {
+	    for (const key in source) {
+	      if (isObject(source[key])) {
+	        if (!target[key]) Object.assign(target, { [key]: {} });
+	        mergeDeep(target[key], source[key]);
+	      } else {
+	        Object.assign(target, { [key]: source[key] });
+	      }
+	    }
+	  }
+	
+	  return mergeDeep(target, ...sources);
+	}]]></script>
+</dunes-script-module>

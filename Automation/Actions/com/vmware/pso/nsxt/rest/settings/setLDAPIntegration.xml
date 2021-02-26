@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setLDAPIntegration" result-type="string" api-version="6.0.0" id="d866d0fc-7e86-4c17-aa2c-cd65a2937a4e" version="0.1.2" category-name="com.vmware.pso.nsxt.rest.settings">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="domainFQDN" t="string"><![CDATA[]]></param>
+  <param n="domainBaseDN" t="string"><![CDATA[]]></param>
+  <param n="bindUser" t="string"><![CDATA[]]></param>
+  <param n="bindPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(domainFQDN,"Input var: domainFQDN");
+dbc.ensureNotNullOrEmpty(domainBaseDN,"Input var: domainBaseDN");
+dbc.ensureNotNullOrEmpty(bindUser,"Input var: bindUser");
+dbc.ensureNotNullOrEmpty(bindPassword,"Input var: bindPassword");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+var url = "/policy/api/v1/aaa/ldap-identity-sources/" + domainFQDN;
+
+var body = {
+    "resource_type": "ActiveDirectoryIdentitySource",
+    "display_name": domainFQDN,
+    "domain_name": domainFQDN,
+    "base_dn": domainBaseDN,
+    "ldap_servers": [
+        {
+            "url": "ldap://" + domainFQDN,
+            "bind_identity": bindUser,
+            "password": bindPassword
+        }
+    ]
+};
+
+var method = "PUT";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

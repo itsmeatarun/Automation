@@ -1,0 +1,291 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="ca56988e-42e6-4692-b3bb-c0b97da21945" version="0.0.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Validate Cloud Provisioner Execution]]></display-name>
+  <position y="10.0" x="180.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="username" type="string"/>
+    <param name="password" type="SecureString"/>
+    <param name="osType" type="string"/>
+    <param name="machineId" type="string"/>
+  </input>
+  <attrib name="scriptType" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="script" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="scriptOutputText" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="isCompleted" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="isFailed" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="cpCompletedKey" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpCompletedKey">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cpFailedKey" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpFailedKey">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="maxTimeOutTry" type="number" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpMaxTimeOutTry"/>
+  <attrib name="expectedWaitTime" type="Date" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="isTimeOut" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="pollingRate" type="number" read-only="false">
+    <value encoded="n"><![CDATA[5.0]]></value>
+  </attrib>
+  <attrib name="timeout" type="number" read-only="false">
+    <value encoded="n"><![CDATA[50.0]]></value>
+  </attrib>
+  <attrib name="vmName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="lockFilesPath" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <attrib name="lockWinFileBasepath" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpWinLockFileBasePath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="cpStatusKeys" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpKeys">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="resultFileCheck" type="Array/boolean" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <attrib name="errorOnFileCheck" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="lockLinFileBasePath" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="cpLinLockFileBasePath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="sleepTime" type="Date" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="sleepSeconds" type="number" read-only="false">
+    <value encoded="n"><![CDATA[180.0]]></value>
+  </attrib>
+  <attrib name="accessToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vraBaseUrl" type="string" read-only="false" conf-id="3c2e0092-6448-49f4-8b5f-eaea26743b0c" conf-key="vraBaseUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="actionResultCP" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="505.0" x="255.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item6" type="task">
+    <display-name><![CDATA[Build the script to execute]]></display-name>
+    <script encoded="false"><![CDATA[System.log("OS Type : " + osType) ;
+sleepTime = new Date();
+sleepTime.setSeconds(sleepTime.getSeconds() + sleepSeconds);
+lockFilesPath = [];
+if(osType.toUpperCase() == "WINDOWS")
+{
+    for(var i in cpStatusKeys.split(","))
+    {
+        lockFilesPath.push(lockWinFileBasepath + cpStatusKeys.split(",")[i]);
+    }
+}else{
+
+    for(var i in cpStatusKeys.split(","))
+    {
+        lockFilesPath.push(lockLinFileBasePath + cpStatusKeys.split(",")[i]);
+    }
+}
+
+var requestedTime = new Date();
+requestedTime.setSeconds(requestedTime.getSeconds() + maxTimeOutTry);
+System.log("Expected Time Out : " + requestedTime);
+expectedWaitTime = requestedTime;
+
+tempVM = vm;
+vmName = vm.name;]]></script>
+    <in-binding>
+      <bind name="osType" type="string" export-name="osType"/>
+      <bind name="maxTimeOutTry" type="number" export-name="maxTimeOutTry"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="cpStatusKeys" type="string" export-name="cpStatusKeys"/>
+      <bind name="lockWinFileBasepath" type="string" export-name="lockWinFileBasepath"/>
+      <bind name="lockLinFileBasePath" type="string" export-name="lockLinFileBasePath"/>
+      <bind name="sleepSeconds" type="number" export-name="sleepSeconds"/>
+    </in-binding>
+    <out-binding>
+      <bind name="script" type="string" export-name="script"/>
+      <bind name="scriptType" type="string" export-name="scriptType"/>
+      <bind name="vmName" type="string" export-name="vmName"/>
+      <bind name="lockFilesPath" type="Array/string" export-name="lockFilesPath"/>
+      <bind name="expectedWaitTime" type="Date" export-name="expectedWaitTime"/>
+      <bind name="sleepTime" type="Date" export-name="sleepTime"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item5" type="task">
+    <display-name><![CDATA[Validate the lock files]]></display-name>
+    <script encoded="false"><![CDATA[System.log("List of File Path : " + lockFilesPath);
+System.log("File Check results : \n" + resultFileCheck);
+sleepTime = new Date();
+sleepTime.setSeconds(sleepTime.getSeconds() + sleepSeconds);
+resultFileCheck.forEach(getStatus);
+function getStatus(item, index)
+{
+    if(item == true)
+    {
+        cpStatusKeys.split(",")[index] == cpCompletedKey 
+        if(cpStatusKeys.split(",")[index].trim().toUpperCase() == cpCompletedKey.trim().toUpperCase() || cpStatusKeys.split(",")[index].trim().toUpperCase() == cpFailedKey.trim().toUpperCase())
+        {
+            System.log("Lock File Name : " + cpStatusKeys.split(",")[index].trim());
+            System.log("Key file Name : " + cpCompletedKey);
+            (cpStatusKeys.split(",")[index].trim() == cpCompletedKey)? isCompleted = true: isFailed = true;
+        }   
+    }
+}
+
+var currentTime = new Date();
+System.log("Current DateTime : " + currentTime);
+System.log("TimeOut DateTime : " + expectedWaitTime);
+if(currentTime > expectedWaitTime)
+    isTimeOut = true;
+resultFileCheck = [];
+
+]]></script>
+    <in-binding>
+      <bind name="scriptOutputText" type="string" export-name="scriptOutputText"/>
+      <bind name="cpCompletedKey" type="string" export-name="cpCompletedKey"/>
+      <bind name="cpFailedKey" type="string" export-name="cpFailedKey"/>
+      <bind name="resultFileCheck" type="Array/boolean" export-name="resultFileCheck"/>
+      <bind name="cpStatusKeys" type="string" export-name="cpStatusKeys"/>
+      <bind name="expectedWaitTime" type="Date" export-name="expectedWaitTime"/>
+      <bind name="sleepSeconds" type="number" export-name="sleepSeconds"/>
+      <bind name="lockFilesPath" type="Array/string" export-name="lockFilesPath"/>
+    </in-binding>
+    <out-binding>
+      <bind name="isCompleted" type="boolean" export-name="isCompleted"/>
+      <bind name="isFailed" type="boolean" export-name="isFailed"/>
+      <bind name="isTimeOut" type="boolean" export-name="isTimeOut"/>
+      <bind name="resultFileCheck" type="Array/boolean" export-name="resultFileCheck"/>
+      <bind name="sleepTime" type="Date" export-name="sleepTime"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="295.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item11" type="custom-condition" alt-out-name="item6">
+    <display-name><![CDATA[Decision]]></display-name>
+    <script encoded="false"><![CDATA[if(isCompleted || isFailed || isTimeOut) 
+    return true;
+else
+    return false;]]></script>
+    <in-binding>
+      <bind name="isCompleted" type="boolean" export-name="isCompleted"/>
+      <bind name="isFailed" type="boolean" export-name="isFailed"/>
+      <bind name="isTimeOut" type="boolean" export-name="isTimeOut"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="340.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item9" type="task" script-module="com.vmware.library.vc.vm.tools/vim3WaitToolsStarted">
+    <display-name><![CDATA[Wait Until VM Tool Starts]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.library.vc.vm.tools").vim3WaitToolsStarted(vm,pollingRate,timeout);
+]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm">
+        <description><![CDATA[VM in which the action look to get the new DNS Name]]></description>
+      </bind>
+      <bind name="pollingRate" type="number" export-name="pollingRate">
+        <description><![CDATA[Time between all request information on the tools [seconds]]]></description>
+      </bind>
+      <bind name="timeout" type="number" export-name="timeout">
+        <description><![CDATA[Timeout before throwing a timeout exception [minutes]]]></description>
+      </bind>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="130.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item3" catch-name="item8" throw-bind-name="errorOnFileCheck" type="foreach">
+    <display-name><![CDATA[Foreach element]]></display-name>
+    <in-binding>
+      <bind name="vmUsername" type="string" export-name="username">
+        <description><![CDATA[Username for the virtual machine]]></description>
+      </bind>
+      <bind name="vmPassword" type="SecureString" export-name="password">
+        <description><![CDATA[Password for the virtual machine]]></description>
+      </bind>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm">
+        <description><![CDATA[Virtual machine]]></description>
+      </bind>
+      <bind name="path" type="Array/string" export-name="*lockFilesPath">
+        <description><![CDATA[Path in virtual machine to check]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="exists" type="Array/boolean" export-name="*resultFileCheck"/>
+    </out-binding>
+    <reference type="Workflow" id="C3808080808080808080808080808080AA80808001322751030482b80adf61e7c"/>
+    <position y="240.0" x="30.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item6" type="task">
+    <display-name><![CDATA[Error on File Check]]></display-name>
+    <script encoded="false"><![CDATA[System.log("VM is rebooting : " + errorOnFileCheck);
+sleepTime = new Date();
+sleepTime.setSeconds(sleepTime.getSeconds() + sleepSeconds);
+]]></script>
+    <in-binding>
+      <bind name="errorOnFileCheck" type="string" export-name="errorOnFileCheck"/>
+      <bind name="sleepSeconds" type="number" export-name="sleepSeconds"/>
+    </in-binding>
+    <out-binding>
+      <bind name="sleepTime" type="Date" export-name="sleepTime"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="295.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item7" type="waiting-timer">
+    <display-name><![CDATA[Waiting timer]]></display-name>
+    <in-binding>
+      <bind name="timer.date" type="Date" export-name="sleepTime">
+        <description><![CDATA[This timer item will wait until date and will continue workflow execution.]]></description>
+      </bind>
+    </in-binding>
+    <out-binding/>
+    <position y="175.0" x="70.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item0" type="link" linked-workflow-id="a8fc92e9-d651-4573-bd81-f16a69818698">
+    <display-name><![CDATA[Add or Update Cloud Provisionor Status]]></display-name>
+    <in-binding>
+      <bind name="accessToken" type="string" export-name="accessToken"/>
+      <bind name="vraBaseUrl" type="string" export-name="vraBaseUrl"/>
+      <bind name="isTimeOut" type="boolean" export-name="isTimeOut"/>
+      <bind name="isProvisionComplete" type="boolean" export-name="isCompleted"/>
+      <bind name="isProvisionFailed" type="boolean" export-name="isFailed"/>
+      <bind name="machineId" type="string" export-name="machineId"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="actionResultCP"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="460.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item10" type="link" linked-workflow-id="370295ac-0d2b-48a9-a59a-c0083ae693e9">
+    <display-name><![CDATA[Get Access Token]]></display-name>
+    <in-binding/>
+    <out-binding>
+      <bind name="accessToken" type="string" export-name="accessToken"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="405.0" x="215.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

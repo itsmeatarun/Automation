@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="configureSyslogNSXTManagers" result-type="void" api-version="6.0.0" id="d63302e6-3414-4a00-9757-57efc698ff17" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt">
+  <param n="nsxtHost" t="string"><![CDATA[NSXT Manager server.]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="syslogServer" t="string"><![CDATA[]]></param>
+  <param n="syslogRootCert" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(syslogServer,"Input var: syslogServer");
+dbc.ensureNotNullOrEmpty(syslogRootCert,"Input var: syslogRootCert");
+
+var exporterName = "loginsight";
+var logLevel = "INFO";
+var port = 9543;
+var exportProtocol = "LI-TLS";
+
+
+System.log("Creating Syslog configuration on: " + nsxtHost);
+var currentExporter = System.getModule("com.vmware.pso.nsxt.rest.settings").getNSXTManagerSyslog(nsxtHost,nsxtAdmin,nsxtPassword);
+if (!dbc.isNullOrEmpty(currentExporter)) {
+    System.log("Found existing Syslog configuration on: " + nsxtHost + ". Overwriting it now.");
+    System.getModule("com.vmware.pso.nsxt.rest.settings").deleteNSXTManagerSyslog(nsxtHost,nsxtAdmin,nsxtPassword,currentExporter);
+}
+System.getModule("com.vmware.pso.nsxt.rest.settings").setNSXTManagerSyslog(nsxtHost,nsxtAdmin,nsxtPassword,exporterName,logLevel,port,exportProtocol,syslogServer,syslogRootCert);
+System.getModule("com.vmware.pso.nsxt.rest.settings").verifyNSXTManagerSyslog(nsxtHost,nsxtAdmin,nsxtPassword);
+
+
+return;]]></script>
+</dunes-script-module>

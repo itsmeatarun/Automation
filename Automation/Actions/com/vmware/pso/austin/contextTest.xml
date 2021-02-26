@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="contextTest" result-type="string" api-version="6.0.0" id="0e5d392b-1888-4d6f-a3f4-6f98684c96b1" version="0.0.0" category-name="com.vmware.pso.austin">
+  <runtime><![CDATA[powercli:12-powershell-7.0]]></runtime>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $inputsString = $inputs | ConvertTo-Json -Compress
+
+    Write-Host ($context | ft | Out-String)
+    Write-Host ($context | fl | Out-String)
+    Write-Host ($context | get-member | Out-String)
+    Write-Host ($context.GetToken() | Out-String)
+
+    Write-Host "Inputs were $inputsString"
+
+    $output=@{status = 'done'}
+
+    return $output
+}
+]]></script>
+</dunes-script-module>

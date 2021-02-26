@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="f93c84b8-65cd-4caf-8d24-14172f9d31ea" version="0.0.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get Certificate Test]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[
+
+
+var certificatesData = new Array();
+
+certificatesData.push(
+    {
+        "name": "vcenter-m01.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDNjCCAh4CAQAwdTEmMCQGA1UEAwwddmNlbnRlci1tMDEucHNvLnZzcGhlcmUu\r\nbG9jYWwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTESMBAGA1UEBwwJUGFsbyBB\r\nbHRvMQ8wDQYDVQQKDAZWTXdhcmUxDDAKBgNVBAsMA1BTTzCCASIwDQYJKoZIhvcN\r\nAQEBBQADggEPADCCAQoCggEBAOV5izAINUbTWRc+3Kb/0NfQV5/p6sl+2ohT+YIl\r\ntxyBraFG7rxLw/vvMYAZopuI4CSPGjRsMozEiBeCLRk+Akw09SqFRM3CH+eTE7Gq\r\n0ZxTf/f/p1fbZr0872Rhzg/i4ViY927FWJJTE61yTcPTj1iWSoZ54VgUOIFzJQdm\r\nDJRhCXe4ZgZYOYChphds3CZN1mWrlOUK1EgKcTjy+TDqI4lLSv7dOcOayfHzR2Go\r\nGUul5ygJmWOaHeV1Vyi7fxNrjCEfDyvV5wHNc9lGZDxkxJdhIl6RMoP3/GEl2Wdi\r\nDW1gjzBb56R3DdTBxHvC0Y1hww6Jur58mbXaMwvwWDmUDtECAwEAAaB8MHoGCSqG\r\nSIb3DQEJDjFtMGswCwYDVR0PBAQDAgXgMD0GA1UdEQQ2MDSBE3N3b2xmcmFtQHZt\r\nd2FyZS5jb22CHXZjZW50ZXItbTAxLnBzby52c3BoZXJlLmxvY2FsMB0GA1UdDgQW\r\nBBRCVY6jFA4eRcrhaIMp0ReUPkxNmDANBgkqhkiG9w0BAQsFAAOCAQEAubpW6PfX\r\nseiK1Sd+Gp9nzHaczhbvhUDbcATzuisB5o60IOYhp6+em0/wMoYfT9mA3lv7c6vb\r\nXgWFUmcKDarLWQbU+/1msBXO/aM7WEuAEA/1Ad/ANePYVOKEh6c9/OIsH7evBz6/\r\np0WPCayPFK2Kk5tWx4OXCeE3Ez/Nbp3hua1PD4PK6usFEu/7GQHGTc5i41xNvs/0\r\nWLyjWPDd/rbG23Nquit0Vz81x3+IU3JVfBjXsSuR9NU2fP1Zc9UR8lQtvLfJ0rNz\r\nBCvvjAYuFv8lbwfiHCx1jj6sjCUoExDlb+JMaLXZDQnJwzXf1B5BOLoyZ5/4LmSj\r\n/Mpt+nnZ2+pJNg==\r\n-----END CERTIFICATE REQUEST-----\r\n",
+        "certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\vcenter-m01.pso.vsphere.local",
+        "type": "VCENTER"
+    }
+);
+
+certificatesData.push(
+    {
+        "name": "vcenter-m01.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDITCCAgkCAQAwdTEmMCQGA1UEAwwddmNlbnRlci1tMDEucHNvLnZzcGhlcmUu\r\nbG9jYWwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTESMBAGA1UEBwwJUGFsbyBB\r\nbHRvMQ8wDQYDVQQKDAZWTXdhcmUxDDAKBgNVBAsMA1BTTzCCASIwDQYJKoZIhvcN\r\nAQEBBQADggEPADCCAQoCggEBAKWI/KxjpgTwXXQdbWHSw16UQPeyvFYL44d0Xgj0\r\nEvH+9HtG3bARwrSG6qxWTybJlq7DiK1t/RI+CJLmed3wjUpauAIQ1bJ3JZ1ixtg0\r\nobjuDdLeq7tQ5JfnHGKRjiXf/wB9Ygq3yvwh+pIsKwZydGmpWeIZuV2/c0HhINy7\r\nYF7fpwu2REY7QbCEgx+31NVh6EXHRyDUX2kF074gMfrGKBadvDdPzfOG+WLlp87b\r\nJPUz6Bvvr3QubChXDKbd2ALU7jGrx5953eiODi9hUrONbLl12QRVPCHh6WLhkCRd\r\n20eQbq82LYo8WRCT1IjQTvBjkqsj54b/OD8LulXtgcxE8aMCAwEAAaBnMGUGCSqG\r\nSIb3DQEJDjFYMFYwCwYDVR0PBAQDAgXgMCgGA1UdEQQhMB+CHXZjZW50ZXItbTAx\r\nLnBzby52c3BoZXJlLmxvY2FsMB0GA1UdDgQWBBRVrW8uC7l0OHGuidCPK/S1OZxT\r\ndjANBgkqhkiG9w0BAQsFAAOCAQEAE81oCvAtgr0C1T3vg8asIZ9BldT4Dk/vpzMH\r\nfkFqrW9XOKu5Shw7hhzd8ewLCP11d7LaYOcvgndVrAT/fCU4KMU4Dwg60vnZxQAu\r\ndHlD1+uwmr9KXivwb9X29AdJh5KTM6ec8CQLclu51JXITkZCJRiNKKjbYAxDo4V2\r\n4CPK4NzaQ0bPke4LquPi0jureJVvC4cQBf9Ju1RqMdlBJcK+w0sBj8rcVATnDbc1\r\nkMH3WrhEo98rumtaqAO2ABkw9XycPDT3fm9Hku1o6HEfrlyJsP05YWCancRv4QX/\r\nXIUMkpJVcfSTLd7EkBg2ynYTuSlsfOhyoteCdojukvs0S0GwMQ==\r\n-----END CERTIFICATE REQUEST-----\r\n",
+		"certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\vcenter-m01.pso.vsphere.local",		
+        "type": "VCENTER"
+    }
+);
+
+certificatesData.push(
+    {
+        "name": "sddc-manager.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDFjCCAf4CAQAwdjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMRIwEAYDVQQH\r\nDAlQYWxvIEFsdG8xDzANBgNVBAoMBlZNd2FyZTEMMAoGA1UECwwDUFNPMScwJQYD\r\nVQQDDB5zZGRjLW1hbmFnZXIucHNvLnZzcGhlcmUubG9jYWwwggEiMA0GCSqGSIb3\r\nDQEBAQUAA4IBDwAwggEKAoIBAQDMA42QhaalhVZrrc/2Jvl7gJVbDhVlN7ci1ngY\r\nHojqqislxOQxmv13pMqU/R3UJVqJqWxlb4LjA0rth5eb9hKCVQ8DWhwiZu2Xp2zq\r\nqMrc0buM/3Z/yYmykuxt2Iuo9khMZBLNMh6blP0BQCxExAOVrYURi9AqQlVJUF/R\r\njRDPxoxJpcHXqs1nFdAeym2iAc9ESTsddJDsAupj6598I7nxBCY5bKkPr2wCXJLb\r\nFbIhlSFriL4ZPmpmCU9CS0lU2LMPzSXwRkO9Zbxr7kV082BY3JaGMukxArtCnsvd\r\nVbcep4fi7vyaZkFTj68qvaDW0MGc85ZYxYYHsWrf7u+X6xJnAgMBAAGgWzBZBgkq\r\nhkiG9w0BCQ4xTDBKMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjApBgNV\r\nHREEIjAggh5zZGRjLW1hbmFnZXIucHNvLnZzcGhlcmUubG9jYWwwDQYJKoZIhvcN\r\nAQELBQADggEBAMT+3RQTnmzj7+ZPLSa6pey+CRAdBdTZ6eRSL5cSGTC0ZyG+KpPe\r\nFROxxBp+JM/sZIgm14fHcSgei3fAZliXPqHZztJMawoUaVATS2uSrF/YY4O+Kwar\r\nTzcMW+/KlJvqKl/pDi+ivI0SEUBCtLJRpQCX3ReiKRQ7Yy/a1fPC7t6GKeHOYX2S\r\nYaE5N+aYVW3z5/ch8l73n5pSOgnjzbG0JOrEU4zgyxFov0eFNJnssEw7YoxDMEmd\r\nhaqtjmvEzuZ1sdHydHSa5EUkusqrV6wymwB1AiKBDK+dem8oG4aftLgLGYqhFQ2g\r\nmqXuvj4GhU2d9JwBvZfRTtkR5u8tu4z8rxc=\r\n-----END CERTIFICATE REQUEST-----\r\n",
+		"certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\sddc-manager.pso.vsphere.local",
+        "type": "SDDC_MANAGER"
+    }
+);
+
+certificatesData.push(
+    {
+        "name": "nsxt-manager-m01-vip.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDBDCCAewCAQAwfjESMBAGA1UEBxMJUGFsbyBBbHRvMQswCQYDVQQIEwJDQTEL\r\nMAkGA1UEBhMCVVMxDDAKBgNVBAsTA1BTTzEPMA0GA1UEChMGVk13YXJlMS8wLQYD\r\nVQQDEyZuc3h0LW1hbmFnZXItbTAxLXZpcC5wc28udnNwaGVyZS5sb2NhbDCCASIw\r\nDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMfhKgUJbvQ5EVt+HD5EQeRqxuCg\r\nS3r/OrsAfxB6Zfw4huKV2riIzYhi0Tn4lZT7TBEhcHio6ai8Yt8Sfo+49eTyptdG\r\n5Vzmm6kDJprki7nV++kcf9ievu54FCy1uMn4U8FAp8ht3Pk7ITaxJkur8t0l1gQe\r\n+ROXvj9AXeZBbPk4NwfWcCmRU052Qzr7ePWYnL3bNkXTmxzuOqAkVZNk5mjxe/eY\r\nxcy+zmRvC5ODc5CtlBymTj/g1aD7w0Nsqtacfh291BRA7QshbcAr2mTJzGexdUjT\r\nhSJHrXawEGWsid1pVYsIsR9utlBR3fVYmRscoMH86EleOGXKJ1/bnB3CCzcCAwEA\r\nAaBBMD8GCSqGSIb3DQEJDjEyMDAwIAYDVR0lAQH/BBYwFAYIKwYBBQUHAwEGCCsG\r\nAQUFBwMCMAwGA1UdEwEB/wQCMAAwDQYJKoZIhvcNAQELBQADggEBADpA7qR9P9yM\r\nodAGdFvimpI4wGBTaaNC6W/bMWTeVnsvpog9lMx/OGr6eSILXDe1/wJh9v7tCw9I\r\n8z6xSPygJU7Uiw9U4EBJccoWEGegVGbUeZClLiAx7Lc8n8voTbwTVJBe0/NCMJ3I\r\n0qHW2fJxYg3Vb13Q6GPzQLae9glDTApXlBu668vhjpIobfhDPC53ha+t8vbJ/hNz\r\ny7XTjPXAu6SsBVs8UrvvrEI/1dkanJGHJ+Hv54YhkhyH1PcsEqHVt7Ho3H/wvnid\r\nPAYudj3gkDVuv60iISlKNERBOmuB10ubv51x8CDlVkET7+2wBou88Z5opkDEkMU9\r\nR/Ko5zt0Krc=\r\n-----END CERTIFICATE REQUEST-----\r\n",
+		"certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\nsxt-manager-m01-vip.pso.vsphere.local",
+        "type": "NSXT_MANAGER"
+    }
+);
+
+certificatesData.push(
+    {
+        "name": "nsxt-manager-m01-node01.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDCDCCAfACAQAwgYExEjAQBgNVBAcTCVBhbG8gQWx0bzELMAkGA1UECBMCQ0Ex\r\nCzAJBgNVBAYTAlVTMQwwCgYDVQQLEwNQU08xDzANBgNVBAoTBlZNd2FyZTEyMDAG\r\nA1UEAxMpbnN4dC1tYW5hZ2VyLW0wMS1ub2RlMDEucHNvLnZzcGhlcmUubG9jYWww\r\nggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCYX7zly58sP+TRHlGNKS+1\r\nLweFJnUEJb053KfrwfJHSQhS+k4RLwA+Ud30EjVp5RzfIyq/6XbfrgWLwgIRFXwh\r\n897Vt9T5Ss//qiXKWZ2W9fG1Y7G9PQMZXHPtcnJ43Balbn94Wq0Oe/AmC4NPKiJj\r\nb7oqQ+5zwflkidVOyB4qyhC+AzRu/giasL2YZrCgnFL7cXk9OSGifn8Bco8PQjks\r\nTTpa3+MHByCaN2lzvek0GIybUTmZ4PWs1esli4xopWTVfV1U8ymeCqSc22hcv6h+\r\nBfhkIl1okJz3+ZuDNjqJDyknWVXKa39n/ioG3lqnHwUuUDsBleUDWNCoyWXa0JrB\r\nAgMBAAGgQTA/BgkqhkiG9w0BCQ4xMjAwMCAGA1UdJQEB/wQWMBQGCCsGAQUFBwMB\r\nBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCTb+1o\r\nZQ8kIhzHRbiCE2rXOlqFZuEtyfxpqPpuYxA6OUqBD3dmuK3oEZO3PE89sWBz9fdH\r\nlRd7Z5bXMcP7VlMSALFP42064bubZgC/FwJ8LifJexx6MmMmvoisdOY65Dt1bO1f\r\nlQKPOSxmj0lIX6kV3MXvdDFxgsPkHB2AaoP5U527ft5/x5PzgbARSgbhAM0tC2n0\r\nGVuSBnVNQUoxzyWaDTXf300Ovmpi6KwfHzDqXP4UyRcyHrEAW2Ifly1iejMvpqrA\r\nCpo0ehaBJnP4CFgcDNq/tLqvp/g2VnAVauXvbzVIFMAquoIqKns7ixD5LLX40IHx\r\n8ftLpDZqwawbsjR/\r\n-----END CERTIFICATE REQUEST-----\r\n",
+		"certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\nsxt-manager-m01-node01.pso.vsphere.local",
+        "type": "NSXT_MANAGER"
+    }
+);
+
+certificatesData.push(
+    {
+        "name": "nsxt-manager-m01-node02.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDCDCCAfACAQAwgYExEjAQBgNVBAcTCVBhbG8gQWx0bzELMAkGA1UECBMCQ0Ex\r\nCzAJBgNVBAYTAlVTMQwwCgYDVQQLEwNQU08xDzANBgNVBAoTBlZNd2FyZTEyMDAG\r\nA1UEAxMpbnN4dC1tYW5hZ2VyLW0wMS1ub2RlMDIucHNvLnZzcGhlcmUubG9jYWww\r\nggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDa13U8xe3fDAqeDLH/Y2Zj\r\nhPem0ECUfRuz5WMVvA5C12T29EY6Wb76rqtYe3BC8POoXbwgKQsR5+pRYujHgUNm\r\n2BwvmVBFnKVkO3o/KWAgjsruTPfEyftleWEGnZQ0vpeFE8Hrt2n9/VM0OvK1MSen\r\nvgBx0BApR3v21g8iXxS/nxqgP15kl0bOJk0k5B9+eGiJpnTSlBvjditCP2T8fAJs\r\n4KNGO8ESkMob+V/4wZ44p8U8e7xhxzCZ/Qn6LZf3e1A/g5HR4M6WcUZAkQtjGsHh\r\nHqXkJc7WRYHjgnPLeM/JC/WGVzATwak+jEuzQ5p4d96bFvfPVdpIxDf/WzBNDxVX\r\nAgMBAAGgQTA/BgkqhkiG9w0BCQ4xMjAwMCAGA1UdJQEB/wQWMBQGCCsGAQUFBwMB\r\nBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQAgYhST\r\n1lQdiG0NY6tXzrlSYB37g/Qylrmw4PvvxQ3sFoyhK4kt/4aGyFSOxSeYa+6SnrAA\r\nohc7hbSjEOK89mil8ThlmJkXrofmSFAKm+0Wv/u3r4As/p/lDVkvI62YBD3Gtn4n\r\nnLydmWrBtljXSzM7Ml/btLOX59KCloeMssUGbqPLSEL3f5CheEquq2CXC+NmfAb/\r\nXnD7Uqpfx7aoTjR9reheLIQTvnBC0ijtdcgls+yjnNx8Hcw9WGJkbb0F/ZhDRLs0\r\nqZu/Mx9w4yDrA5xwPc8hpoP9cXpoARXGVwr4gsIjXrwYPw/UGxd6Mfyf7OTWGeg/\r\n87NYK3e1PI/VwZdh\r\n-----END CERTIFICATE REQUEST-----\r\n",
+		"certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\nsxt-manager-m01-node02.pso.vsphere.local",
+        "type": "NSXT_MANAGER"
+    }
+);
+
+certificatesData.push(
+    {
+        "name": "nsxt-manager-m01-node03.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIIDCDCCAfACAQAwgYExEjAQBgNVBAcTCVBhbG8gQWx0bzELMAkGA1UECBMCQ0Ex\r\nCzAJBgNVBAYTAlVTMQwwCgYDVQQLEwNQU08xDzANBgNVBAoTBlZNd2FyZTEyMDAG\r\nA1UEAxMpbnN4dC1tYW5hZ2VyLW0wMS1ub2RlMDMucHNvLnZzcGhlcmUubG9jYWww\r\nggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC7A1Mu9hBiqiWEijCBTViX\r\nPIa6T5Ruig2mkeoB/XMjrmgoYyQP/ieMSJjgrXPZLYnnGVoKlYxHsS+gIEGRy63S\r\nFQ6lr01P/VDNYmQsQGs3Wdtul+CABrqHFMm0Qd0e96Ytcq6GKSZgyVm5rOYzBaOq\r\nHl42C4idKgZ04vN9OPiCbEyVFsOVw7r00xg76yTbRVhdhKkNMuFnYgFM5cixHUvT\r\n5uJ99bJNqZlmlxSk4m3UgV+yosys3y/+A5773DhTp6sD7Cdn3AI0d2edPetCZnGg\r\n7CqITkToeiua+BVGZx0s8WtKIY5PH6leGqvdVYDX3LJlA+iRLYWLe/T8Czy/IrXb\r\nAgMBAAGgQTA/BgkqhkiG9w0BCQ4xMjAwMCAGA1UdJQEB/wQWMBQGCCsGAQUFBwMB\r\nBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCUV5u1\r\n1EdDm8wsWwyweikpfNzrplB789hMHzEKPD/QGWl7b109jDh0CxDI1Y09O/sZ8NJG\r\njeA/czsD98PAS2csQ1AjiTmPnO8QXgqSVKJ2e/2b5bhaM58pwI2jexXFATGxvFXy\r\nWT7DRhva3hdGAa0olUDUp/LU3oMIMiE+bDvOjnsFOk5Td4tnvvFd/pjyysUs8Hod\r\nD6lprh6UM+YGlsOQ3PwJapAq+2C2DqsWSxWII82h5hiTTkRkILo4Hk9bRA1UXEXa\r\nJ7+UWwIyc6rFovOIPQJjuAlP4rGByNmiZPW6uR+1ZfooQbZPmGHDk7gaDFHVmc5I\r\n8jdq1+qJDKT+/+Fq\r\n-----END CERTIFICATE REQUEST-----\r\n",
+		"certificateDN": "\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\nsxt-manager-m01-node03.pso.vsphere.local",
+        "type": "NSXT_MANAGER"
+    }
+);
+
+certificatesData = System.getModule("com.vmware.pso.vcf.sddcmanager").getDomainCertificates("10.0.0.11", "admin", "VMware12345!", certificatesData);
+
+
+System.log(JSON.stringify(certificatesData));]]></script>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

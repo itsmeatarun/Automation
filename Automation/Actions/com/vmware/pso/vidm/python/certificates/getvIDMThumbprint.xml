@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getvIDMThumbprint" result-type="Properties" api-version="6.0.0" id="e2da7082-42cc-41ce-97c6-7dff3d7c4ef1" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vidm.python.certificates">
+  <runtime><![CDATA[python:3.7]]></runtime>
+  <param n="vidmFQDN" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[import json
+import ssl
+import socket
+import hashlib
+
+def handler(context, inputs):
+    #jsonOut=json.dumps(inputs, separators=(',', ':'))
+    #print("Inputs were {0}".format(jsonOut))
+
+    addr = str(inputs["vidmFQDN"])
+    
+    if not addr:
+        outputs = {
+            "status": "failed",
+            "error": "Input vidmFQDN was empty."
+        }
+        return outputs
+    
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        wrappedSocket = ssl.wrap_socket(sock)
+        wrappedSocket.connect((addr, 443))
+    except:
+        outputs = {
+            "status": "failed",
+            "error": "Failed connecting to vidm host: {0}".format(addr)
+        }
+        return outputs
+
+    try:
+        der_cert_bin = wrappedSocket.getpeercert(True)
+        pem_cert = ssl.DER_cert_to_PEM_cert(wrappedSocket.getpeercert(True))
+        #thumb_md5 = hashlib.md5(der_cert_bin).hexdigest()
+        #thumb_sha1 = hashlib.sha1(der_cert_bin).hexdigest()
+        thumb_sha256 = hashlib.sha256(der_cert_bin).hexdigest()
+        wrappedSocket.close()
+    except:
+        outputs = {
+            "status": "failed",
+            "failed": "Failed generating thumbprint for vidm host: {0}".format(addr)
+        }
+        return outputs
+    
+    #print("MD5: " + thumb_md5)
+    #print("SHA1: " + thumb_sha1)
+    print("SHA256 Thumbprint: " + thumb_sha256)
+
+    outputs = {
+        "status": "success",
+        "thumbprint": thumb_sha256
+    }
+
+    return outputs
+]]></script>
+</dunes-script-module>

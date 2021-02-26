@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="testvSphereConnection" result-type="boolean" api-version="6.0.0" id="3281edb3-3e16-45fb-94bd-282cba3360c1" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vrli.rest">
+  <param n="vrliHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vrliSessionId" t="string"><![CDATA[]]></param>
+  <param n="vcHostname" t="string"><![CDATA[]]></param>
+  <param n="vcUsername" t="string"><![CDATA[]]></param>
+  <param n="vcPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="acceptCert" t="boolean"><![CDATA[Automatically accept not trusted vCenter Server certificates.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vrliHost,"Input var: vrliHost");
+dbc.ensureNotNullOrEmpty(vrliSessionId,"Input var: vrliSessionId");
+dbc.ensureNotNullOrEmpty(vcHostname,"Input var: vcHostname");
+dbc.ensureNotNullOrEmpty(vcUsername,"Input var: vcUsername");
+dbc.ensureNotNullOrEmpty(vcPassword,"Input var: vcPassword");
+dbc.ensureNotNullOrEmpty(acceptCert,"Input var: acceptCert");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(vrliHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Bearer "+ vrliSessionId);
+
+var url = "/api/v1/vsphere/testconnection";
+
+var body = {
+    "acceptCert": acceptCert,
+    "hostname": vcHostname,
+    "username": vcUsername,
+    "password": vcPassword
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+try {
+    var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+    System.log(response);
+} catch (e) {
+    System.log("vSphere connection test failed with following error: " + e);
+    return false;
+}
+return true;]]></script>
+</dunes-script-module>

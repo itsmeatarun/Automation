@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="cryptoTest" result-type="Properties" api-version="6.0.0" id="faa0dad9-8ef7-4659-8642-969ef3285fff" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.polyglot.tests">
+  <runtime><![CDATA[node:12]]></runtime>
+  <script encoded="false"><![CDATA[exports.handler = (context, inputs, callback) => {
+    console.log('Inputs were ' + JSON.stringify(inputs));
+    var crypto = require('crypto');
+    //var nodeRSA = require('node-rsa');
+    console.log(crypto.getCiphers());
+    callback(undefined, {status: "done",ciphers: crypto.getCiphers()});
+}
+]]></script>
+</dunes-script-module>

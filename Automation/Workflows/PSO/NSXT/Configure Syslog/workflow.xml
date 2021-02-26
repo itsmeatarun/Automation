@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="c2003ee6-d061-4523-9b3b-f181a2496ecb" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Configure Syslog]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="nsxtHosts" type="Array/string">
+      <description><![CDATA[Array of NSXT Manager servers. Must be run on each node.]]></description>
+    </param>
+    <param name="nsxtAdmin" type="string"/>
+    <param name="nsxtPassword" type="SecureString"/>
+    <param name="syslogServer" type="string"/>
+    <param name="syslogRootCert" type="string"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.nsxt/configureSyslogNSXTManagers">
+    <display-name><![CDATA[configureSyslogNSXTManagers]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.nsxt").configureSyslogNSXTManagers(nsxtHosts,nsxtAdmin,nsxtPassword,syslogServer,syslogRootCert);
+]]></script>
+    <in-binding>
+      <bind name="nsxtHosts" type="Array/string" export-name="nsxtHosts">
+        <description><![CDATA[Array of NSXT Manager servers. Must be run on each node.]]></description>
+      </bind>
+      <bind name="nsxtAdmin" type="string" export-name="nsxtAdmin"/>
+      <bind name="nsxtPassword" type="SecureString" export-name="nsxtPassword"/>
+      <bind name="syslogServer" type="string" export-name="syslogServer"/>
+      <bind name="syslogRootCert" type="string" export-name="syslogRootCert"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="170.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="lockAndSteal" result-type="boolean" api-version="6.0.0" id="cdea5257-efe2-4e09-b8a4-f10aba7f57d8" version="1.0.1" allowed-operations="evf" category-name="com.vmware.pso.util">
+  <description><![CDATA[This action is a lock and wait for the specified wait time (in seconds)
+If one owner keeps the lock beyond the specified wait time the lock is removed and the action tries to obtain the lock]]></description>
+  <param n="lockId" t="string"><![CDATA[The ID of the lock. Only one lock of any ID can be active at any one time]]></param>
+  <param n="lockOwner" t="string"><![CDATA[The current owner of the lock]]></param>
+  <param n="waitTime" t="number"><![CDATA[Maximum time in seconds any one owner can keep a lock before the action tries to steal it.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+System.debug("========== Executing action: " + arguments.callee.name.substr(6) + " ==========" );
+
+var stolen = false;
+var locks = [];
+var oldOwner = "";
+var count = 0;
+
+//System.debug("Getting Lock for "+lockId);
+var newLock = LockingSystem.lock(lockId,lockOwner);
+
+while (newLock == false) {	
+	locks = LockingSystem.retrieveAll();
+	for each ( var lock in locks ) {	//System.log(lock);
+		if ( lock.indexOf(lockId) >=0 ) {
+			var owner = lock.split(",")[1].toString();
+			if ( owner == oldOwner) { 
+				count++;
+			}
+			else {
+				count = 0;
+				oldOwner = owner;
+			}
+			break;
+		}
+	}
+	//System.log(count+" : "+oldOwner);
+	if (count > waitTime) {
+		stolen = true;
+		LockingSystem.unlock(lockId,oldOwner);
+		oldOwner = "";}
+	// add the else around the sleep to allow for an instant lock after the steal
+	else {
+		System.sleep(1000);
+	}
+	newLock = LockingSystem.lock(lockId,lockOwner);
+}
+//System.log("I have the lock for "+lockId);
+return stolen;]]></script>
+</dunes-script-module>

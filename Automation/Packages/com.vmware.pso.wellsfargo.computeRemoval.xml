@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<package>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='aaec8abc-f478-464f-aabc-adad2c5d1499'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='91c0d597-1e08-4db3-b267-bb6b94edd4e3'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='BD80808080808080808080808080808003C180800122528313869552e41805bb1'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='99afccd7-9fcc-4dc2-82b7-586de690364e'&dunesName='Action'&name='vim3WaitTaskEnd'&category='com.vmware.library.vc.basic']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='b014431f-4af1-4e3b-9e6b-44431a8e7069'&dunesName='Action'&name='destroyVm'&category='com.vmware.library.vc.vm']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Workflow?id='370295ac-0d2b-48a9-a59a-c0083ae693e9'&dunesName='Workflow']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='f5bbb734-6c7f-419a-8bfc-2fef20b42926'&dunesName='Action'&name='executeTransientRESTOperation'&category='com.vmware.pso.rest']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/ConfigurationElement?id='3c2e0092-6448-49f4-8b5f-eaea26743b0c'&dunesName='ConfigurationElement']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='d9fb497f-51fe-4738-a2e3-ebbafb6e4572'&dunesName='Action'&name='addOrUpdateMachineProperties'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='e6c1f8cc-ddce-4968-a8d1-8e7873311c79'&dunesName='Action'&name='getImageMappings'&category='com.vmware.pso.wellsfargo']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='3330540b-3f64-4003-94a1-df18a28ea28b'&dunesName='Action'&name='getWorkflowByName'&category='com.vmware.library.vcac']]></elm>
+<elm src-category='null'><![CDATA[dunes://service.dunes.ch/Action?id='64435834-904d-46e1-8522-87acce2f88b8'&dunesName='Action'&name='waitForCompletion'&category='com.vmware.library.workflow']]></elm>
+<used-plugin name='VC' version='6.5.0' />
+</package>

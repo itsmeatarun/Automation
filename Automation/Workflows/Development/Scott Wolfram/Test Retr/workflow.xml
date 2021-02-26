@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="cd15e90c-dc7c-4247-a75a-d5e4bb2b1864" editor-version="2.0" version="0.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Test Retr</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="400.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">var response = System.getModule("com.vmware.pso.venafi").getCertificate(&#13;
+    "venafi-vedsdk.wellsfargo.net",&#13;
+    "vdit.vra.venafi.d",&#13;
+    "EWak4Q#rwu2DmPH9",     &#13;
+    "\\VED\\Policy\\EIT-Tech Infrastructure-VE (Ansible) - PKI Admins\\EIT-Tech Infrastructure-VE (Ansible)\\SSL WF Enterprise CA05 G2 (SHA-256) 1-year\\wave-vlcc2\\sdw-test03.wellsfargo.net",&#13;
+    true,&#13;
+    true&#13;
+);&#13;
+&#13;
+System.log("response: " + JSON.stringify(response));</script>
+        <in-binding/>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getConfigurationElementSimple" result-type="ConfigurationElement" api-version="6.0.0" id="2bfbff3f-9c55-4d95-a461-c79ac74e72ef" version="3.1.1" allowed-operations="evf" category-name="com.vmware.pso.configurations">
+  <description><![CDATA[Returns the configuration element in the path provided.]]></description>
+  <param n="name" t="string"><![CDATA[Name of the Configuration Element to get]]></param>
+  <param n="path" t="string"><![CDATA[(Optional) Path to look for the element]]></param>
+  <script encoded="false"><![CDATA["use strict";
+var actionName = arguments.callee.name.substr(6);
+System.debug("  Executing action: " + actionName);
+var defaultElementPath;
+
+if ( !!!name ) throw "Must supply name to lookup";
+if ( !!!path ) throw "Must supply Path to lookup";
+
+var configPath = path;
+var category = Server.getConfigurationElementCategoryWithPath(configPath);
+if ( category == null ) {
+	throw "Configuration Element Category " + configPath + " could not be found";
+}
+var elements = category.configurationElements;
+for each (element in elements) {
+	if ( name.equalsIgnoreCase(element.name) ) {
+		try {
+			return element;
+		}
+		catch (errorCode) {
+			throw "Error retrieving '" + name + "'. Make sure the desired configuration element is in the '" + configPath + "'";
+		}
+		break;
+	}
+}]]></script>
+</dunes-script-module>

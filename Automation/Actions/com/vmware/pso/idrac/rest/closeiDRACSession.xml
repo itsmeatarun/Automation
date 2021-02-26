@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="closeiDRACSession" result-type="void" api-version="6.0.0" id="1d072746-8cc4-4670-bedf-fdb922330a32" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.idrac.rest">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="idracSessionId" t="string"><![CDATA[]]></param>
+  <param n="idracAuthToken" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(idracSessionId,"Input var: idracSessionId");
+dbc.ensureNotNullOrEmpty(idracAuthToken,"Input var: idracAuthToken");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(idracHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("X-Auth-Token",idracAuthToken);
+var url = "/redfish/v1/Sessions/" + idracSessionId;
+
+var method = "DELETE";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

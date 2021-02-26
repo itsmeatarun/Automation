@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="toggleMaintenanceMode" result-type="Properties" api-version="6.0.0" id="ec61e881-8e23-40ce-b8f1-839fed46f78d" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.host" memory-limit="512000000" timeout="1800">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="esxiHostname" t="string"><![CDATA[]]></param>
+  <param n="enterMaintMode" t="boolean"><![CDATA[True = Enter maint mode, False =  leave maint mode]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        $inputsString = $inputs | ConvertTo-Json -Compress
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $esxiHostname = $inputs.esxiHostname
+        [ValidateNotNullorEmpty()]
+        $enterMaintMode = $inputs.enterMaintMode
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate        
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter: " + $_.Exception
+        Write-Host "Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Finding VM host $esxiHostname"
+        $vmHost = Get-VMHost -Name $esxiHostname
+        if ($vmHost -eq $null) {
+            throw "No VM Host found with name $esxiHostname"
+        }
+
+        if ($enterMaintMode) {
+            Write-Host "Putting $esxiHostname into Maintenance Mode"
+            $null = Set-VMhost -VMhost $vmHost -State Maintenance -Evacuate:$(!$vmHost.IsStandalone) -VsanDataMigrationMode EnsureAccessibility -Confirm:$false -ErrorAction Stop
+        } else {
+            Write-Host "Taking $esxiHostname out of Maintenance Mode"
+            $null = Set-VMhost -VMhost $vmHost -State Connected -Confirm:$false -ErrorAction Stop
+        }
+
+    } catch {
+        Write-Host "Failed toggling Maintenance Mode to $enterMaintMode. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

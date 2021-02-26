@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getTransientRESTHost" result-type="REST:RESTHost" api-version="6.0.0" id="1d3d0d22-4133-4734-87fa-b06d877ecd62" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.rest.util">
+  <description><![CDATA[Generic REST Host with no custom URL]]></description>
+  <param n="host" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(host, "host");
+
+var hostURL = "https://" + host;
+System.getModule("com.vmware.pso.ssl.util").importCertificalteFromURL(host);
+
+
+var restHost = RESTHostManager.createHost("TransientRESTHost-" + host);
+var transientRestHost = RESTHostManager.createTransientHostFrom(restHost);
+transientRestHost.url = hostURL;
+
+return transientRestHost;]]></script>
+</dunes-script-module>

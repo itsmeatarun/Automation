@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addUpdateKmsProvider" result-type="void" api-version="6.0.0" id="e975e9dd-6536-4ff5-b7b5-2b8b1893b6f8" version="0.0.3" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="kmsName" t="Array/string"><![CDATA[Array of KMS names for KMS Cluster]]></param>
+  <param n="kmsProviderName" t="string"><![CDATA[KMS Cluster name]]></param>
+  <param n="kmsAddress" t="Array/string"><![CDATA[Array of KMS servers for KMS Cluster]]></param>
+  <param n="kmsPort" t="Array/number"><![CDATA[Array of KMS server ports for KMS Cluster]]></param>
+  <param n="kmsUser" t="string"><![CDATA[KMS username for KMS Cluster]]></param>
+  <param n="kmsPassword" t="SecureString"><![CDATA[KMS password for KMS Cluster]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(kmsName,"Input var: kmsName");
+dbc.ensureNotNullOrEmpty(kmsProviderName,"Input var: kmsProviderName");
+dbc.ensureNotNullOrEmpty(kmsAddress,"Input var: kmsAddress");
+dbc.ensureNotNullOrEmpty(kmsPort,"Input var: kmsPort");
+dbc.ensureNotNullOrEmpty(kmsUser,"Input var: kmsUser");
+dbc.ensureNotNullOrEmpty(kmsPassword,"Input var: kmsPassword");
+
+if (!(kmsName.length == kmsAddress.length && kmsName.length == kmsPort.length)) {
+    throw "Input vars kmsName, kmsAddress, kmsPort all corespond to each other and must have same number of elements.";
+}
+
+for (var i = 0; i < kmsName.length; i++) {
+    System.log("Starting addKMSServer for "+ kmsName[i]);
+    var createResult = System.getModule("com.vmware.pso.vcenter.powercli.settings").addKMSServer(vCenterFQDN,vCenterUser,vCenterPassword,kmsName[i],kmsProviderName,kmsAddress[i],kmsPort[i],kmsUser,kmsPassword,ignoreSSLCertificate);    var createStatus = createResult.get("status");
+    System.log("addKMSServer completed with status: " + createStatus + " for KMS with name: " + kmsName[i]);
+    if (createStatus != "success") {
+        throw "addUpdateKmsProvider failed with error: " + createResult.get("error");
+    }
+}
+
+return;]]></script>
+</dunes-script-module>

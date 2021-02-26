@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createAppVolvCAdmRole" result-type="void" api-version="6.0.0" id="58134f0d-5972-4eb3-98b0-9c5ff4821b2f" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <description><![CDATA[Create custom role for App Volumes vCenter Admin in specified vCenter.]]></description>
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(roleName,"Input var: roleName");
+
+var role = {
+  "name": roleName,
+  "privileges": [
+    "System.Anonymous",
+    "System.View",
+    "System.Read",
+    "Global.CancelTask",
+    "Folder.Create",
+    "Folder.Delete",
+    "Datastore.Browse",
+    "Datastore.DeleteFile",
+    "Datastore.FileManagement",
+    "Datastore.AllocateSpace",
+    "Datastore.UpdateVirtualMachineFiles",
+    "Host.Config.AdvancedConfig",
+    "Host.Local.CreateVM",
+    "Host.Local.ReconfigVM",
+    "Host.Local.DeleteVM",
+    "VirtualMachine.Inventory.Create",
+    "VirtualMachine.Inventory.CreateFromExisting",
+    "VirtualMachine.Inventory.Register",
+    "VirtualMachine.Inventory.Unregister",
+    "VirtualMachine.Inventory.Move",
+    "VirtualMachine.Interact.PowerOn",
+    "VirtualMachine.Interact.PowerOff",
+    "VirtualMachine.Interact.Suspend",
+    "VirtualMachine.Config.AddExistingDisk",
+    "VirtualMachine.Config.AddNewDisk",
+    "VirtualMachine.Config.RemoveDisk",
+    "VirtualMachine.Config.AddRemoveDevice",
+    "VirtualMachine.Config.Settings",
+    "VirtualMachine.Config.Resource",
+    "VirtualMachine.Provisioning.Customize",
+    "VirtualMachine.Provisioning.Clone",
+    "VirtualMachine.Provisioning.PromoteDisks",
+    "VirtualMachine.Provisioning.CreateTemplateFromVM",
+    "VirtualMachine.Provisioning.DeployTemplate",
+    "VirtualMachine.Provisioning.CloneTemplate",
+    "VirtualMachine.Provisioning.MarkAsTemplate",
+    "VirtualMachine.Provisioning.MarkAsVM",
+    "VirtualMachine.Provisioning.ReadCustSpecs",
+    "VirtualMachine.Provisioning.ModifyCustSpecs",
+    "Resource.AssignVMToPool",
+    "Task.Create",
+    "Sessions.TerminateSession"
+  ]
+};
+var roleJSON = JSON.stringify(role);
+var overwriteExisting = true;
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").createRole(vCenterFQDN,vCenterUser,vCenterPassword,roleJSON,overwriteExisting,ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+System.log("createRole completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createAppVolvCAdmRole failed with error: " + createResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

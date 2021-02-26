@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addDistributedPortGroup" result-type="Properties" api-version="6.0.0" id="a399adf6-bcf1-42f8-adca-90786650fb9d" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.network" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vdsName" t="string"><![CDATA[Name of vds to create port group in]]></param>
+  <param n="portGroupName" t="string"><![CDATA[]]></param>
+  <param n="portGroupVLAN" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $vdsName = $inputs.vdsName
+        [ValidateNotNullorEmpty()]
+        $portGroupName = $inputs.portGroupName
+        [ValidateNotNullorEmpty()]
+        [int]$portGroupVLAN = $inputs.portGroupVLAN
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Getting VDS '$vdsName'"
+        $vds = Get-VDSwitch -Name $vdsName -ErrorAction SilentlyContinue
+
+        if (!$vds) {
+            Write-Host "Unable to find VDS with name '$vdsName'"
+            $output.add("status","failed")
+            $output.add("error","Unable to find VDS with name '$vdsName'")
+            try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+            return $output 
+        }
+
+        Write-Host "Checking to see if port group '$portGroupName' exists"
+        $portGroup = Get-VDPortgroup -VDSwitch $vds -Name $portGroupName -ErrorAction SilentlyContinue
+
+        if ($portGroup) {
+            Write-Host "Updating port group '$portGroupName'"
+            $portGroup = $portGroup | Set-VDVlanConfiguration -VlanId $portGroupVLAN
+        } else {
+            Write-Host "Creating port group '$portGroupName'"
+            $portGroup = New-VDPortgroup -VDSwitch $vds -Name $portGroupName -VlanId $portGroupVLAN
+        }
+
+    } catch {
+        Write-Host "Failed creating port group '$portGroupName'. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error","Failed creating port group '$portGroupName': " + $_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

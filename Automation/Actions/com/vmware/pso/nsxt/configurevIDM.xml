@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="configurevIDM" result-type="void" api-version="6.0.0" id="a12ae5d7-150e-4dd6-8dbe-a43cd659fd48" version="0.0.2" allowed-operations="evf" category-name="com.vmware.pso.nsxt">
+  <param n="vIDM_Host" t="string"><![CDATA[]]></param>
+  <param n="vIDM_ClientID" t="string"><![CDATA[]]></param>
+  <param n="vIDM_ClientSecret" t="SecureString"><![CDATA[]]></param>
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="usingExternalLB" t="boolean"><![CDATA[]]></param>
+  <param n="enablevIDM" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(enablevIDM,"Input var: enablevIDM");
+if (enablevIDM) {
+    dbc.ensureNotNullOrEmpty(vIDM_Host,"Input var: vIDM_Host");
+    dbc.ensureNotNullOrEmpty(vIDM_ClientID,"Input var: vIDM_ClientID");
+    dbc.ensureNotNullOrEmpty(vIDM_ClientSecret,"Input var: vIDM_ClientSecret");
+    dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+    dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+    dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+    dbc.ensureNotNullOrEmpty(usingExternalLB,"Input var: usingExternalLB");
+} else {
+    dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+    dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+    dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+}
+
+var nsxClientID = nsxtHost;
+
+System.log("Getting vIDM Session Token");
+var vIDMSessionToken = System.getModule("com.vmware.pso.vidm.rest").getvIDMClientIdAccessToken(vIDM_Host,vIDM_ClientID,vIDM_ClientSecret);
+System.log("Creating NSXT Client ID");
+var clientIdSecret = System.getModule("com.vmware.pso.vidm.rest.admin").createOauth2Client(vIDM_Host,vIDMSessionToken,nsxClientID);
+
+System.log("Getting vIDM certificate thumbprint");
+var thumprintResult = System.getModule("com.vmware.pso.vidm.python.certificates").getvIDMThumbprint(vIDM_Host);
+var thumprintStatus = thumprintResult.get("status");
+System.log("getvIDMThumbprint completed with status: " + thumprintStatus);
+if (thumprintStatus != "success") {
+    throw "configurevIDM failed with error: " + thumprintResult.get("error");
+}
+var vidmThumprint = thumprintResult.get("thumbprint");
+
+System.log("Configuring NSXT vIDM integration");
+System.getModule("com.vmware.pso.nsxt.rest.settings").setvIDMIntegration(nsxtHost,nsxtAdmin,nsxtPassword,vIDM_Host,nsxClientID,clientIdSecret,vidmThumprint,usingExternalLB,enablevIDM);
+
+return;]]></script>
+</dunes-script-module>

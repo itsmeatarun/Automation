@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createNFSDatastore" result-type="Properties" api-version="6.0.0" id="46b5b638-33bb-48d1-9855-55c298edc48a" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.storage" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="datastoreName" t="string"><![CDATA[]]></param>
+  <param n="nfsServer" t="string"><![CDATA[]]></param>
+  <param n="nfsSharePath" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $datastoreName = $inputs.datastoreName
+        [ValidateNotNullorEmpty()]
+        $nfsServer = $inputs.nfsServer
+        [ValidateNotNullorEmpty()]
+        $nfsSharePath = $inputs.nfsSharePath
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+
+        Write-Host "Checking to see if datastore '$datastoreName' exists"
+        $dsExists = Get-Datastore -Name $datastoreName -Server $viConnection -ErrorAction SilentlyContinue
+        if ($dsExists) {
+            Write-Host "Warning: Datastore '$datastoreName' already exists."
+            $output.add("status","success")
+            try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+            return $output 
+        }
+        Write-Host "Creating datastore '$datastoreName'"
+        $null = Get-VMHost | New-Datastore -Nfs -Name $datastoreName -Path $nfsSharePath -NfsHost $nfsServer
+
+        Write-Host "Disconnecting from vCenter '$vcfqdn'"
+        $null = Disconnect-VIServer -Server $viConnection -Confirm:$false
+
+    } catch {
+        Write-Host "Failed creating Datastore. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

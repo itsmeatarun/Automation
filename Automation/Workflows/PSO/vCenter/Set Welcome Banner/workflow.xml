@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="1b0886d0-05f4-4101-a738-0779cc572de4" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set Welcome Banner]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="vcfqdn" type="string"/>
+    <param name="vcuser" type="string"/>
+    <param name="vcpassword" type="SecureString"/>
+    <param name="welcomeBanner" type="string"/>
+    <param name="ignoreSSLCertificate" type="boolean"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="340.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/setWelcomeBanner">
+    <display-name><![CDATA[setWelcomeBanner]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").setWelcomeBanner(vcfqdn,vcuser,vcpassword,welcomeBanner,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vcfqdn" type="string" export-name="vcfqdn"/>
+      <bind name="vcuser" type="string" export-name="vcuser"/>
+      <bind name="vcpassword" type="SecureString" export-name="vcpassword"/>
+      <bind name="welcomeBanner" type="string" export-name="welcomeBanner"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="180.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

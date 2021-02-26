@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvCenterStatsSettings" result-type="void" api-version="6.0.0" id="0964ad71-f238-43aa-8533-9f7d892a3dc2" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+
+var statOneKey = 1;
+var statOneLogLevel = 2;
+var statOneEnabled = true;
+var statOneResult = System.getModule("com.vmware.pso.vcenter.powercli.settings").configureStatistics(vCenterFQDN,vCenterUser,vCenterPassword,statOneKey,statOneLogLevel,null,null,null,statOneEnabled,ignoreSSLCertificate);
+var statOneStatus = statOneResult.get("status");
+System.log("configureStatistics completed with status: " + statOneStatus);
+if (statOneStatus != "success") {
+    throw "setvCenterStatsSettings failed with error: " + statOneResult.get("error");
+}
+
+var statFourKey = 4;
+var statFourEnabled = false;
+var statFourResult = System.getModule("com.vmware.pso.vcenter.powercli.settings").configureStatistics(vCenterFQDN,vCenterUser,vCenterPassword,statFourKey,null,null,null,null,statFourEnabled,ignoreSSLCertificate);
+var statFourStatus = statFourResult.get("status");
+System.log("configureStatistics completed with status: " + statFourStatus);
+if (statFourStatus != "success") {
+    throw "setvCenterStatsSettings failed with error: " + statFourResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

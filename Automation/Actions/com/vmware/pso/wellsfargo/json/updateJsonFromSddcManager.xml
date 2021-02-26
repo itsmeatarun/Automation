@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="updateJsonFromSddcManager" result-type="string" api-version="6.0.0" id="e15a1deb-c125-44ba-9e6a-8a877d4f8e61" version="0.0.3" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.json">
+  <param n="podJSON" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(podJSON,"Input var: podJSON");
+
+var podConfig = JSON.parse(podJSON);
+
+var sddcmanagerHost = podConfig.SDDCManager.Hostname;
+var sddcmanagerUser = podConfig.SDDCManager.SSOAdminUser;
+var sddcmanagerPassword = podConfig.SDDCManager.SSOAdminPassword;
+
+var token = System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tokens").getBearerToken(sddcmanagerUser, sddcmanagerPassword, sddcmanagerHost);
+
+//Get all credentials from SDDC Manager
+var credentials = System.getModule("com.vmware.pso.vcf.sddcmanager").getCredentials(sddcmanagerUser,sddcmanagerPassword,sddcmanagerHost);
+
+var domains = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getDomains(sddcmanagerHost,token)).elements;
+var nsxtClusters = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getNSXTClusters(sddcmanagerHost,token)).elements;
+
+//Update SDDC Manager details
+podConfig.SDDCManager.VMName = sddcmanagerHost.split(".")[0];
+podConfig.SDDCManager.Domains = [];
+
+for each (var domain in domains) {
+    podConfig.SDDCManager.Domains.push(domain.name);
+}
+
+//Update Mgmt vCenter details
+var mgmt = domains.filter(function (domain) {
+    return domain.type == "MANAGEMENT";
+})[0];
+var mgmtvc = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getvCenterById(sddcmanagerHost,token,mgmt.vcenters[0].id));
+podConfig.vCenter.mgmtvCenter.VCFDomain = mgmt.name;
+podConfig.vCenter.mgmtvCenter.Hostname = mgmtvc.fqdn;
+podConfig.vCenter.mgmtvCenter.VMName = mgmtvc.fqdn.split(".")[0];
+podConfig.vCenter.mgmtvCenter.IPAddress = mgmtvc.ipAddress;
+var mgmtcluster = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getClusterById(sddcmanagerHost,token,mgmt.clusters[0].id));
+podConfig.vCenter.mgmtvCenter.vSanClusterName = mgmtcluster.name;
+
+var mgmtrootpass = credentials.filter(function (credential) {
+    return credential.resourceName == this && credential.username == "root";
+}, mgmtvc.fqdn)[0];
+podConfig.vCenter.mgmtvCenter.RootPassword = mgmtrootpass.password;
+
+var mgmtssoadmin = credentials.filter(function (credential) {
+    return credential.resourceName == this && credential.credentialType == "SSO";
+}, mgmtvc.fqdn)[0];
+podConfig.vCenter.mgmtvCenter.SSOAdminUser = mgmtssoadmin.username;
+podConfig.vCenter.mgmtvCenter.SSOAdminPassword = mgmtssoadmin.password;
+
+//The action below fails due to VCF on VxRAIL not knowing the networking details of the cluster.
+//var mgmtvds = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getvdsByClusterId(sddcmanagerHost,token,mgmt.clusters[0].id))[0];
+//podConfig.vCenter.mgmtvCenter.vdsName = mgmtvds.name;
+//Get VDS from vCenter
+podConfig.vCenter.mgmtvCenter.vdsName = System.getModule("com.vmware.pso.vcenter.powercli.network").getVDSNameForVM(mgmtvc.fqdn,mgmtssoadmin.username,mgmtssoadmin.password,
+                                                                                                                    podConfig.vCenter.mgmtvCenter.VMName,true);
+
+//Update VI vCenters details
+var wldTemplate = podConfig.vCenter.wldvCenters[0];
+podConfig.vCenter.wldvCenters = [];
+
+var viDomains = domains.filter(function (domain) {
+    return domain.type == "VI";
+});
+
+for each (var wld in viDomains) {
+    var vcobj = JSON.parse(JSON.stringify(wldTemplate));
+    var vivc = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getvCenterById(sddcmanagerHost,token,wld.vcenters[0].id));
+    vcobj.VCFDomain = wld.name;
+    vcobj.Hostname = vivc.fqdn;
+    vcobj.VMName = vivc.fqdn.split(".")[0];
+    vcobj.IPAddress = vivc.ipAddress;
+    vcobj.vSanClusterNames = [];
+    for each (var cluster in wld.clusters) {
+        var viCluster = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").getClusterById(sddcmanagerHost,token,cluster.id));
+        vcobj.vSanClusterNames.push(viCluster.name);
+    }
+
+    var virootpass = credentials.filter(function (credential) {
+        return credential.resourceName == this && credential.username == "root";
+    }, vivc.fqdn)[0];
+    vcobj.RootPassword = virootpass.password;
+    //VI Linked to Mgmt SSO
+    vcobj.SSOAdminUser = mgmtssoadmin.username;
+    vcobj.SSOAdminPassword = mgmtssoadmin.password;
+
+    podConfig.vCenter.wldvCenters.push(vcobj);
+}
+
+//Update mgmt NSXT details
+podConfig.NSXT.mgmtNSXT.VCFDomain = mgmt.name;
+
+mgmtNSXT = nsxtClusters.filter(function (cluster) {
+    return cluster.domains[0].name == this;
+}, mgmt.name)[0];
+podConfig.NSXT.mgmtNSXT.ManagerVIP = mgmtNSXT.vipFqdn;
+for each (var host in mgmtNSXT.nodes) {
+    podConfig.NSXT.mgmtNSXT.ManagerHostnames.push(host.fqdn);
+}
+
+var nsxtadmin = credentials.filter(function (credential) {
+    return credential.resourceName == this && credential.credentialType == "API";
+}, mgmtNSXT.vipFqdn)[0];
+podConfig.NSXT.mgmtNSXT.AdminUser = nsxtadmin.username;
+podConfig.NSXT.mgmtNSXT.AdminPassword = nsxtadmin.password;
+
+var nsxtrootpass = credentials.filter(function (credential) {
+    return credential.resourceName == this && credential.username == "root";
+}, mgmtNSXT.vipFqdn)[0];
+podConfig.NSXT.mgmtNSXT.RootPassword =  nsxtrootpass.password;
+
+//Update VI NSXT details
+var wldNSXTTemplate = podConfig.NSXT.wldNSXT[0];
+podConfig.NSXT.wldNSXT = [];
+
+for each (var wld in viDomains) {
+    var viNSXT = nsxtClusters.filter(function (cluster) {
+        return cluster.domains[0].name == this;
+    },wld.name)[0];
+    var nsxtobj = JSON.parse(JSON.stringify(wldNSXTTemplate));
+    nsxtobj.VCFDomain = wld.name;
+    nsxtobj.ManagerVIP = viNSXT.vipFqdn;
+    for each (var host in viNSXT.nodes) {
+        nsxtobj.ManagerHostnames.push(host.fqdn);
+    }
+
+    var nsxtadmin = credentials.filter(function (credential) {
+        return credential.resourceName == this && credential.credentialType == "API";
+    }, viNSXT.vipFqdn)[0];
+    nsxtobj.AdminUser = nsxtadmin.username;
+    nsxtobj.AdminPassword = nsxtadmin.password;
+
+    var nsxtrootpass = credentials.filter(function (credential) {
+        return credential.resourceName == this && credential.username == "root";
+    }, viNSXT.vipFqdn)[0];
+    nsxtobj.RootPassword = nsxtrootpass.password;
+
+    podConfig.NSXT.wldNSXT.push(nsxtobj);
+}
+
+//Update ESXi host details
+var esxiTemplate = podConfig.ESXi.Hosts[0];
+podConfig.ESXi.Hosts = [];
+
+var hostCredentials = credentials.filter(function (credential) {
+    return credential.resourceType == "ESXI";
+});
+
+for each (var hostCred in hostCredentials) {
+    var credObj = JSON.parse(JSON.stringify(esxiTemplate));
+    credObj.Hostname = hostCred.resourceName;
+    credObj.IPAddress = hostCred.resourceIp;
+    credObj.User = hostCred.username;
+    credObj.Password = hostCred.password;
+    
+    podConfig.ESXi.Hosts.push(credObj);
+}
+
+return JSON.stringify(podConfig);]]></script>
+</dunes-script-module>

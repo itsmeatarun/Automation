@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvCenterWebProxyv2" result-type="string" api-version="6.0.0" id="52ecd89a-8434-40f6-9377-fb00d21a4922" version="0.0.2" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterHostname" t="string"><![CDATA[FQDN of vCenter on which to set the Proxy Host.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[User with priv to auth to vCenter.]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vCenterVmName" t="string"><![CDATA[]]></param>
+  <param n="vCenterRootPass" t="SecureString"><![CDATA[]]></param>
+  <param n="proxyHost" t="string"><![CDATA[]]></param>
+  <param n="proxyPort" t="string"/>
+  <param n="ignoreSSLCertificate" t="boolean"/>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(proxyHost,"Input var: proxyHost");
+dbc.ensureNotNullOrEmpty(proxyPort,"Input var: proxyPort");
+dbc.ensureNotNullOrEmpty(vCenterHostname,"Input var: vCenterHostname");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(vCenterVmName,"Input var: vCenterVmName");
+dbc.ensureNotNullOrEmpty(vCenterRootPass,"Input var: vCenterRootPass");
+
+var script = 'cp /etc/sysconfig/proxy /etc/sysconfig/proxy.bak\n'
+script += 'sed -i "s/\\(PROXY_ENABLED=\\).*\\$/\\1\\"yes\\"/" /etc/sysconfig/proxy\n'
+script += 'sed -i "s/\\(HTTP_PROXY=\\).*\\$/\\1\\"https:\\/\\/<<proxyHost>>\\"/" /etc/sysconfig/proxy\n'
+script += 'sed -i "s/\\(HTTPS_PROXY=\\).*\\$/\\1\\"https:\\/\\/<<proxyHost>>\\"/" /etc/sysconfig/proxy\n'
+
+script = script.replace(/<<proxyHost>>/g,proxyHost + ":" + proxyPort);
+System.debug(script);
+
+var scriptResult = System.getModule("com.vmware.pso.remoteScript").runRemoteScript([vCenterVmName],vCenterHostname,vCenterUser,vCenterPassword,script,"root",vCenterRootPass,ignoreSSLCertificate);
+
+var status = scriptResult.get("status");
+System.log("Set proxy completed with status: " + status);
+if (status != "success") {
+    throw "Set proxy failed with error: " + scriptResult.get("error");
+}
+
+return status;]]></script>
+</dunes-script-module>

@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="DesignByContract" result-type="Any" api-version="6.0.0" id="8c57ca6a-476c-4af4-9437-bb208c5dfbfa" version="3.5.1" allowed-operations="evf" category-name="com.vmware.pso.util.testing">
+  <description><![CDATA[Creates a simplistic Design by Contract Module that exposes many utility methods.
+
+Comparator functions that return true/false:
+isClassType(object, classType)
+isProperties(object)
+isEmpty(object)
+isOneOf(input, validItems)
+isArray(object)
+isString(object)
+isNull(object)
+isNullOrEmpty(object)
+
+Test Functions that all throw if condition is not met:
+
+ensureProperties( object, name) 
+ensureNotNullOrEmpty( object, name )
+ensureArray( object, name)
+ensureNumberAndInRange(input, min, max, name)
+ensureClassType(object, classType, name )
+ensureIsOneOf(input, validItems, name)
+ensureNumber(object, name)
+ensureClassType(object, propClassName, name)]]></description>
+  <script encoded="false"><![CDATA["use strict";
+
+function DesignByContract() {
+
+  var logAndThrow = function(errorMsg) {
+    System.error(errorMsg);
+    throw errorMsg;
+  }
+  
+  var isClassType = function(object, classType) {
+
+    if ( classType == null || ! "String".equalsIgnoreCase(System.getObjectClassName(classType)) ) {
+      logAndThrow("classType cannot be null and must be a string");
+    }
+  
+    if ( object == null ) {
+      return false;
+    }
+    if ( classType.equalsIgnoreCase(System.getObjectClassName(object)) ) {
+      return true;
+    }
+    else {
+      // System.debug("Object is a " + System.getObjectClassName(object));
+      return false;
+    }
+  }
+
+  var isProperties = function IsProperties(object) {
+    return isClassType(object, "Properties");
+  }
+  var isArray = function (object) {
+    return isClassType(object, "Array");
+  }
+  
+  var isString = function (object) {
+    return isClassType(object, "String");
+  }
+
+  var isNull = function (object) {
+    return (object == null );
+  }
+  
+  var isEmpty = function (object) {
+    return ( isNull(object) )                                               ? true :
+           ( isClassType(object, "String") && "".equalsIgnoreCase(object) ) ? true :
+           ( isArray(object) && object.length == 0 )                        ? true : 
+         (   isProperties(object) && object.keys.length <= 0 )              ? true : 
+                                                                                      false; 
+  }
+
+  var isNullOrEmpty = function (object) {
+	 return ( this.isNull(object) || this.isEmpty(object) );
+  }
+  
+  var isOneOf = function(input, validItems) {
+    var isValid = false;
+    this.ensureNotNullOrEmpty(input, "input");
+    this.ensureClassType(validItems, "Array", "validItems");
+    for each ( var member in validItems ) {
+      if ( member === input ) {
+        return true;
+        break;
+      }
+    }
+    return false;
+    }
+
+  this.logAndThrow = logAndThrow;
+
+  this.isClassType = isClassType;
+      
+  this.isEmpty = isEmpty;
+  
+  this.isNull = isNull;
+
+  this.isArray = isArray; 
+
+  this.isProperties = isProperties;
+  
+  this.isString = isString;
+  
+  this.isOneOf = isOneOf;
+
+  this.isNullOrEmpty = isNullOrEmpty;
+  
+  this.ensureProperties = function( object, name) {
+    if ( ! isClassType(object, "Properties") ) {
+      errorMessage = name + " must be properties object";
+      logAndThrow(errorMessage);
+    }
+  }
+
+  this.ensureNotNullOrEmpty = function( object, name ) {
+    var errorMessage = "";
+
+    if ( isNull(object) ) {
+      errorMessage = name + " cannot be null";
+      logAndThrow(errorMessage);
+    }
+    
+    if (isClassType(object, "String") && isEmpty(object) ) {
+      errorMessage = name + " cannot be an empty string";
+      
+      logAndThrow(errorMessage);
+    }
+    
+    if ( isArray(object) && isEmpty(object) ) {
+      errorMessage = name + " cannot be an empty array";
+      logAndThrow(errorMessage);
+    }
+      
+      
+    if ( isProperties(object) && isEmpty(object) ) {
+      errorMessage = name + " must have at least 1 property defined";
+      logAndThrow(errorMessage);
+    }
+  }
+  
+  this.ensureArray = function( object, name) {
+    if ( ! isArray(object) ) {
+      logAndThrow( name + " must be a " + propType + "object");
+    }
+  }
+  
+  this.ensureNumberAndInRange = function(input, min, max, name) {
+    if ( isNaN(input) || input < min || input > max ) {
+        logAndThrow( "Input '" + name + "' must be a number between " + min + " and " + max + ". You entered '" + input + "'");  
+      }
+  }
+  
+  this.ensureClassType = function(object, classType, name ) {
+    if ( ! isClassType(object, classType) ){
+      errorMessage = name + " must be '" + classType + "' but it is a '" + System.getObjectClassTYpe(object) + "'";
+      logAndThrow(errorMessage);
+    }
+  }
+        
+  this.ensureIsOneOf = function(input, validItems, name) {
+    var isValid = false;
+    this.ensureNotNullOrEmpty(input, "input");
+    if ( ! isArray(validItems) || validItems.length == 0 ) {
+      errorMessage = "validItems must be an array and cannot be empty";
+      logAndThrow(errorMessage);
+    }
+    for each (var member in validItems) {
+      if ( member === input ) {
+        isValid = true;
+        break;
+      }
+    }
+    if ( ! isValid ) {
+      logAndThrow("'" + input + "' is not one of the allowed values: " + validItems.join(", "))
+    }
+  }
+  
+  this.ensureNumber = function(object, name) {
+    if ( isNaN(object) ) {
+      errorMessage = name + " must be a number."
+      logAndThrow(errorMessage);
+    }
+  }
+  
+  this.ensureClassType = function(object, propClassName, name) {
+    var isValid = false;
+    this.ensureNotNullOrEmpty(object, "object");
+    if ( ! isClassType(object, propClassName) ) {
+      errorMessage = name + " must be a '" + propClassName + "' object";
+      logAndThrow(errorMessage);
+    }
+  }
+}
+
+return new DesignByContract();]]></script>
+</dunes-script-module>

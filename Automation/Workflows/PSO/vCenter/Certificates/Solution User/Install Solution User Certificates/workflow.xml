@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="a267377d-4c6f-41f4-ad80-b8f2042e7fa3" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Install Solution User Certificates]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="targetVcFQDN" type="string"/>
+    <param name="vcfqdn" type="string"/>
+    <param name="vcuser" type="string"/>
+    <param name="vcpassword" type="SecureString"/>
+    <param name="vcVM" type="string"/>
+    <param name="vcGuestUser" type="string"/>
+    <param name="vcGuestPassword" type="SecureString"/>
+    <param name="ignoreSSLCertificate" type="boolean"/>
+    <param name="logDir" type="string"/>
+    <param name="certAdminUser" type="string"/>
+    <param name="certAdminPassword" type="SecureString"/>
+    <param name="venafiPolicyDN" type="string"/>
+    <param name="venafiHost" type="string"/>
+    <param name="venafiUser" type="string"/>
+    <param name="venafiPassword" type="SecureString"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="340.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/downloadAndInstallSolutionUserCertificates">
+    <display-name><![CDATA[downloadAndInstallSolutionUserCertificates]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").downloadAndInstallSolutionUserCertificates(targetVcFQDN,vcfqdn,vcuser,vcpassword,vcVM,vcGuestUser,vcGuestPassword,ignoreSSLCertificate,logDir,certAdminUser,certAdminPassword,venafiPolicyDN,venafiHost,venafiUser,venafiPassword);
+]]></script>
+    <in-binding>
+      <bind name="targetVcFQDN" type="string" export-name="targetVcFQDN"/>
+      <bind name="vcfqdn" type="string" export-name="vcfqdn"/>
+      <bind name="vcuser" type="string" export-name="vcuser"/>
+      <bind name="vcpassword" type="SecureString" export-name="vcpassword"/>
+      <bind name="vcVM" type="string" export-name="vcVM"/>
+      <bind name="vcGuestUser" type="string" export-name="vcGuestUser"/>
+      <bind name="vcGuestPassword" type="SecureString" export-name="vcGuestPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+      <bind name="logDir" type="string" export-name="logDir"/>
+      <bind name="certAdminUser" type="string" export-name="certAdminUser"/>
+      <bind name="certAdminPassword" type="SecureString" export-name="certAdminPassword"/>
+      <bind name="venafiPolicyDN" type="string" export-name="venafiPolicyDN"/>
+      <bind name="venafiHost" type="string" export-name="venafiHost"/>
+      <bind name="venafiUser" type="string" export-name="venafiUser"/>
+      <bind name="venafiPassword" type="SecureString" export-name="venafiPassword"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="180.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

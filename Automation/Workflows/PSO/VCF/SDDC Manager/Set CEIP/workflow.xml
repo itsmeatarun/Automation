@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="e2406360-931d-4e85-ab1c-ca0a24533d8f" version="0.0.0" api-version="6.0.0" allowed-operations="evf" editor-version="1.6" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set CEIP]]></display-name>
+  <position y="45.5" x="104.0"/>
+  <input>
+    <param name="user" type="string"/>
+    <param name="password" type="SecureString"/>
+    <param name="host" type="string"/>
+    <param name="enable" type="boolean"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="44.90909090909091" x="384.5"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcf.sddcmanager/setCEIP">
+    <display-name><![CDATA[Set CEIP]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcf.sddcmanager").setCEIP(user,password,host,enable);
+]]></script>
+    <in-binding>
+      <bind name="user" type="string" export-name="user"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+      <bind name="host" type="string" export-name="host"/>
+      <bind name="enable" type="boolean" export-name="enable"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="55.5" x="200.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="user">
+      <desc><![CDATA[user]]></desc>
+    </p-param>
+    <p-param name="password">
+      <desc><![CDATA[password]]></desc>
+    </p-param>
+    <p-param name="host">
+      <desc><![CDATA[host]]></desc>
+    </p-param>
+    <p-param name="enable">
+      <desc><![CDATA[enable]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

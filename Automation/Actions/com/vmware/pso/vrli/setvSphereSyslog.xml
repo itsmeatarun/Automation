@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvSphereSyslog" result-type="void" api-version="6.0.0" id="52eebbdc-27cb-40fc-8a7f-3ad91a9df1e1" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vrli">
+  <param n="vrliHost" t="string"><![CDATA[]]></param>
+  <param n="vrliUser" t="string"><![CDATA[]]></param>
+  <param n="vrliPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcHostname" t="string"><![CDATA[]]></param>
+  <param n="vcUsername" t="string"><![CDATA[]]></param>
+  <param n="vcPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="acceptUntrustedvCCert" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vrliHost,"Input var: vrliHost");
+dbc.ensureNotNullOrEmpty(vrliUser,"Input var: vrliUser");
+dbc.ensureNotNullOrEmpty(vrliPassword,"Input var: vrliPassword");
+dbc.ensureNotNullOrEmpty(vcHostname,"Input var: vcHostname");
+dbc.ensureNotNullOrEmpty(vcUsername,"Input var: vcUsername");
+dbc.ensureNotNullOrEmpty(vcPassword,"Input var: vcPassword");
+dbc.ensureNotNullOrEmpty(acceptUntrustedvCCert,"Input var: acceptUntrustedvCCert");
+
+var userType = "Local";
+var vrliSessionId = System.getModule("com.vmware.pso.vrli.rest").getvRLISessionToken(vrliHost,vrliUser,vrliPassword,userType);
+
+var ableToConnect = System.getModule("com.vmware.pso.vrli.rest").testvSphereConnection(vrliHost,vrliSessionId,vcHostname,vcUsername,vcPassword,acceptUntrustedvCCert);
+if (!ableToConnect) {
+    throw "Connection test failed. Exiting.";
+}
+
+var syslogProtocol = "ssl";
+var vsphereEventsEnabled = true;
+var autoConfigEsxiHosts = true;
+
+var integrationExists = System.getModule("com.vmware.pso.vrli.rest").checkvSphereIntegrationExists(vrliHost, vrliSessionId, vcHostname);
+if (integrationExists) {
+    System.getModule("com.vmware.pso.vrli.rest").putvSphereIntegration(vrliHost,vrliSessionId,vcHostname,vcUsername,vcPassword,acceptUntrustedvCCert,syslogProtocol,vsphereEventsEnabled,autoConfigEsxiHosts);
+} else {
+    System.getModule("com.vmware.pso.vrli.rest").postvSphereIntegration(vrliHost,vrliSessionId,vcHostname,vcUsername,vcPassword,acceptUntrustedvCCert,syslogProtocol,vsphereEventsEnabled,autoConfigEsxiHosts);
+}
+
+System.log("setvRLISyslog completed successfully");
+return;]]></script>
+</dunes-script-module>

@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item6" object-name="workflow:name=generic" id="e6456a0d-9716-4b9d-b85e-b4b2ea29f1a9" version="0.1.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Download File From Git Repository]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="gitAPIBaseUrl" type="string"/>
+    <param name="gitToken" type="string"/>
+    <param name="gitBranch" type="string"/>
+    <param name="dirPath" type="string"/>
+    <param name="fileNamePath" type="string"/>
+    <param name="vmUserName" type="string"/>
+    <param name="vmPassword" type="SecureString"/>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="scriptType" type="string"/>
+    <param name="scriptTimeout" type="number"/>
+    <param name="scriptRefreshTime" type="number"/>
+    <param name="scriptWorkingDirectory" type="string"/>
+    <param name="interactiveSession" type="boolean"/>
+    <param name="fileName" type="string"/>
+    <param name="repoPath" type="string"/>
+  </input>
+  <output>
+    <param name="vcoFileExists" type="boolean"/>
+  </output>
+  <attrib name="vroPath" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vroFolder" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="guestFilePath" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="overwrite" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="gitBranchName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitFileOutPut" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="340.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item5" type="task">
+    <display-name><![CDATA[Create provisioner File ]]></display-name>
+    <script encoded="false"><![CDATA[
+mimeAttachment = new MimeAttachment();
+mimeAttachment.name = fileName;
+mimeAttachment.mimeType = "";
+mimeAttachment.content = gitFileOutPut;
+
+vroFolder = System.getTempDirectory() + "/" + System.nextUUID();
+
+mimeAttachment.write(vroFolder,fileName);
+vroPath = vroFolder + "/" + fileName;
+System.log("Wrote cloud provisioner ("+ fileName +") file to /data/vco" + vroPath);
+
+guestFilePath = dirPath + fileName;
+
+System.log(guestFilePath +" : "+ dirPath +" : " + vroPath)
+
+vcoFileExists = true;]]></script>
+    <in-binding>
+      <bind name="dirPath" type="string" export-name="dirPath"/>
+      <bind name="fileName" type="string" export-name="fileName"/>
+      <bind name="gitFileOutPut" type="Any" export-name="gitFileOutPut"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vcoFileExists" type="boolean" export-name="vcoFileExists"/>
+      <bind name="vroFolder" type="string" export-name="vroFolder"/>
+      <bind name="vroPath" type="string" export-name="vroPath"/>
+      <bind name="guestFilePath" type="string" export-name="guestFilePath"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="185.0" x="9.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item0" type="task">
+    <display-name><![CDATA[Delete Temporary File on vRO]]></display-name>
+    <script encoded="false"><![CDATA[
+System.log("File created on " + guestFilePathForProvisioner);
+
+var uniqueScriptFile = new File(vroPath);
+var uniqueScriptFolder = new File(uniqueScriptFile.directory);
+uniqueScriptFile.deleteFile();
+uniqueScriptFolder.deleteFile();
+
+System.log("Deleted temp provisioner.py vCO file /data/vco" + vroPath);
+]]></script>
+    <in-binding>
+      <bind name="vroPath" type="string" export-name="vroPath"/>
+      <bind name="guestFilePathForProvisioner" type="string" export-name="guestFilePath"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="295.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item4" type="link" linked-workflow-id="C78080808080808080808080808080809480808001322751030482b80adf61e7c">
+    <display-name><![CDATA[Copy file from vCO to guest]]></display-name>
+    <in-binding>
+      <bind name="vmUsername" type="string" export-name="vmUserName"/>
+      <bind name="vmPassword" type="SecureString" export-name="vmPassword"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="vcoPath" type="string" export-name="vroPath"/>
+      <bind name="guestFilePath" type="string" export-name="guestFilePath"/>
+      <bind name="overwrite" type="boolean" export-name="overwrite"/>
+    </in-binding>
+    <out-binding>
+      <bind name="result" type="boolean" export-name="vcoFileExists"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="240.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="task">
+    <display-name><![CDATA[prepare input values]]></display-name>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item3" type="task" script-module="com.vmware.pso.csp/getFileFromGitRepo">
+    <display-name><![CDATA[getFileFromGitRepo]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.csp").getFileFromGitRepo(gitBaseUrl,gitAccess_token,branchName,filePath,repoPath);
+]]></script>
+    <in-binding>
+      <bind name="gitBaseUrl" type="string" export-name="gitAPIBaseUrl"/>
+      <bind name="gitAccess_token" type="string" export-name="gitToken"/>
+      <bind name="branchName" type="string" export-name="gitBranch"/>
+      <bind name="filePath" type="string" export-name="fileNamePath"/>
+      <bind name="repoPath" type="string" export-name="repoPath"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Any" export-name="gitFileOutPut"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

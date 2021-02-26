@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="configurePortGroupsForHorizonAndvRealize" result-type="void" api-version="6.0.0" id="402a9ce5-d16f-4775-9859-e9dd2c22a9c5" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="podID" t="string"><![CDATA[Horizon Pod ID to be used for the portg group name.]]></param>
+  <param n="vdsName" t="string"><![CDATA[VDS to create the port group in.]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(podID,"Input var: podID");
+dbc.ensureNotNullOrEmpty(vdsName,"Input var: vdsName");
+
+var horizonPortGroup = podID + "-mgmt-Horizon-Management-VL1030";
+var horizonVLAN = 1030;
+var horizonResult = System.getModule("com.vmware.pso.vcenter.powercli.network").addDistributedPortGroup(vCenterFQDN,vCenterUser,vCenterPassword,vdsName,horizonPortGroup,horizonVLAN,ignoreSSLCertificate);
+var horizonStatus = horizonResult.get("status");
+System.log("addDistributedPortGroup completed with status: " + horizonStatus);
+if (horizonStatus != "success") {
+    throw "configurePortGroupsForHorizonAndvRealize failed with error: " + horizonResult.get("error");
+}
+
+var vRealizePortGroup = podID + "-mgmt-vRealize-Management-VL1015";
+var vRealizeVLAN = 1015;
+var vRealizeResult = System.getModule("com.vmware.pso.vcenter.powercli.network").addDistributedPortGroup(vCenterFQDN,vCenterUser,vCenterPassword,vdsName,vRealizePortGroup,vRealizeVLAN,ignoreSSLCertificate);
+var vRealizeStatus = vRealizeResult.get("status");
+System.log("addDistributedPortGroup completed with status: " + vRealizeStatus);
+if (vRealizeStatus != "success") {
+    throw "configurePortGroupsForvRealizeAndvRealize failed with error: " + vRealizeResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

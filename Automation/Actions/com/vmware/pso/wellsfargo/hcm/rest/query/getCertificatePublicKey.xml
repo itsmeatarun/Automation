@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getCertificatePublicKey" result-type="string" api-version="6.0.0" id="24754938-c8f1-4caf-95cc-9daf737bc522" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.hcm.rest.query">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="project" t="string"><![CDATA[]]></param>
+  <param n="serverName" t="string"><![CDATA[]]></param>
+  <param n="instance" t="string"><![CDATA[]]></param>
+  <param n="uniqueCred" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(project, "project");
+dbc.ensureNotNullOrEmpty(serverName, "serverName");
+dbc.ensureNotNullOrEmpty(instance, "instance");
+dbc.ensureNotNullOrEmpty(uniqueCred, "uniqueCred");
+
+return main();
+
+function main() { 
+    var restHost = System.getModule("com.vmware.pso.wellsfargo.hcm.rest").getTransientHCMRESTHost(host);
+    dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+	var headers = new Properties();
+	headers.put("Accept","text/plain");
+
+	var url = "/Venafi/Certs/query.php?Project={project}&Server_Name={serverName}&Instance={instance}&UniqueCred={uniqueCred}&PublicKey";
+	var method = "GET";
+    var content = null;
+	var inParametersValues = [project, serverName, instance, uniqueCred];
+	
+	var response = System.getModule("com.vmware.pso.wellsfargo.hcm.rest").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+
+    System.debug("Response: " + response);
+	
+	return response;
+}]]></script>
+</dunes-script-module>

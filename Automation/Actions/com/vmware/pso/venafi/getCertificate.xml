@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getCertificate" result-type="Properties" api-version="6.0.0" id="2ef29c45-12c1-4309-9eb4-a269d59495bd" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi" memory-limit="512000000">
+  <param n="host" t="string"><![CDATA[Venafi Host]]></param>
+  <param n="user" t="string"><![CDATA[Venafi User]]></param>
+  <param n="password" t="SecureString"><![CDATA[Venafi Password]]></param>
+  <param n="certificateDN" t="string"><![CDATA[Venafi Certificate DN]]></param>
+  <param n="privateKey" t="boolean"><![CDATA[Get the private key]]></param>
+  <param n="includeChain" t="boolean"><![CDATA[Get the certificate chain]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"Input var: host");
+dbc.ensureNotNullOrEmpty(user,"Input var: user");
+dbc.ensureNotNullOrEmpty(password,"Input var: password");
+dbc.ensureNotNullOrEmpty(certificateDN,"Input var: certificateDN");
+
+var response;
+
+response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.authorize").getAPIKey(user, password, host));
+
+var apiKey = response.APIKey;
+
+response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.certificate.retrieve").retrieveCertificate(host, apiKey, certificateDN, "Base64", privateKey, "VMware12345!2", includeChain));
+
+if(response.CertificateData == undefined) {
+    throw "No certificate data";
+}
+
+var certificateData = response.CertificateData;
+
+return System.getModule("com.vmware.pso.venafi.util").decodeCertificateChain(certificateData, "VMware12345!2");
+
+]]></script>
+</dunes-script-module>

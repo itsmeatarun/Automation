@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getPods" result-type="Array/string" api-version="6.0.0" id="f329826d-a966-4f09-b3f3-ca9c4d09630b" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.json.ui">
+  <param n="configPath" t="string"><![CDATA[]]></param>
+  <param n="configName" t="string"><![CDATA[]]></param>
+  <param n="environment" t="string"><![CDATA[]]></param>
+  <param n="region" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(configPath,"Input var: configPath");
+dbc.ensureNotNullOrEmpty(configName,"Input var: configName");
+if (dbc.isNullOrEmpty(environment) || dbc.isNullOrEmpty(region)) {
+    System.log("environment and region cannot be null.");
+    return [""];
+}
+
+var configElement = System.getModule("com.vmware.pso.configurations").getConfigurationElementSimple(configName,configPath);
+var githubHost = configElement.getAttributeWithKey("GitHost").value;
+var githubUser = configElement.getAttributeWithKey("GitUser").value;
+var githubToken = configElement.getAttributeWithKey("GitUserToken").value;
+var baseURL = configElement.getAttributeWithKey("GitRepoContentURL").value;
+
+var podPath = environment + "/" + region + "/PODs"
+var response = System.getModule("com.vmware.pso.github.rest").getRepoContent(githubHost,githubUser,githubToken,baseURL,podPath);
+var contents = JSON.parse(response);
+
+var pods = [];
+for each ( var item in contents ) {
+    if (item.type == "dir" && item.name.indexOf("-") != 0) {
+        pods.push(item.name);
+    }
+}
+System.debug(pods);
+
+return pods;]]></script>
+</dunes-script-module>

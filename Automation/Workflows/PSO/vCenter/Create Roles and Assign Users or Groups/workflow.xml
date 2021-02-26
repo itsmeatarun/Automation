@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="2183774f-74f2-45c7-aca8-515f62c816d6" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create Roles and Assign Users or Groups]]></display-name>
+  <position y="10.0" x="100.0"/>
+  <input>
+    <param name="vCenterFQDN" type="string"/>
+    <param name="vCenterUser" type="string"/>
+    <param name="vCenterPassword" type="SecureString"/>
+    <param name="vrlcmUsers" type="Array/string"/>
+    <param name="vrlcmGroups" type="Array/string"/>
+    <param name="vragroups" type="Array/string"/>
+    <param name="vrliGroups" type="Array/string"/>
+    <param name="vropsGroups" type="Array/string"/>
+  </input>
+  <attrib name="nothing" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <attrib name="ignoreSSLCertificate" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="584.21875" x="100.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.vmware.pso.vcenter/createAndAssignvRLCMRole">
+    <display-name><![CDATA[createAndAssignvRLCMRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAndAssignvRLCMRole(vCenterFQDN,vCenterUser,vCenterPassword,adUsers,adGroups,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="adUsers" type="Array/string" export-name="vrlcmUsers">
+        <description><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="adGroups" type="Array/string" export-name="vrlcmGroups">
+        <description><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="75.0" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task" script-module="com.vmware.pso.vcenter/createAndAssignvRLIRole">
+    <display-name><![CDATA[createAndAssignvRLIRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAndAssignvRLIRole(vCenterFQDN,vCenterUser,vCenterPassword,adUsers,adGroups,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="adUsers" type="Array/string" export-name="nothing">
+        <description><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="adGroups" type="Array/string" export-name="vrliGroups">
+        <description><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="130.0" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" type="task" script-module="com.vmware.pso.vcenter/createAndAssignvROPsRole">
+    <display-name><![CDATA[createAndAssignvROPsRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAndAssignvROPsRole(vCenterFQDN,vCenterUser,vCenterPassword,adUsers,adGroups,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="adUsers" type="Array/string" export-name="nothing">
+        <description><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="adGroups" type="Array/string" export-name="vropsGroups">
+        <description><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="185.0" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="task" script-module="com.vmware.pso.vcenter/createAndAssignvRARole">
+    <display-name><![CDATA[createAndAssignvRARole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAndAssignvRARole(vCenterFQDN,vCenterUser,vCenterPassword,adUsers,adGroups,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="adUsers" type="Array/string" export-name="nothing">
+        <description><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="adGroups" type="Array/string" export-name="vragroups">
+        <description><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></description>
+      </bind>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="240.0" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="task" script-module="com.vmware.pso.vcenter/createAppVolDistMgmtRole">
+    <display-name><![CDATA[createAppVolDistMgmtRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAppVolDistMgmtRole(vCenterFQDN,vCenterUser,vCenterPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="292.5" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" type="task" script-module="com.vmware.pso.vcenter/createAppVolPkgMgmtRole">
+    <display-name><![CDATA[createAppVolPkgMgmtRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAppVolPkgMgmtRole(vCenterFQDN,vCenterUser,vCenterPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="346.25" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item8" type="task" script-module="com.vmware.pso.vcenter/createAppVolvCAdmRole">
+    <display-name><![CDATA[createAppVolvCAdmRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createAppVolvCAdmRole(vCenterFQDN,vCenterUser,vCenterPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="396.875" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item9" type="task" script-module="com.vmware.pso.vcenter/createHznvCAdmRole">
+    <display-name><![CDATA[createHznvCAdmRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createHznvCAdmRole(vCenterFQDN,vCenterUser,vCenterPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="445.3125" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item10" type="task" script-module="com.vmware.pso.vcenter/createHznImgMgmtRole">
+    <display-name><![CDATA[createHznImgMgmtRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createHznImgMgmtRole(vCenterFQDN,vCenterUser,vCenterPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="494.21875" x="60.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/createHznvCInfAdmRole">
+    <display-name><![CDATA[createHznvCInfAdmRole]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").createHznvCInfAdmRole(vCenterFQDN,vCenterUser,vCenterPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="544.453125" x="60.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

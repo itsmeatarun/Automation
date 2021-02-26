@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="requestAndWaitForCertificate" result-type="string" api-version="6.0.0" id="dcb15402-2223-4d86-aadd-683ea9a14833" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.wellsfargo.hcm">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="project" t="string"><![CDATA[]]></param>
+  <param n="serverName" t="string"><![CDATA[]]></param>
+  <param n="instance" t="string"><![CDATA[]]></param>
+  <param n="format" t="string"><![CDATA[]]></param>
+  <param n="stripPasswd" t="boolean"><![CDATA[]]></param>
+  <param n="altNames" t="string"><![CDATA[]]></param>
+  <param n="includeChain" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var response = System.getModule("com.vmware.pso.wellsfargo.hcm.rest.request").createCertificate(host, project, serverName, instance, format, stripPasswd, altNames, includeChain);
+
+var uniqueId = response.split("\r\n")[1];
+
+
+var status =""
+while(status != "Ready for use" && status != "Error") {
+    System.log("Waiting 3 seconds to check certificate status...");
+    System.sleep(3000);
+    System.log("Checking certificate status");
+    status = System.getModule("com.vmware.pso.wellsfargo.hcm.rest.query").getCertificateStatus(host, project, serverName, instance, uniqueId);
+    System.debug("Got status '" + status + "'");
+}
+
+if(status == "Error") {
+    throw "Error creating certificate: " + serverName + ":" + instance;
+}
+
+return uniqueId;]]></script>
+</dunes-script-module>

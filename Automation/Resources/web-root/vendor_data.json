@@ -1,0 +1,50 @@
+{
+    "non_factory_domain": "devint.cloud.wellsfargo.net",
+    "datacenter": "shoreview",
+    "wf_labaas": true,
+    "puppet": {
+        "puppet_ca": "ca.devint.pce.wellsfargo.net",
+        "puppet_ca_list": [
+            "ca.devint.pce.wellsfargo.net",
+            "puppetca01.devint.sv.pce.wellsfargo.net"
+        ],
+        "puppet_cert_file": "autosigner_devint.zip",
+        "puppet_version": "current",
+        "puppet_environment": "devint",
+        "puppet_vip": "puppetmom01.devint.sv.cloud.wellsfargo.net",
+        "default_wf_pe_version": "2018",
+        "puppet_master": "puppet.devint.pce.wellsfargo.net"
+    },
+    "cloud": "DevINT",
+    "isp_endpoints": [
+        "https://ispservice-dev.sl03ad1.azure.wellsfargo.net",
+        "https://ispservice-uat.sl03ad1.azure.wellsfargo.net",
+        "https://ispservice.sl04ad1.azure.wellsfargo.net"
+    ],
+    "default_wf_domain": "AD-ENT",
+    "linux_timezone": "US/Eastern",
+    "pce_datacenter": "CIC",
+    "utility_server": "runtime01.devint.cloud.wellsfargo.net",
+    "windows_timezone": "Eastern Standard Time",
+    "athena_endpoint": "https://central-sv.devint.cloud.wellsfargo.net:15080",
+    "valid_wf_domains": [
+        "AD-ENT",
+        "QA-ENT",
+        "XNET",
+        "XTCH"
+    ],
+    "time_servers": [
+        "162.101.165.14",
+        "162.102.197.46",
+        "10.88.48.18"
+    ],
+    "factory_domains": [
+        "wellsfargo.com",
+        "wellsfargo.net",
+        "infra.wellsfargo.com"
+    ],
+    "is_ird": false,
+    "datacenter_short": "cc",
+    "pce_admin_project_id": "c2451b2683134f01b0b5881ae6eeb16e",
+    "cih_endpoint": "https://api.cih.dev-int.cloud.wellsfargo.net:5080"
+}

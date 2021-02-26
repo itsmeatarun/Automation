@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="4ed397a0-9fdd-4632-b112-cb7351654386" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[download certificates]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="390.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[var certificatesData = new Array();
+
+
+certificatesData.push(
+    {
+        "name": "vcenter-vi01.pso.vsphere.local",
+        "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIIDNzCCAh8CAQAwdDEnMCUGA1UEAwwedmNlbnRlci12aTAxLnBzby52c3BoZXJl\nLmxvY2FsMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQUwxCzAJBgNVBAcMAlVTMRMw\nEQYDVQQKDApXZWxsc0ZhcmdvMQ0wCwYDVQQLDARXYXZlMIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEArv+YlbvjxJdOx6bQKfywtqk77vfn77+mM/vlh+b9\nAKdHB25dfQIY0a7hYMV9gLh3zObljLoLgLU5DYbggGaK1WWDZiCSvAqVTNCG7VYl\nXr0B9ZqkTbj0jA2raBae4lD00mvDIJxtClr57IPToDkSk5WLETeANSrpgpPF/NNS\nDqdpojeD6qL0Yr8BB8GxUAh3jnsVTzkhhhjH13oi0UL5AFw2m+r3ZbeSiB6LNS3G\nJoOlz6Fz6uDPaDHcr5rZkjAr1glbLA1zGQ4QZsrurbDJf/hZPm5OQKasoEgB/E3l\nEw/HmfMhUQNRRUJhMle75N3vJMXQ5cHuxP8jX5TLbtHkSwIDAQABoH4wfAYJKoZI\nhvcNAQkOMW8wbTALBgNVHQ8EBAMCBeAwPwYDVR0RBDgwNoEUYWRtaW5Ad2VsbHNm\nYXJnby5jb22CHnZjZW50ZXItdmkwMS5wc28udnNwaGVyZS5sb2NhbDAdBgNVHQ4E\nFgQUXtX5Jxib6r6UGG46LMXSy9+lnEkwDQYJKoZIhvcNAQELBQADggEBADRzD1MJ\nBwqZo5bLBX/o43Y4MQFpISeDnn3Z5hr1P/JYeNuFpXrzOvtt2BY2j6QWkiN2SHgn\nIX0YIVPJfo/9/QJPrip+MlUiODODTQxJ2yggt1aL+GVRbxsF5xY2t3rzzgWugp75\nGWrU0SuGzhZXLjikgsmKma7Nh5qqbQIi8sd+cfz1EjLJymdhulGUFNKYcxAdKdP/\nsv2drcqhPAly5ZdUSay0f5y2zJKGsUgS/IUXUc5PwHxfq139i5g3N3TJANV2OOWv\nTuGWG7xc2YZSRt7oQx0USO3RBQ59phzxYF5dzrNR+Ij56T5vCZ2wmFF9TdXrLFl6\nUJ4kzmvQgfswFpM=\n-----END CERTIFICATE REQUEST-----",
+        "type": "VCENTER",
+        "certificateDN":"\\VED\\Policy\\Code Signing\\Certificates\\162 Lab\\vcenter-vi01.pso.vsphere.local"
+    }
+);
+
+
+
+var actionResult = System.getModule("com.vmware.pso.vcf.sddcmanager").getDomainCertificates(
+    "10.0.0.11", //venafiHost,
+    "admin", //venafiUser,
+    "VMware12345!", //venafiPassword,
+    certificatesData
+);
+
+
+System.log("-----------------------------------------------------")
+System.log(JSON.stringify(actionResult));]]></script>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="220.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

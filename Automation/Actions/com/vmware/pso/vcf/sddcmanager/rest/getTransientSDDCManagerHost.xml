@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getTransientSDDCManagerHost" result-type="REST:RESTHost" api-version="6.0.0" id="2d57b02e-72e3-4e44-8f04-9c7761c8d49a" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.vcf.sddcmanager.rest">
+  <param n="cbHost" t="string"><![CDATA[Cloud Builder host to create transient host for.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(cbHost, "cbHost");
+
+var cbURL = "https://" + cbHost;
+System.getModule("com.vmware.pso.ssl.util").importCertificalteFromURL(cbURL);
+
+
+var restHost = RESTHostManager.createHost("TransientRESTHost-" + cbHost);
+var transientRestHost = RESTHostManager.createTransientHostFrom(restHost);
+transientRestHost.url = cbURL;
+
+return transientRestHost;]]></script>
+</dunes-script-module>

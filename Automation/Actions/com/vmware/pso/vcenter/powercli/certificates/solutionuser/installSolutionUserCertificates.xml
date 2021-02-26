@@ -1,0 +1,140 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="installSolutionUserCertificates" result-type="string" api-version="6.0.0" id="93287963-878d-4c38-a431-a39cce78315c" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.certificates.solutionuser">
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <param n="logDir" t="string"><![CDATA[]]></param>
+  <param n="certAdminUser" t="string"><![CDATA[]]></param>
+  <param n="certAdminPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var script = "";
+
+script += '#!/usr/bin/python3' + '\n';
+script += '\n';
+script += 'import sys' + '\n';
+script += 'import pexpect' + '\n';
+script += 'import time' + '\n';
+script += '\n';
+script += 'logDir = sys.argv[1]' + '\n';
+script += 'print("logDir: " + logDir)' + '\n';
+script += 'vcAdminUser = sys.argv[2]' + '\n';
+script += 'print("vcAdminUser: " + vcAdminUser)' + '\n';
+script += 'vcAdminPassword = sys.argv[3]' + '\n';
+script += 'pathToCerts = sys.argv[4]' + '\n';
+script += 'print("pathToCerts: " + pathToCerts)' + '\n';
+script += '\n';
+script += 'logfile = open(logDir + "/certificate-manager.log", "wb")' + '\n';
+script += '\n';
+script += 'process = pexpect.spawn("/usr/lib/vmware-vmca/bin/certificate-manager", logfile=logfile)' + '\n';
+script += 'process.setecho(False)' + '\n';
+script += '\n';
+script += 'process.expect("Option\\[1 to 8\\]: ")' + '\n';
+script += 'process.sendline("5")' + '\n';
+script += '\n';
+script += 'process.expect("Enter username \\[Administrator@vsphere.local\\]:")' + '\n';
+script += 'process.sendline(vcAdminUser)' + '\n';
+script += '\n';
+script += 'process.expect("Enter password:")' + '\n';
+script += 'process.logfile = None' + '\n';
+script += 'process.sendline(vcAdminPassword)' + '\n';
+script += 'process.logfile = logfile' + '\n';
+script += '\n';
+script += 'process.expect("Option \\[1 or 2\\]: ")' + '\n'
+script += 'process.sendline("2")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/machine.pub")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/machine.key")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/vsphere-webclient.pub")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/vsphere-webclient.key")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/vpxd.pub")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/vpxd.key")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/vpxd-extension.pub")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/vpxd-extension.key")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/hvc.pub")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/hvc.key")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/wcp.pub")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/wcp.key")' + '\n';
+script += '\n';
+script += 'process.expect("File : ")' + '\n';
+script += 'process.sendline(pathToCerts + "/hvc-issuer.pub")' + '\n';
+script += '\n';
+script += 'process.expect("Continue operation : Option\\[Y/N\\] \\? :")' + '\n';
+script += 'process.sendline("y")' + '\n';
+script += '\n';
+script += 'process.timeout = 900' + '\n';
+script += 'process.read()' + '\n';
+
+
+var filename = "installSolutionUserCertificates-" + System.getCurrentTime() + ".sh";
+var filepath = "/tmp";
+
+var response = System.getModule("com.vmware.pso.remoteScript").copyFileToGuest(
+    vcVM,
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    script, 
+    filename, 
+    filepath, 
+    vcGuestUser, 
+    vcGuestPassword, 
+    ignoreSSLCertificate
+);
+
+if(response["status"] == "failed") {
+    throw response["error"]  ;
+}
+
+var file = response["guestFilePath"];
+var command =
+    "chmod 700 " + file + "; " +
+    "/bin/bash -l -c '" + file + " " + logDir + " " + certAdminUser + " \"" + certAdminPassword + "\" " + "/tmp/certs';" +
+    "rm " + file + ";" +
+    "cat " + logDir + "/certificate-manager.log"
+
+System.log("Executing the certificate manager, this may take a 10-15 minutes");
+
+response = System.getModule(
+    "com.vmware.pso.remoteScript").runRemoteScript(
+    [vcVM],
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    command,
+    vcGuestUser, 
+    vcGuestPassword, 
+    ignoreSSLCertificate
+) ;
+
+if(response["status"] == "failed") {
+    throw response["error"]  ;
+}]]></script>
+</dunes-script-module>

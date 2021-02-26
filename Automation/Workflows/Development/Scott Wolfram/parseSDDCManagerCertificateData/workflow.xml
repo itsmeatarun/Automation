@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="2fb780cf-ce37-4777-b95b-ad1b5f64acc8" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[parseSDDCManagerCertificateData]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <attrib name="dataString" type="string" read-only="false">
+    <value encoded="n"><![CDATA[{"CertificateDetails":{"LCMAlias":"VenafiCreds","VenafiHostname":"10.0.0.11","VenafiUser":"","VenafiPassword":"","OrganizationUnit":"Wave","Organization":"WellsFargo","Country":"US","RootCertificateURL":"http://10.0.0.10/ova/wf_rootUAT01G2.crt","City":"Oxmoor","State":"AL","Locality":"US"},"vCenter":{"CustomizationsLoggingDir":"/root","KMS":{"ProviderName":"KMS-Cluster-1","KmsServers":[{"FriendlyName":"KMS1","Hostname":"dockervm01.pso.vsphere.local","Port":"5696"},{"FriendlyName":"KMS2","Hostname":"dockervm01.pso.vsphere.local","Port":"5697"}]},"CustomStoragePolicyName":"Wells Fargo vSan Storage Policy","CustomStoragePolicyDiskStripes":"5","CustomStoragePolicyFTT":"2","SyslogPort":"1514","SyslogProtocol":"TLS","noProxyHosts":[],"NFSDatastoreName":"NFS01","NFSHostnameIP":"10.0.0.10","NFSSharePath":"/netshare","LCMADGroupsUsers":["pso\\lab_group"],"vRLIADGroupsUsers":["pso\\vrli"],"vROPSADGroupsUsers":["pso\\vrops"],"vRAADGroupsUsers":["pso\\vra"],"HorizonADGroupsUsers":[""],"DumpPort":"6500","SolutionUserPolicyDN":"\\VED\\Policy\\Code Signing\\Certificates\\162 Lab","mgmtvCenter":{"VCFDomain":"sddcId-public-api-1001","Hostname":"vcenter-m01.pso.vsphere.local","VMName":"vcenter-m01","IPAddress":"10.0.0.122","SSOAdminUser":"administrator@vsphere.local","SSOAdminPassword":"VMware12345!","RootPassword":"VMware12345!","vdsName":"pso-m01-cl01-vds01","vSanClusterName":"pso-m01-cl01"},"wldvCenters":[{"VCFDomain":"pso-vi01","Hostname":"vcenter-vi01.pso.vsphere.local","VMName":"vcenter-vi01","IPAddress":"10.0.0.132","SSOAdminUser":"administrator@vsphere.local","SSOAdminPassword":"VMware12345!","RootPassword":"VMware12345!","vSanClusterNames":[""],"vSanClusterName":["pso-vi01-cl01"]}]},"ESXi":{"ShellTimeout":"0","ShellInteractiveTimeout":"900","WelcomeBanner":"Warning: Only allowed users can login.","DumpvNIC":"vmk0","Hosts":[{"Hostname":"esxi01.pso.vsphere.local","IPAddress":"10.0.0.100","User":"root","Password":"VMware12345!"},{"Hostname":"esxi02.pso.vsphere.local","IPAddress":"10.0.0.101","User":"root","Password":"VMware12345!"},{"Hostname":"esxi03.pso.vsphere.local","IPAddress":"10.0.0.102","User":"root","Password":"VMware12345!"},{"Hostname":"esxi04.pso.vsphere.local","IPAddress":"10.0.0.103","User":"root","Password":"VMware12345!"},{"Hostname":"esxi05.pso.vsphere.local","IPAddress":"10.0.0.104","User":"root","Password":"VMware12345!"},{"Hostname":"esxi06.pso.vsphere.local","IPAddress":"10.0.0.105","User":"root","Password":"VMware12345!"},{"Hostname":"esxi07.pso.vsphere.local","IPAddress":"10.0.0.106","User":"root","Password":"VMware12345!"}]},"NSXT":{"EnableIPv6":true,"ipDiscoveryProfileName":"vdi-guest-ip-discovery-profile","UsingExternalLB":false,"EnablevIDM":true,"vIDMUsersOrGroups":[{"Name":"lab_group@pso.vsphere.local","isGroup":"true","RoleName":"enterprise_admin"}],"mgmtNSXT":{"VCFDomain":"sddcId-public-api-1001","ManagerVIP":"nsxt-manager-m01-vip.pso.vsphere.local","ManagerHostnames":["nsxt-manager-m01-node01.pso.vsphere.local","nsxt-manager-m01-node02.pso.vsphere.local","nsxt-manager-m01-node03.pso.vsphere.local"],"AdminUser":"admin","AdminPassword":"VMware123!VMware123!","RootPassword":"VMware123!VMware123!"},"wldNSXT":[{"VCFDomain":"pso-vi01","ManagerVIP":"nsxt-manager-vi01-vip.pso.vsphere.local","ManagerHostnames":["nsxt-manager-vi01-node01.pso.vsphere.local","nsxt-manager-vi01-node02.pso.vsphere.local","nsxt-manager-vi01-node03.pso.vsphere.local"],"AdminUser":"admin","AdminPassword":"VMware123!VMware123!","RootPassword":"VMware123!VMware123!","vdiSegments":[{"Name":"VDI Guest 01","VLAN":"1031"},{"Name":"VDI Guest 02","VLAN":"1032"},{"Name":"VDI Guest 03","VLAN":"1033"},{"Name":"VDI Guest 04","VLAN":"1034"},{"Name":"VDI Guest 05","VLAN":"1035"}]}]},"ActiveDirectory":{"LCMAlias":"ActiveDirectoryCreds","DomainFQDN":"pso.vsphere.local","ADJoinUser":"","ADJoinPassword":"","ADOrgUnit":""},"vRLCM":{"Hostname":"vrlcm.pso.vsphere.local"},"WebProxy":{"Hostname":"10.0.0.254","Port":"3128","User":"","Password":""},"SDDCManager":{"LCMBackupAlias":"SDDCManagerBackupCreds","LCMSSOAdminAlias":"DefaultSDDCManagerSSOCreds","LCMLocalUserAlias":"DefaultSDDCManagerRootCreds","BackupHostname":"10.0.0.152","BackupHostPort":"22","BackupHostUsername":"","BackupHostPassword":"","BackupHostDirectoryPath":"/tmp","BackupHostSSHFingerPrint":"SHA256:6DaNMbiKRBdvm5rNsORtRzWuODKYr/hT/V0g4kM67Gw","RootCertKeystoreAlias":"rootcert","VMName":"sddc-manager","Hostname":"sddc-manager.pso.vsphere.local","LocalUser":"","LocalPassword":"","SSOAdminUser":"administrator@vsphere.local","SSOAdminPassword":"VMware12345!","EnableCeip":false,"VenafiPolicyDN":"\\VED\\Policy\\Code Signing\\Certificates\\162 Lab","Domains":["sddcId-public-api-1001","pso-vi01"]},"vRLI":{"LCMAlias":"vRLICreds","Hostname":"vrli.pso.vsphere.local","User":"","Password":""},"vIDM":{"LCMAlias":"vIDMClientId","Hostname":"vidm.pso.vsphere.local","AutomationClientID":"","AutomationClientSecret":""},"podID":"POD1","iDRAC":{"User":"","Password":"","CertificatePolicyDN":"","Hostnames":[{"FQDN":"","CertificateSANs":[]}]},"AutomationSwitches":{"SDDCManager":{"Opt out of CEIP":true,"Add Wells Fargo Root Cert to Trusted Certs":true,"Configure Proxy":true,"Update Certs for VCF Managed Components":true,"Configure Backup":true},"vCenter":{"Update Solution User Certs":true,"Configure Proxy":true,"Set ESXi Cert Mode":true,"Set Stats and Logging Level":true,"Enable Dump Collector":true,"Configure Hzn and vRZ Port Groups":true,"Add NFS Storage":true,"Configure AD Settings":true,"Create and Assign Roles":true},"ESXi":{"Rotate Host Certs":true,"Set Shell Timeout":true,"Set Welcome Banner":true,"Set Dump Collector":true},"vSAN":{"Set Kms Provider":true,"Enable vSan Encryption":true,"Create Storage Policy":true},"NSXT":{"Enable IPv6":true,"Create VDI Segments":true,"Configure Syslog":true,"Configure AD Settings":true}}}]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="380.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[var data = JSON.parse(dataString);
+
+var resourcesByDomain = new Properties();
+
+createManagementResources();
+createvCenterResources();
+createNSXTResources();
+
+System.log(JSON.stringify(resourcesByDomain));
+
+
+function createNSXTResources() {
+    var wldNSXTs = data.NSXT.wldNSXT;
+
+    for each (var wldNSXT in wldNSXTs) {
+        if(!resourcesByDomain.get(wldNSXT.VCFDomain)) {
+            resourcesByDomain.put(wldNSXT.VCFDomain, {"type" : "VI", "resources" : new Array()})
+        }
+
+        resourcesByDomain.get(wldNSXT.VCFDomain).resources.push(
+            createResource(
+                wldNSXT.ManagerVIP,
+                "NSXT_MANAGER"
+            ) 
+        )
+    }
+}
+
+function createvCenterResources() {
+    var wlvdvCenters = data.vCenter.wldvCenters;
+
+    for each (var wlvdvCenter in wlvdvCenters) {
+        if(!resourcesByDomain.get(wlvdvCenter.VCFDomain)) {
+            resourcesByDomain.put(wlvdvCenter.VCFDomain, {"type" : "VI", "resources" : new Array()})
+        }
+
+        resourcesByDomain.get(wlvdvCenter.VCFDomain).resources.push(
+            createResource(
+                wlvdvCenter.Hostname,
+                "VCENTER"
+            )        
+        )
+    }
+}
+
+function createManagementResources() {
+    resourcesByDomain.put(data.vCenter.mgmtvCenter.VCFDomain, {"type" : "MANAGEMENT", "resources" : new Array()});
+
+    resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+        createResource(
+            data.vCenter.mgmtvCenter.Hostname,
+            "VCENTER"
+        )
+    );
+
+    resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+        createResource(
+            data.SDDCManager.Hostname,
+            "SDDCMANAGER"
+        )
+    );
+
+    resourcesByDomain.get(data.vCenter.mgmtvCenter.VCFDomain).resources.push(
+        createResource(
+            data.NSXT.mgmtNSXT.ManagerVIP,
+            "NSXT_MANAGER"
+        )
+    );
+}
+
+function createResource(fqdn, type) {
+    return {
+        "fqdn" : fqdn,
+        "type" : type
+    }
+}]]></script>
+    <in-binding>
+      <bind name="dataString" type="string" export-name="dataString"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="70.0" x="180.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

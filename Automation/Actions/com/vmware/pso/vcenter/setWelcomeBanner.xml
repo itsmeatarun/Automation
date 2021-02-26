@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setWelcomeBanner" result-type="void" api-version="6.0.0" id="d0a1ccf6-e4e4-4a21-b83e-8117d148dcfd" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter" memory-limit="512000000">
+  <param n="vcfqdn" t="string"><![CDATA[vCenter/ESXI Hostname]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter/ESXI Username]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter/ESXI Password]]></param>
+  <param n="welcomeBanner" t="string"><![CDATA[Welcome banner ]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[Ignore SSL connection issues ]]></param>
+  <script encoded="false"><![CDATA[var assignResult = System.getModule("com.vmware.pso.vcenter.powercli.host").setWelcomeBanner(vcfqdn, vcuser, vcpassword, welcomeBanner, ignoreSSLCertificate)
+
+var assignStatus = assignResult.get("status");
+System.debug("setWelcomeBanner completed with status: " + assignStatus);
+if (assignStatus != "success") {
+    throw "setWelcomeBanner failed with error: " + assignResult.get("error");
+}
+]]></script>
+</dunes-script-module>

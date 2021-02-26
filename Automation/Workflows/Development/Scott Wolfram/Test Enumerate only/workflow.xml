@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="1022b6c7-9fed-4a0a-a189-145085d0458e" editor-version="2.0" version="0.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+    <display-name> Test Enumerate only</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="390.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">var response = System.getModule("com.vmware.pso.venafi.rest.workflow.ticket.enumerate").enumerateTicketsForCertificate(&#13;
+    "venafi-vedsdk.wellsfargo.net",&#13;
+    "29188a74-8b41-3a70-e315-539c8fe483c7",&#13;
+    "\\VED\\Policy\\EIT-Tech Infrastructure-VE - PKI Admins\\EIT-Tech Infrastructure-VE\\SSL WF Enterprise CA05 G2 (SHA-256) 2-year\\sdw-test01.wellsfargo.net"&#13;
+);&#13;
+&#13;
+&#13;
+&#13;
+System.log("response: " + response);</script>
+        <in-binding/>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="150.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

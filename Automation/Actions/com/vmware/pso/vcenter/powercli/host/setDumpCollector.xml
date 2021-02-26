@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setDumpCollector" result-type="Properties" api-version="6.0.0" id="c50d708a-2d93-47af-9b5b-7a5e91b5ba7d" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.host" memory-limit="512000000">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="hostVNic" t="string"><![CDATA[]]></param>
+  <param n="networkServerIP" t="string"><![CDATA[]]></param>
+  <param n="networkServerPort" t="number"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        $inputsString = $inputs | ConvertTo-Json -Compress
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $hostVNic = $inputs.hostVNic
+        [ValidateNotNullorEmpty()]
+        $networkServerIP = $inputs.networkServerIP
+        [ValidateNotNullorEmpty()]        
+        $networkServerPort = $inputs.networkServerPort
+        [ValidateNotNullorEmpty()]    
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate        
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter: " + $_.Exception
+        Write-Host "Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        $null = Get-VMHost | Set-VMHostDumpCollector -HostVNic "$hostVNic" -NetworkServerIP "$networkServerIP" -NetworkServerPort $networkServerPort
+    } catch {
+        Write-Host "Failed setting Dump Collector. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+    
+    $output.add("status","success")
+    return $output
+}
+
+
+function Set-VMHostDumpCollector {
+    [CmdletBinding()]
+    Param (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [ValidateNotNullOrEmpty()]
+        [PSObject[]]$VMHost,
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]
+        [ValidateNotNullOrEmpty()]
+        [String]$HostVNic,
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]
+        [ValidateNotNullOrEmpty()]
+        [String]$NetworkServerIP,
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]
+        [ValidateNotNullOrEmpty()]
+        [int]$NetworkServerPort
+    )
+
+    begin {
+    }
+
+    process {
+        foreach ($ESXiHost in $VMHost) {
+            try {
+                if ($ESXiHost.GetType().Name -eq "string") {
+                    try {
+                        $ESXiHost = Get-VMHost $ESXiHost -ErrorAction Stop
+                    }
+                    catch [Exception] {
+                        Write-Warning "VMHost $ESXiHost does not exist"
+                    }
+                }
+                elseif ($ESXiHost -isnot [VMware.VimAutomation.ViCore.Impl.V1.Inventory.VMHostImpl]) {
+                    Write-Warning "You did not pass a string or a VMHost object"
+                    Return
+                }
+
+                Write-Verbose "Setting Dump Collector config for $ESXiHost"
+                $ESXCli = Get-EsxCli -VMHost $ESXiHost -V2
+
+                Write-Host "Setting the parameters for $VMHost"
+                $arguments = $ESXCli.System.Coredump.Network.Set.CreateArgs()
+                $arguments.interfacename = $HostVNic
+                $arguments.serverport = $NetworkServerPort
+                $arguments.serverip = $NetworkServerIP
+                $ESXCli.System.Coredump.Network.Set.Invoke($arguments)
+
+                Write-Host "Enabling core dump for $VMHost"
+                $arguments = $ESXCli.System.Coredump.Network.Set.CreateArgs()
+                $arguments.enable = $true
+                $ESXCli.System.Coredump.Network.Set.Invoke($arguments)
+
+                Write-Verbose "Successfully Set Dump Collector config for $ESXiHost"
+            } catch {
+	            Write-Host "Failed updating core dump settings: " + $_.Exception
+                throw $Exception
+            }
+        }
+    }
+ 
+    end {
+    }
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getVDSNameForVM" result-type="string" api-version="6.0.0" id="c6ed6b2b-f0eb-4b6b-a070-0bb8e7c13d94" version="0.1.4" category-name="com.vmware.pso.vcenter.powercli.network" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:12-powershell-7.0]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vmName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $vmName = $inputs.vmName
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        throw "Error: $($_.Exception.Message))"
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Error: $($_.Exception.Message))"   
+    } 
+    try {
+        Write-Host "Getting VDS Name associated with VM '$vmName'"
+        $vds = Get-VM -Name $vmName | Get-VDSwitch
+        $vdsName = $vds.Name
+
+        if (!$vdsName) {
+            throw "Unable to find VDS name for '$vmName'"
+        }
+    } catch {
+        Write-Host "Error: Failed getting VDS Name. Exiting." -ForegroundColor red
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Error: Failed getting VDS Name: $($_.Exception.Message))"       
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    return $vdsName
+}
+]]></script>
+</dunes-script-module>

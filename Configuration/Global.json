@@ -1,0 +1,31 @@
+{
+	"CertificateDetails": {
+		"LCMAlias": "VenafiCreds",
+		"VenafiHostname": "venafi-vedsdk.wellsfargo.net",
+		"VenafiUser": "",
+		"VenafiPassword": "",
+		"OrganizationUnit": "Virtual Hosting Services",
+		"Organization": "Wells Fargo",
+		"Country": "US",
+		"Email": "admin@wellsfargo.com"
+	},
+	"SDDCManager": {
+		"CertKeySize": "2048",
+		"CertKeyAlgorithm": "RSA"
+	},
+	"vCenter": {
+		"CustomizationsLoggingDir": "/root",
+		"VDIFolderName": "Desktop Pools",
+		"BootDeviceFolder": "Boot Devices*"
+	},
+	"ESXi": {
+		"WelcomeBanner": "{align:left}{bgcolor:dark-grey}{color:white}{esxproduct} {esxversion} \nHostname: {hostname}\nIP Address: {ip} \nSerial Number: {serial-number}\nService Tag: {servicetag}{bgcolor:yellow}{color:black}\n \n                                                                          \n******************** WARNING: For Authorized Use Only ********************\n*You have accessed a private computer system. Unauthorized access, use,  *\n*connection, or entry is not permitted and constitutes a crime punishable*\n*by law. We reserve the right to fully pursue criminal and civil legal   *\n*penalties. All individuals using this computer system with or without   *\n*proper authority are subject to having all their activities monitored   *\n*and recorded. Anyone using this system implicitly consents to this      *\n*monitoring. Any evidence of suspected criminal activity revealed by     *\n*such monitoring may be provided to law enforcement officials.           *\n**************************************************************************\n                                                                          \n{/color}{/bgcolor}{/align}",
+		"DumpvNIC": "vmk2",
+		"ShellTimeout": "0",
+		"ShellInteractiveTimeout": "900"
+	},
+	"NSXT": {
+		"EnableIPv6": true,
+		"ipDiscoveryProfileName": "vdi-guest-ip-discovery-profile"
+	}
+}

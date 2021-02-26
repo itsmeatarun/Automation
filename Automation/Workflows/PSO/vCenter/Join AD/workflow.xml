@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="51cd43a3-ed48-4b20-b01c-54d7c4d96bdd" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Join AD]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="vCenterVmName" type="string"/>
+    <param name="vmParentvCenterFQDN" type="string">
+      <description><![CDATA[FQDN of vCenter where vCenterVmName can be found.]]></description>
+    </param>
+    <param name="vCenterUser" type="string"/>
+    <param name="vCenterPassword" type="SecureString"/>
+    <param name="vCenterRootPassword" type="SecureString"/>
+    <param name="adUser" type="string"/>
+    <param name="adPassword" type="SecureString"/>
+    <param name="domainFQDN" type="string"/>
+    <param name="orgUnit" type="string"/>
+    <param name="vCenterHostname" type="string"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="175.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.vmware.pso.vcenter/joinADandSetDefaultIdentity">
+    <display-name><![CDATA[joinADandSetDefaultIdentity]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.vcenter").joinADandSetDefaultIdentity(vCenterVmName,vCenterFQDN,vCenterUser,vCenterPassword,vCenterRootPassword,adUser,adPassword,domainFQDN,orgUnit);
+]]></script>
+    <in-binding>
+      <bind name="vCenterVmName" type="string" export-name="vCenterVmName"/>
+      <bind name="vCenterFQDN" type="string" export-name="vmParentvCenterFQDN"/>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="vCenterRootPassword" type="SecureString" export-name="vCenterRootPassword"/>
+      <bind name="adUser" type="string" export-name="adUser"/>
+      <bind name="adPassword" type="SecureString" export-name="adPassword"/>
+      <bind name="domainFQDN" type="string" export-name="domainFQDN"/>
+      <bind name="orgUnit" type="string" export-name="orgUnit">
+        <description><![CDATA[Optional: OU Name like "infra/servers" OR full DN of OU]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name=""/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/rebootvCenterAndWait">
+    <display-name><![CDATA[rebootvCenterAndWait]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").rebootvCenterAndWait(vCenterHostname,vCenterUser,vCenterPassword);
+]]></script>
+    <in-binding>
+      <bind name="vCenterHostname" type="string" export-name="vCenterHostname"/>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

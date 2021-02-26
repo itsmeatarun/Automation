@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="uploadAndInstallDomainCertificates" result-type="void" api-version="6.0.0" id="5f87757b-5927-48d2-ab68-6c6d234ec767" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="host" t="string"><![CDATA[SDDC Manager host]]></param>
+  <param n="user" t="string"><![CDATA[SDDC Manager User]]></param>
+  <param n="password" t="string"><![CDATA[SDDC Manager password]]></param>
+  <param n="certificatesData" t="Array/Properties"><![CDATA[{crt, name, type}]]></param>
+  <param n="domain" t="string"><![CDATA[SDDC / VCF Domain]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"Input var: host");
+dbc.ensureNotNullOrEmpty(user,"Input var: user");
+dbc.ensureNotNullOrEmpty(password,"Input var: password");
+dbc.ensureNotNullOrEmpty(domain,"Input var: domain");
+dbc.ensureNotNullOrEmpty(certificatesData,"Input var: certificatesData");
+
+var token = System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tokens").getBearerToken(user, password, host);
+
+//Grab the first cert's root certs
+var rootCA = certificatesData[0].rootcrts;
+
+System.log("Uploading certificates");
+var response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.python.certificate").uploadCertificates(certificatesData, rootCA, token, domain, host));
+
+System.log("Installing Certificates");
+response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.domains").installDomainCertificates(host, token, domain, certificatesData));
+
+var taskId = response.id;
+
+response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+
+var retryMax = 360;
+var retryCount = 0;
+var retryWait = 5000;
+while(response.status == "IN_PROGRESS") {
+	if(retryCount > retryMax) {
+		throw "Maximum retry attempts, " + retryMax + " reached waiting for configure backup task: '" + taskId + "'";
+	}
+	System.log("Got status: '" + response.status + "', Waiting " + retryWait + " millis to check configure backup.");
+	System.sleep(retryWait);
+	response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+	retryCount++;
+}
+
+if(response.status.toLowerCase() != "successful") {
+	throw "Error installing certificates";
+}
+
+System.log("Completed with status: '" + response.status + "'");]]></script>
+</dunes-script-module>

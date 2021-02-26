@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getCertFromURL" result-type="string" api-version="6.0.0" id="2e107669-c616-49b1-b7d0-ffe73ce6a1d5" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.ssl.util">
+  <runtime><![CDATA[python:3.7]]></runtime>
+  <param n="certificateURL" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[import urllib
+
+def handler(context, inputs):
+    url = str(inputs["certificateURL"])
+    cert = urllib.request.urlopen(url).read().decode('utf-8')
+    return cert
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="executionTest" result-type="string" api-version="6.0.0" id="34d4530f-ab95-498b-a73b-292875c238ba" version="0.0.0" category-name="com.vmware.pso.austin">
+  <param n="testinput" t="string"/>
+  <script encoded="false"><![CDATA[System.sleep(30000);
+return "done";]]></script>
+</dunes-script-module>

@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="3c525149-c871-4a42-866a-4a4545321bd6" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Rotate Host Certificates]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="esxiHostFQDNs" type="Array/string">
+      <description><![CDATA[Array of ESXi hosts to replace Certs on]]></description>
+    </param>
+    <param name="esxiUser" type="string"/>
+    <param name="esxiPassword" type="SecureString"/>
+    <param name="parentvcFqdn" type="string"/>
+    <param name="vcUser" type="string"/>
+    <param name="vcPassword" type="SecureString"/>
+    <param name="venafiHost" type="string"/>
+    <param name="venafiUser" type="string"/>
+    <param name="venafiPassword" type="SecureString"/>
+    <param name="ignoreSSLCertificate" type="boolean"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.esxi/rotateHostsCustomCerts">
+    <display-name><![CDATA[rotateHostsCustomCerts]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.esxi").rotateHostsCustomCerts(esxiHostFQDNs,esxiUser,esxiPassword,parentvcFqdn,vcUser,vcPassword,venafiHost,venafiUser,venafiPassword,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="esxiHostFQDNs" type="Array/string" export-name="esxiHostFQDNs">
+        <description><![CDATA[Array of ESXi hosts to replace Certs on]]></description>
+      </bind>
+      <bind name="esxiUser" type="string" export-name="esxiUser"/>
+      <bind name="esxiPassword" type="SecureString" export-name="esxiPassword"/>
+      <bind name="parentvcFqdn" type="string" export-name="parentvcFqdn"/>
+      <bind name="vcUser" type="string" export-name="vcUser"/>
+      <bind name="vcPassword" type="SecureString" export-name="vcPassword"/>
+      <bind name="venafiHost" type="string" export-name="venafiHost"/>
+      <bind name="venafiUser" type="string" export-name="venafiUser"/>
+      <bind name="venafiPassword" type="SecureString" export-name="venafiPassword"/>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="170.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

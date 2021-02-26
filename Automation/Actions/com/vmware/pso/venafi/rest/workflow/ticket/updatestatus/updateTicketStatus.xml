@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="updateTicketStatus" result-type="string" api-version="6.0.0" id="7795091a-a608-40ee-984e-20e6947f10c6" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi.rest.workflow.ticket.updatestatus">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="apiKey" t="string"><![CDATA[]]></param>
+  <param n="guid" t="string"><![CDATA[]]></param>
+  <param n="status" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(apiKey, "apiKey");
+dbc.ensureNotNullOrEmpty(guid, "guid");
+dbc.ensureNotNullOrEmpty(status, "status");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.venafi.rest").getTransientRESTHost(host);
+	dbc.ensureNotNullOrEmpty(restHost,"restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+    headers.put("x-venafi-api-key", apiKey);
+	var url = "/workflow/ticket/updatestatus";
+	
+	var method = "POST";
+	var content = JSON.stringify(
+        {
+            "GUID": guid,
+            "Status": status
+        }
+	);
+	
+	var inParametersValues = null;
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": Enumerate ticket response '" + JSON.stringify(response) + "'");
+	
+	return JSON.stringify(response);
+}
+	]]></script>
+</dunes-script-module>

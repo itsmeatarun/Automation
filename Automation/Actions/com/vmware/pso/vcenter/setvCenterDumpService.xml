@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvCenterDumpService" result-type="void" api-version="6.0.0" id="cccfd8ac-f6f2-43f6-b8d7-56d76d94143a" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterHostname" t="string"><![CDATA[FQDN of vCenter on which to set the Proxy Host.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[User with priv to auth to vCenter.]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHostname,"Input var: vCenterHostname");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+
+var sessionToken = System.getModule("com.vmware.pso.vcenter.rest").getvCenterSessionToken(vCenterHostname,vCenterUser,vCenterPassword);
+
+var serviceID = "netdumper";
+var startupType = "AUTOMATIC";
+var status = System.getModule("com.vmware.pso.vcenter.rest.appliance").updateService(vCenterHostname,sessionToken,serviceID,startupType);
+status = System.getModule("com.vmware.pso.vcenter.rest.appliance").startService(vCenterHostname,sessionToken,serviceID);
+
+System.getModule("com.vmware.pso.vcenter.rest").endvCenterSession(vCenterHostname,sessionToken);
+
+System.log("Start and enable vCenter Dump Service completed with status: '" + status + "'");
+return;]]></script>
+</dunes-script-module>

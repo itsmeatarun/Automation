@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setBackup_Configuration" result-type="void" api-version="6.0.0" id="943b0e8d-ff35-46a8-9604-16c313c92527" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="user" t="string"><![CDATA[SDDC Manager Username]]></param>
+  <param n="password" t="SecureString"><![CDATA[SDDC Manager Passowrd]]></param>
+  <param n="host" t="string"><![CDATA[SDDC Manager host]]></param>
+  <param n="backupHost" t="string"><![CDATA[Backup host]]></param>
+  <param n="backupHostPassword" t="SecureString"><![CDATA[Backup host passowrd]]></param>
+  <param n="backupHostPort" t="number"><![CDATA[Backup host port]]></param>
+  <param n="backupHostUsername" t="string"><![CDATA[Backup host username]]></param>
+  <param n="backupHostDirectoryPath" t="string"><![CDATA[Backup host directory]]></param>
+  <param n="backupHostSSHFingerPrint" t="string"><![CDATA[Backup host SSH Fingerprint]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"Input var: host");
+dbc.ensureNotNullOrEmpty(backupHost,"Input var: backupHost");
+dbc.ensureNotNullOrEmpty(backupHostPassword,"Input var: backupHostPassword");
+dbc.ensureNotNullOrEmpty(backupHostPort,"Input var: backupHostPort");
+dbc.ensureNotNullOrEmpty(backupHostUsername,"Input var: backupHostUsername");
+dbc.ensureNotNullOrEmpty(backupHostDirectoryPath,"Input var: backupHostDirectoryPath");
+dbc.ensureNotNullOrEmpty(backupHostSSHFingerPrint,"Input var: backupHostSSHFingerPrint");
+
+var token = System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tokens").getBearerToken(user, password, host);
+
+var response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.system.backup_configuration").putBackup_Configuration(
+    host,
+    token,
+    backupHost,
+    backupHostPassword,
+    backupHostPort,
+    backupHostUsername,
+    backupHostDirectoryPath,
+    backupHostSSHFingerPrint
+));
+
+var taskId = response.id;
+
+response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+
+var retryMax = 120;
+var retryCount = 0;
+var retryWait = 5000;
+while(response.status == "In Progress") {
+	if(retryCount > retryMax) {
+		throw "Maximum retry attempts, " + retryMax + " reached waiting for configure backup task: '" + taskId + "'";
+	}
+	System.log("Got status: '" + response.status + "', Waiting " + retryWait + " millis to check configure backup.");
+	System.sleep(retryWait);
+	response = JSON.parse(System.getModule("com.vmware.pso.vcf.sddcmanager.rest.tasks").getTask(host, token, taskId));
+	retryCount++;
+}
+
+if(response.status.toLowerCase() == "failed") {
+	throw "Set backup configuration failed";
+}
+
+System.log("Completed with status: '" + response.status + "'");]]></script>
+</dunes-script-module>

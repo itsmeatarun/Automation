@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addTrustedCertificate" result-type="Properties" api-version="6.0.0" id="51d9ef9f-215a-4a62-87dd-c48d6ec3cbc4" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.powercli.certificates" memory-limit="512000000" timeout="900">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[vCenter Host where the SDDC Manager VM is running]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter username]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter password]]></param>
+  <param n="sddcManagerVM" t="string"><![CDATA[The SDDC Manager VM name]]></param>
+  <param n="sddcManagerGuestUser" t="string"><![CDATA[SDDC Manager username to run code as]]></param>
+  <param n="sddcManagerGuestPassword" t="SecureString"><![CDATA[SDDC Manager password to run code as]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[Ignore SSL Connection errros]]></param>
+  <param n="rootCert" t="string"><![CDATA[Root certfificate]]></param>
+  <param n="keystoreAlias" t="string"><![CDATA[Alias name in the key store]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $sddcManagerVM = $inputs.sddcManagerVM
+        [ValidateNotNullorEmpty()]
+        $sddcManagerGuestUser = $inputs.sddcManagerGuestUser
+        [ValidateNotNullorEmpty()]
+        $sddcManagerGuestPassword = $inputs.sddcManagerGuestPassword
+        [ValidateNotNullorEmpty()]
+        $rootCert = $inputs.rootCert
+        [ValidateNotNullorEmpty()]
+        $keystoreAlias = $inputs.keystoreAlias
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }    
+    try {
+        $vm = Get-VM -Name $sddcManagerVM -Server $viConnection  
+
+        $command = "echo -e '" + $rootCert + "' > /tmp/root.crt"
+        Execute-Command -vm $vm -command $command -sddcManagerGuestUser $sddcManagerGuestUser -sddcManagerGuestPassword $sddcManagerGuestPassword
+
+        $command = "cp /etc/vmware/vcf/commonsvcs/trusted_certificates.store /etc/vmware/vcf/commonsvcs/trusted_certificates.store.bak-\$(date +"%Y-%m-%dT%H%M%S")"
+        Execute-Command -vm $vm -command $command -sddcManagerGuestUser $sddcManagerGuestUser -sddcManagerGuestPassword $sddcManagerGuestPassword
+        $command = "yes | keytool -importcert -alias $keystoreAlias -file /tmp/root.crt -keystore /etc/vmware/vcf/commonsvcs/trusted_certificates.store -storepass ``cat /etc/vmware/vcf/commonsvcs/trusted_certificates.key``"
+        Execute-Command -vm $vm -command $command -sddcManagerGuestUser $sddcManagerGuestUser -sddcManagerGuestPassword $sddcManagerGuestPassword
+
+        $command = "cp /etc/alternatives/jre/lib/security/cacerts /etc/alternatives/jre/lib/security/cacerts.bak-\$(date +"%Y-%m-%dT%H%M%S")"
+        Execute-Command -vm $vm -command $command -sddcManagerGuestUser $sddcManagerGuestUser -sddcManagerGuestPassword $sddcManagerGuestPassword
+        $command = "yes | keytool -importcert -alias $keystoreAlias -file /tmp/root.crt -keystore /etc/alternatives/jre/lib/security/cacerts -storepass changeit"
+        Execute-Command -vm $vm -command $command -sddcManagerGuestUser $sddcManagerGuestUser -sddcManagerGuestPassword $sddcManagerGuestPassword
+
+        Write-Host 
+        $command = "yes | sh /opt/vmware/vcf/operationsmanager/scripts/cli/sddcmanager_restart_services.sh"
+        Execute-Command -vm $vm -command $command -sddcManagerGuestUser $sddcManagerGuestUser -sddcManagerGuestPassword $sddcManagerGuestPassword
+    } catch {
+        Write-Host "Failed adding trusted certificate. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+
+function Execute-Command {
+    [CmdletBinding()]
+    Param (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]
+        [ValidateNotNullOrEmpty()]
+        [PSObject[]]$vm,
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]
+        [ValidateNotNullOrEmpty()]
+        [String]$command,
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]
+        [ValidateNotNullOrEmpty()]
+        [String]$sddcManagerGuestUser,
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]
+        [ValidateNotNullOrEmpty()]
+        [String]$sddcManagerGuestPassword
+    )
+
+    begin {
+    }
+
+    process {
+        $task = Invoke-VMScript -VM $vm -ScriptText $command -ScriptType Bash -GuestUser $sddcManagerGuestUser -GuestPassword $sddcManagerGuestPassword -ToolsWaitSecs 600 -RunAsync
+        
+        while ($task.State -eq "Running") {	Start-Sleep -Seconds 5 }
+        
+        Write-Host "Script completed with exit code: $($task.result.ExitCode)"
+        Write-Host "Script Logs:"
+        Write-Host "$($task.result.ScriptOutput)"   
+
+        if($($task.result.ExitCode) -gt 0) {
+            Write-Host "Error executing '$command'. Exited with code $($task.result.ExitCode)"
+            throw "Error executing '$command'. Exited with code $($task.result.ExitCode)"
+        }
+    }
+ 
+    end {
+    }
+}]]></script>
+</dunes-script-module>

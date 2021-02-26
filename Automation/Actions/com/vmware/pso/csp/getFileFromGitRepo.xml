@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getFileFromGitRepo" result-type="Any" api-version="6.0.0" id="5bf0b3a4-081b-4621-9500-1af206d334a8" version="0.1.0" allowed-operations="evf" category-name="com.vmware.pso.csp">
+  <description><![CDATA[Get all vRA Disk Details for a machine
+
+Note: Uses the project-service API, which may later be deprecated]]></description>
+  <param n="gitBaseUrl" t="string"><![CDATA[VMware Cloud Services API base URL]]></param>
+  <param n="gitAccess_token" t="string"><![CDATA[Auth bearer token]]></param>
+  <param n="branchName" t="string"><![CDATA[Branch name to download]]></param>
+  <param n="filePath" t="string"><![CDATA[FileName path after repoUrl to download]]></param>
+  <param n="repoPath" t="string"><![CDATA[Git Repository path]]></param>
+  <script encoded="false"><![CDATA[const opMethod = "GET";
+//const opUrl = "/api/v3/repos/pce-eng/vm-provisioner-nextgen/contents/vm_provisioner/vm_provisioner.py?ref={0}";
+// ex., repoPath = /pce-eng/wf-install_puppet
+//ex., filePath = /install_pupet.py
+const opUrl = "/api/v3/repos{0}/contents/{1}?ref={2}";
+const contentType = "application/json";
+const urlParamValues = [repoPath, filePath, branchName];
+System.log("Branch Name : " + branchName);
+System.log("Base Url : " + gitBaseUrl);
+System.log("Git Token : " + gitAccess_token);
+System.log("OperationUrl : " + opUrl);
+var headers = new Properties();
+headers.put("Authorization", "token " + gitAccess_token);
+
+var contentJson = "";
+var content = JSON.stringify(contentJson);
+
+var createOpResponse  = System.getModule("com.vmware.pso.rest").executeTransientRESTOperation(
+    gitBaseUrl,null,null,opMethod,opUrl,urlParamValues,headers,contentType,content);
+
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to get cloud profivisioner from git repo (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+
+var resOutput = JSON.parse(createOpResponse.responseString);
+
+var createOp2ndResponse  = System.getModule("com.vmware.pso.rest").executeTransientRESTOperation(
+    gitBaseUrl,null,null,opMethod,resOutput.download_url.replace(gitBaseUrl,""),"","",contentType,content);
+
+
+return createOp2ndResponse.responseString;]]></script>
+</dunes-script-module>

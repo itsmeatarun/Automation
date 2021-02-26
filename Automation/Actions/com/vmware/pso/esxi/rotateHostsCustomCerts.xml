@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="rotateHostsCustomCerts" result-type="void" api-version="6.0.0" id="50689737-abc3-4171-a32a-82385c75aa08" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.esxi">
+  <param n="esxiHostFQDNs" t="Array/string"><![CDATA[Array of ESXi hosts to replace Certs on]]></param>
+  <param n="esxiUser" t="string"><![CDATA[]]></param>
+  <param n="esxiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="parentvcFqdn" t="string"><![CDATA[]]></param>
+  <param n="vcUser" t="string"><![CDATA[]]></param>
+  <param n="vcPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="venafiHost" t="string"><![CDATA[]]></param>
+  <param n="venafiUser" t="string"><![CDATA[]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <param n="venafiPolicyDN" t="string"/>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(esxiHostFQDNs,"Input var: esxiHostFQDNs");
+dbc.ensureNotNullOrEmpty(esxiUser,"Input var: esxiUser");
+dbc.ensureNotNullOrEmpty(esxiPassword,"Input var: esxiPassword");
+dbc.ensureNotNullOrEmpty(parentvcFqdn,"Input var: parentvcFqdn");
+dbc.ensureNotNullOrEmpty(vcUser,"Input var: vcUser");
+dbc.ensureNotNullOrEmpty(vcPassword,"Input var: vcPassword");
+dbc.ensureNotNullOrEmpty(venafiHost,"Input var: venafiHost");
+dbc.ensureNotNullOrEmpty(venafiPassword,"Input var: venafiPassword");
+dbc.ensureNotNullOrEmpty(vcUser,"Input var: vcUser");
+
+for (var i=0; i<esxiHostFQDNs.length; i++) {
+    var shortName = esxiHostFQDNs[i].split(".")[0];
+    var subjectAltNames = [
+        {
+            "Name": esxiHostFQDNs[i],
+            "Type": "2"
+        },
+        {
+            "Name": shortName,
+            "Type": "2"
+        }
+    ];
+    
+    System.log("Getting new cert for: " + esxiHostFQDNs[i]);
+    var objectDN = System.getModule("com.vmware.pso.venafi").createAndApproveCertificate(venafiHost,venafiUser,venafiPassword,venafiPolicyDN,esxiHostFQDNs[i],esxiHostFQDNs[i],null,null,null,null,null,subjectAltNames, false);
+    var newCertificate = System.getModule("com.vmware.pso.venafi").getCertificate(venafiHost,venafiUser,venafiPassword,objectDN,true,true);
+    var caCert = newCertificate.get("certificates")[0];
+    var privateKey = newCertificate.get("privateKey");
+    //Cleanup the cert and Key of any extra details
+    caCert = caCert.match(/-----BEGIN CERTIFICATE-----(.|\n|\r)*?-----END CERTIFICATE-----/gm)[0]; 
+    privateKey = privateKey.match(/-----BEGIN RSA PRIVATE KEY-----(.|\n|\r)*?-----END RSA PRIVATE KEY-----/gm)[0]; 
+
+    System.log("Putting " + esxiHostFQDNs[i] + " into maint mode.");
+    var maintResult = System.getModule("com.vmware.pso.vcenter.powercli.host").toggleMaintenanceMode(parentvcFqdn,vcUser,vcPassword,esxiHostFQDNs[i],true,ignoreSSLCertificate);
+    var maintStatus = maintResult.get("status");
+    System.log("toggleMaintenanceMode completed with status: " + maintStatus);
+    if (maintStatus != "success") {
+        throw "toggleMaintenanceMode failed with error: " + maintResult.get("error");
+    }
+
+    System.log("Disconnecting " + esxiHostFQDNs[i] + " from vCenter.");
+    var connResult = System.getModule("com.vmware.pso.vcenter.powercli.host").toggleHostConnectionState(parentvcFqdn,vcUser,vcPassword,esxiHostFQDNs[i],null,null,false,ignoreSSLCertificate);
+    var connStatus = connResult.get("status");
+    System.log("toggleHostConnectionState completed with status: " + connStatus);
+    if (connStatus != "success") {
+        throw "toggleHostConnectionState failed with error: " + connResult.get("error");
+    }
+    
+    System.log("Applying custom ca cert to " + esxiHostFQDNs[i]);
+    System.getModule("com.vmware.pso.esxi.rest").applyCustomCACert(esxiHostFQDNs[i], esxiUser, esxiPassword, caCert);
+    System.log("Applying custom cert key to " + esxiHostFQDNs[i]);
+    System.getModule("com.vmware.pso.esxi.rest").applyCustomCertKey(esxiHostFQDNs[i], esxiUser, esxiPassword, privateKey);
+
+    var rebootResult = System.getModule("com.vmware.pso.esxi.powercli.host").rebootHostAndWait(esxiHostFQDNs[i],esxiUser,esxiPassword,true);
+    var rebootStatus = rebootResult.get("status");
+    System.log("rebootHostAndWait completed with status: " + rebootStatus);
+    if (rebootStatus != "success") {
+        throw "rebootHostAndWait failed with error: " + rebootResult.get("error");
+    }
+
+    System.log("Reconnecting " + esxiHostFQDNs[i] + " to vCenter.");
+    var connResult = System.getModule("com.vmware.pso.vcenter.powercli.host").toggleHostConnectionState(parentvcFqdn,vcUser,vcPassword,esxiHostFQDNs[i],esxiUser,esxiPassword,true,ignoreSSLCertificate);
+    var connStatus = connResult.get("status");
+    System.log("toggleHostConnectionState completed with status: " + connStatus);
+    if (connStatus != "success") {
+        throw "toggleHostConnectionState failed with error: " + connResult.get("error");
+    }
+
+    System.log("Taking " + esxiHostFQDNs[i] + " out of maint mode.");
+    var maintResult = System.getModule("com.vmware.pso.vcenter.powercli.host").toggleMaintenanceMode(parentvcFqdn,vcUser,vcPassword,esxiHostFQDNs[i],false,ignoreSSLCertificate);
+    var maintStatus = maintResult.get("status");
+    System.log("toggleMaintenanceMode completed with status: " + maintStatus);
+    if (maintStatus != "success") {
+        throw "toggleMaintenanceMode failed with error: " + maintResult.get("error");
+    }
+
+}
+
+return;]]></script>
+</dunes-script-module>

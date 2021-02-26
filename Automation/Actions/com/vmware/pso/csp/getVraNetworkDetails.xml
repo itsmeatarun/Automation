@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getVraNetworkDetails" result-type="string" api-version="6.0.0" id="bd4302e6-1fff-401a-a33c-ff990ac864bb" version="0.2.0" allowed-operations="evf" category-name="com.vmware.pso.csp">
+  <description><![CDATA[Get all IP Addresses for a given network
+
+Note: Uses the project-service API, which may later be deprecated]]></description>
+  <param n="vraBaseUrl" t="string"><![CDATA[VMware Cloud Services API base URL]]></param>
+  <param n="access_token" t="string"><![CDATA[Auth bearer token]]></param>
+  <param n="machineId" t="string"><![CDATA[VirtualMachine Id]]></param>
+  <param n="networkId" t="string"><![CDATA[Network ID]]></param>
+  <script encoded="false"><![CDATA[System.log("Starting Action: getVraNetworkDetails");
+const opMethod = "GET";
+const opUrl = "/iaas/api/machines/{0}/network-interfaces/{1}";
+const contentType = "application/json";
+const urlParamValues = [machineId,networkId];
+
+var headers = new Properties();
+headers.put("Authorization", "Bearer " + access_token);
+
+var contentJson = "";
+var content = JSON.stringify(contentJson);
+
+var createOpResponse  = System.getModule("com.vmware.pso.rest").executeTransientRESTOperation(
+    vraBaseUrl,null,null,opMethod,opUrl,urlParamValues,headers,contentType,content);
+
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to retrieve network metadata (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+System.log("Ending Action: getVraNetworkDetails");
+return createOpResponse.responseString;]]></script>
+</dunes-script-module>

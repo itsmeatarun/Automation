@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="requestCertificateWithCSR" result-type="string" api-version="6.0.0" id="5f8d914f-9581-4e2d-85ad-b6ecb9954015" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi.rest.certificate.request">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="apiKey" t="string"><![CDATA[]]></param>
+  <param n="policyDN" t="string"><![CDATA[]]></param>
+  <param n="objectName" t="string"><![CDATA[]]></param>
+  <param n="pkcs10" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(apiKey, "apiKey");
+dbc.ensureNotNullOrEmpty(policyDN, "policyDN");
+dbc.ensureNotNullOrEmpty(objectName, "objectName");
+dbc.ensureNotNullOrEmpty(pkcs10, "pkcs10");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.venafi.rest").getTransientRESTHost(host);
+	dbc.ensureNotNullOrEmpty(restHost,"restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+    headers.put("x-venafi-api-key", apiKey);
+	var url = "/certificates/Request";
+	
+	var method = "POST";
+	var content = JSON.stringify(
+        {
+            "PolicyDN": policyDN,
+            "ObjectName": objectName,
+            "PKCS10": pkcs10,
+            "DisableAutomaticRenewal": false,
+            "CertificateType": "Server Certificate"
+        }
+	);
+	
+	var inParametersValues = null;
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": Certificate request request response '" + JSON.stringify(response) + "'");
+	
+	return JSON.stringify(response);
+}
+	]]></script>
+</dunes-script-module>

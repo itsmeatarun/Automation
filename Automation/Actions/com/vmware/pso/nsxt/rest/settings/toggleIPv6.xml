@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="toggleIPv6" result-type="void" api-version="6.0.0" id="37167f8e-3680-48d3-b254-510049634f9b" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.nsxt.rest.settings">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="enableIPv6" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(enableIPv6,"Input var: enableIPv6");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+var url = "/policy/api/v1/infra/global-config";
+
+var l3_forwarding_mode = "IPV4_ONLY";
+if (enableIPv6) {
+	l3_forwarding_mode = "IPV4_AND_IPV6"; 
+}
+
+var body = {
+  "l3_forwarding_mode": l3_forwarding_mode
+};
+
+var method = "PATCH";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

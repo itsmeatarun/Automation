@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getDomainCSRs" result-type="string" api-version="6.0.0" id="6732cb1d-513b-4a39-bcf2-074e77d270f9" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.rest.domains">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <param n="domain" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"host");
+dbc.ensureNotNullOrEmpty(token,"token");
+
+var restHost = System.getModule("com.vmware.pso.vcf.sddcmanager.rest").getTransientSDDCManagerHost(host);
+dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+return main();
+
+function main() { 
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	headers.put("Authorization", token);
+	var url = "/v1/domains/" + domain + "/csrs";
+	
+	var method = "GET";
+    var content = null;
+	var inParametersValues = null;
+	
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug("getCSRs response'" + JSON.stringify(response) + "'");	
+	
+	return JSON.stringify(response);
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="downloadSolutionUserCertificates" result-type="string" api-version="6.0.0" id="44509a60-adbf-4505-8a1d-f0f9676bf691" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.certificates.solutionuser">
+  <param n="venafiPolicyDN" t="string"><![CDATA[]]></param>
+  <param n="targetVcFQDN" t="string"><![CDATA[]]></param>
+  <param n="venafiHost" t="string"><![CDATA[]]></param>
+  <param n="venafiUser" t="string"><![CDATA[]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLcertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var certificantDNs = new Properties();
+
+certificantDNs.put("hvc", venafiPolicyDN + "\\" + targetVcFQDN + "_hvc");
+certificantDNs.put("wcp", venafiPolicyDN + "\\" + targetVcFQDN + "_wcp");
+certificantDNs.put("vpxd", venafiPolicyDN + "\\" + targetVcFQDN + "_vpxd");
+certificantDNs.put("vpxd-extension", venafiPolicyDN + "\\" + targetVcFQDN + "_vpxd-extension" );
+certificantDNs.put("vsphere-webclient", venafiPolicyDN + "\\" + targetVcFQDN + "_vsphere-webclient");
+certificantDNs.put("machine", venafiPolicyDN + "\\" + targetVcFQDN + "_machine");
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").downloadCertificates(certificantDNs, venafiHost, venafiUser, venafiPassword, vcVM, vcfqdn, vcuser, vcpassword, vcGuestUser, vcGuestPassword, ignoreSSLcertificate);]]></script>
+</dunes-script-module>

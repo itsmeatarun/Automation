@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setLogInsightConfig" result-type="string" api-version="6.0.0" id="a6da0a3e-c168-4a29-a156-b0d2a666b7d5" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="sddcManagerVmName" t="string"><![CDATA[]]></param>
+  <param n="sddcManagervCenterFQDN" t="string"><![CDATA[]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="sddcManagerRootPass" t="SecureString"><![CDATA[]]></param>
+  <param n="vrliHostname" t="string"><![CDATA[]]></param>
+  <param n="acceptUntustedCert" t="boolean"><![CDATA[Ignore SSL Connection issues]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(sddcManagerVmName,"Input var: sddcManagerVmName");
+dbc.ensureNotNullOrEmpty(sddcManagervCenterFQDN,"Input var: sddcManagervCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(sddcManagerRootPass,"Input var: sddcManagerRootPass");
+dbc.ensureNotNullOrEmpty(vrliHostname,"Input var: vrliHostname");
+dbc.ensureNotNullOrEmpty(acceptUntustedCert,"Input var: acceptUntustedCert");
+
+var script = 'curl <<insecure>>--output /tmp/liagent-current.rpm https://<<vrliHostname>>/api/v1/agent/packages/types/rpm\n'
+script += 'SERVERHOST=<<vrliHostname>> SERVERPORT=9543 SERVERPROTO=cfapi LIAGENT_SSL=yes rpm -i /tmp/liagent-current.rpm\n'
+script += 'cp /var/lib/loginsight-agent/liagent.ini /var/lib/loginsight-agent/liagent.ini.bak\n'
+script += 'sed -i "/^ssl=.*/a ssl_accept_any=<<acceptAny>>" /var/lib/loginsight-agent/liagent.ini\n'
+script += 'sed -i "/^ssl=.*/a ssl_ca_path=/etc/ssl/certs/vcf_https.crt" /var/lib/loginsight-agent/liagent.ini\n'
+script += '/etc/init.d/liagentd restart'
+
+var insecure = acceptUntustedCert ? "--insecure " : "";
+var acceptAny = acceptUntustedCert ? "yes" : "no";
+script = script.replace("<<insecure>>",insecure);
+script = script.replace("<<acceptAny>>",acceptAny);
+script = script.replace(/<<vrliHostname>>/gm,vrliHostname);
+System.debug(script);
+
+var sddcManagerUser = "root";
+var scriptResult = System.getModule("com.vmware.pso.remoteScript").runRemoteScript([sddcManagerVmName],sddcManagervCenterFQDN,vCenterUser,vCenterPassword,script,sddcManagerUser,sddcManagerRootPass,acceptUntustedCert);
+
+var status = scriptResult.get("status");
+System.log("Install vRLI completed with status: " + status);
+if (status != "success") {
+    throw "Install vRLI failed with error: " + scriptResult.get("error");
+}
+
+return status;]]></script>
+</dunes-script-module>

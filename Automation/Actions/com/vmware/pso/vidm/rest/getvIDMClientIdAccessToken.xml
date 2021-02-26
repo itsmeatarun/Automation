@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getvIDMClientIdAccessToken" result-type="string" api-version="6.0.0" id="f583f6d5-7990-4bde-948a-3aa000ed9b98" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vidm.rest">
+  <param n="vIDM_Host" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vIDM_ClientID" t="string"><![CDATA[]]></param>
+  <param n="vIDM_ClientSecret" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vIDM_Host,"Input var: vIDM_Host");
+dbc.ensureNotNullOrEmpty(vIDM_ClientID,"Input var: vIDM_ClientID");
+dbc.ensureNotNullOrEmpty(vIDM_ClientSecret,"Input var: vIDM_ClientSecret");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(vIDM_Host);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(vIDM_ClientID + ":" + vIDM_ClientSecret);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/x-www-form-urlencoded");
+headers.put("Authorization","Basic " + auth);
+var url = "/SAAS/auth/oauthtoken?grant_type=client_credentials";
+
+var method = "POST";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+dbc.ensureNotNullOrEmpty(response.access_token,"Access Token");
+return response.access_token;]]></script>
+</dunes-script-module>

@@ -1,0 +1,404 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="af577945-e9ab-4c6c-8813-d79f028c3d1d" version="0.0.1" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Compute Post Removal]]></display-name>
+  <position y="10.0" x="330.0"/>
+  <input>
+    <param name="inputProperties" type="Properties"/>
+  </input>
+  <attrib name="ipAddress" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="instanceId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="fqdn" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="domainName" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="domainName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="apiBaseUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="apiBaseUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="ptrRecordActionUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="ptrRecordActionUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="nameRecordActionUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="nameRecordActionUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="nameRecordResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="contentJsonUsingPtr" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="contentJsonUsingFQDN" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="ptrRecordResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="osType" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="boksActionUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="boksActionUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="rsaActionUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="rsaActionurl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="contentJsonBoks" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="contentJsonRSA" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="boksActionResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="rsaActionResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vmName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="wfDomain" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="osVersion" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="isFactory" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="isGoldenImage" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="dnsNameErrorMsg" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorMsgDNSPtrRecord" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorMsgRemoveADRecord" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorMsgBoksRecord" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="contentJsonRemedy" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="remedyActionResult" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="remedyActionUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="remedyActionUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorMsgRSA" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="remedyBaseUrl" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="remedyBaseUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="remedyToken" type="string" read-only="false" conf-id="a0f69683-24a1-4a01-86d4-bab1c0aba634" conf-key="remedyToken">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="remedyHeaders" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[{}]]></value>
+  </attrib>
+  <workflow-item name="item1" out-name="item3" catch-name="item11" throw-bind-name="dnsNameErrorMsg" type="task" script-module="com.vmware.pso.wellsfargo/deleteCloudProvisionerRecordOnVMRemoval">
+    <display-name><![CDATA[deleteDNSNameRecord]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").deleteCloudProvisionerRecordOnVMRemoval(apiBaseUrl,contentJson,action,headers);
+]]></script>
+    <in-binding>
+      <bind name="apiBaseUrl" type="string" export-name="apiBaseUrl"/>
+      <bind name="contentJson" type="Any" export-name="contentJsonUsingFQDN"/>
+      <bind name="action" type="string" export-name="nameRecordActionUrl">
+        <description><![CDATA[action e.g ptr_record_decom or ]]></description>
+      </bind>
+      <bind name="headers" type="Properties" export-name="">
+        <description><![CDATA[optional input for headers]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="nameRecordResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="185.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item10" type="task">
+    <display-name><![CDATA[prepare for decommision]]></display-name>
+    <script encoded="false"><![CDATA[
+var regExp = /\(([^)]+)\)/;
+var instanceUUID = inputProperties.customProperties.get("instanceUUID");
+var isHOS = inputProperties.customProperties.get("isHos");
+vmName = inputProperties.resourceNames[0];
+instanceId = inputProperties.resourceIds[0];
+osType = inputProperties.customProperties.get("osType");
+isFactory = inputProperties.customProperties.isFactory;
+wfDomain = inputProperties.customProperties.wf_domain;
+osVersion = (inputProperties.customProperties.image)?inputProperties.customProperties.image.split("-")[2] : null;
+isGoldenImage = inputProperties.customProperties.isGoldenImage;
+if(vmName.match(regExp) != -1)
+{
+	var names = vmName.split("(");
+	vmName = names[0].trim();
+}
+
+System.log("isGoldenImage : " + isGoldenImage );
+System.log("OsVersion : "+ osVersion + " \n" + "Domain : " + wfDomain + " \n " + "IsFactory : " + isFactory); 
+ 
+
+for each (var ips in inputProperties.addresses) {
+	for each (var ip in ips) {
+		ipAddress = ip;
+		if (ipAddress) break;
+	}
+}
+
+fqdn = vmName + "." + domainName;
+
+
+
+contentJsonUsingPtr = {
+    "ip_address": ipAddress,
+    "instance_id": instanceId
+}
+
+
+if(osType.toUpperCase().trim() == "LINUX")
+    contentJsonBoks = contentJsonUsingPtr;
+
+contentJsonUsingFQDN = {
+	"fqdn": fqdn,
+	"instance_id": instanceId
+}
+
+contentJsonRSA = {
+    "ip_address": ipAddress
+}
+
+contentJsonRemedy = {
+    "instance_id": (isHOS != null && isHOS != false)? instanceUUID : instanceId
+}
+remedyHeaders = new Properties();
+remedyHeaders.put("Authorization", remedyToken);
+
+System.log("OsType  :" + osType);
+System.log("Ptr Conten :" +  JSON.stringify(contentJsonUsingPtr));
+System.log("Name Content :" + JSON.stringify(contentJsonUsingFQDN));
+System.log("Boks Content :" + JSON.stringify(contentJsonBoks));
+System.log("RSA Content :" + JSON.stringify(contentJsonRSA));
+System.log("Remedy Content :" + JSON.stringify(contentJsonRemedy));]]></script>
+    <in-binding>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+      <bind name="domainName" type="string" export-name="domainName"/>
+      <bind name="remedyToken" type="string" export-name="remedyToken"/>
+    </in-binding>
+    <out-binding>
+      <bind name="ipAddress" type="string" export-name="ipAddress"/>
+      <bind name="instanceId" type="string" export-name="instanceId"/>
+      <bind name="fqdn" type="string" export-name="fqdn"/>
+      <bind name="contentJsonUsingPtr" type="Any" export-name="contentJsonUsingPtr"/>
+      <bind name="contentJsonUsingFQDN" type="Any" export-name="contentJsonUsingFQDN"/>
+      <bind name="osType" type="string" export-name="osType"/>
+      <bind name="contentJsonBoks" type="Any" export-name="contentJsonBoks"/>
+      <bind name="contentJsonRSA" type="Any" export-name="contentJsonRSA"/>
+      <bind name="vmName" type="string" export-name="vmName"/>
+      <bind name="isFactory" type="boolean" export-name="isFactory"/>
+      <bind name="wfDomain" type="string" export-name="wfDomain"/>
+      <bind name="osVersion" type="string" export-name="osVersion"/>
+      <bind name="isGoldenImage" type="boolean" export-name="isGoldenImage"/>
+      <bind name="contentJsonRemedy" type="Any" export-name="contentJsonRemedy"/>
+      <bind name="remedyHeaders" type="Properties" export-name="remedyHeaders"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="290.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item5" catch-name="item12" throw-bind-name="errorMsgDNSPtrRecord" type="task" script-module="com.vmware.pso.wellsfargo/deleteCloudProvisionerRecordOnVMRemoval">
+    <display-name><![CDATA[deleteDNSPtrRecord]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").deleteCloudProvisionerRecordOnVMRemoval(apiBaseUrl,contentJson,action,headers);
+]]></script>
+    <in-binding>
+      <bind name="apiBaseUrl" type="string" export-name="apiBaseUrl"/>
+      <bind name="contentJson" type="Any" export-name="contentJsonUsingPtr"/>
+      <bind name="action" type="string" export-name="ptrRecordActionUrl">
+        <description><![CDATA[action e.g ptr_record_decom or ]]></description>
+      </bind>
+      <bind name="headers" type="Properties" export-name="">
+        <description><![CDATA[optional input for headers]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="ptrRecordResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="295.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item4" type="end" end-mode="0">
+    <in-binding/>
+    <position y="725.0" x="200.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="condition" alt-out-name="item8" comparator="0">
+    <display-name><![CDATA[is Linux VM?]]></display-name>
+    <script encoded="false"><![CDATA[// Generated by the system, cannot be edited
+return (osType.match("LINUX") !== null);]]></script>
+    <in-binding>
+      <bind name="osType" type="string" export-name="osType"/>
+    </in-binding>
+    <out-binding/>
+    <condition name="osType" type="string" comparator="2" label="null">LINUX</condition>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="395.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item7" catch-name="item14" throw-bind-name="errorMsgBoksRecord" type="task" script-module="com.vmware.pso.wellsfargo/deleteCloudProvisionerRecordOnVMRemoval">
+    <display-name><![CDATA[deleteBoksRecord]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").deleteCloudProvisionerRecordOnVMRemoval(apiBaseUrl,contentJson,action,headers);
+]]></script>
+    <in-binding>
+      <bind name="apiBaseUrl" type="string" export-name="apiBaseUrl"/>
+      <bind name="contentJson" type="Any" export-name="contentJsonBoks"/>
+      <bind name="action" type="string" export-name="boksActionUrl">
+        <description><![CDATA[action e.g ptr_record_decom or ]]></description>
+      </bind>
+      <bind name="headers" type="Properties" export-name="">
+        <description><![CDATA[optional input for headers]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="boksActionResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="460.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item15" catch-name="item16" throw-bind-name="errorMsgRSA" type="task" script-module="com.vmware.pso.wellsfargo/deleteCloudProvisionerRecordOnVMRemoval">
+    <display-name><![CDATA[deleteRSARecord]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").deleteCloudProvisionerRecordOnVMRemoval(apiBaseUrl,contentJson,action,headers);
+]]></script>
+    <in-binding>
+      <bind name="apiBaseUrl" type="string" export-name="apiBaseUrl"/>
+      <bind name="contentJson" type="Any" export-name="contentJsonRSA"/>
+      <bind name="action" type="string" export-name="rsaActionUrl">
+        <description><![CDATA[action e.g ptr_record_decom or ]]></description>
+      </bind>
+      <bind name="headers" type="Properties" export-name="">
+        <description><![CDATA[optional input for headers]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="rsaActionResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="570.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item7" catch-name="item13" throw-bind-name="errorMsgRemoveADRecord" type="link" linked-workflow-id="f145a186-ddd5-4d83-a055-e77d82751e1b">
+    <display-name><![CDATA[Remove an AD Record]]></display-name>
+    <in-binding>
+      <bind name="vmName" type="string" export-name="vmName"/>
+      <bind name="wfDomain" type="string" export-name="wfDomain"/>
+      <bind name="osVersion" type="string" export-name="osVersion"/>
+      <bind name="isFactory" type="boolean" export-name="isFactory"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="460.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item9" type="end" end-mode="0">
+    <in-binding/>
+    <position y="175.0" x="330.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item1" type="custom-condition" alt-out-name="item9">
+    <display-name><![CDATA[Is Not golden Image]]></display-name>
+    <script encoded="false"><![CDATA[if((isGoldenImage)? isGoldenImage.valueOf() : "false" == "false")
+    return true;
+else
+    return false;]]></script>
+    <in-binding>
+      <bind name="isGoldenImage" type="boolean" export-name="isGoldenImage"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="120.0" x="290.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item3" type="task">
+    <display-name><![CDATA[dns name error found]]></display-name>
+    <script encoded="false"><![CDATA[System.warn(" Error while deleting DNS Name Record : "+ dnsNameErrorMsg);]]></script>
+    <in-binding>
+      <bind name="dnsNameErrorMsg" type="string" export-name="dnsNameErrorMsg"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="243.33333333333334" x="286.6666666666667"/>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item5" type="task">
+    <display-name><![CDATA[dns ptr error found]]></display-name>
+    <script encoded="false"><![CDATA[System.warn("Error occur while deleting DNS Ptr record : " + errorMsgDNSPtrRecord);]]></script>
+    <in-binding>
+      <bind name="errorMsgDNSPtrRecord" type="string" export-name="errorMsgDNSPtrRecord"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="336.6666666666667" x="286.6666666666667"/>
+  </workflow-item>
+  <workflow-item name="item13" out-name="item7" throw-bind-name="errorMsgRemoveADRecord" type="task">
+    <display-name><![CDATA[remove AD error found]]></display-name>
+    <script encoded="false"><![CDATA[System.warn("Error occurs while removing AD Records : " + errorMsgRemoveADRecord);]]></script>
+    <in-binding>
+      <bind name="errorMsgRemoveADRecord" type="string" export-name="errorMsgRemoveADRecord"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="510.0" x="286.6666666666667"/>
+  </workflow-item>
+  <workflow-item name="item14" out-name="item7" type="task">
+    <display-name><![CDATA[delete boks error found]]></display-name>
+    <script encoded="false"><![CDATA[System.warn("Error Occurs whild deleting Boks : " + errorMsgBoksRecord);]]></script>
+    <in-binding>
+      <bind name="errorMsgBoksRecord" type="string" export-name="errorMsgBoksRecord"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="515.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item15" out-name="item4" type="task" script-module="com.vmware.pso.wellsfargo/deleteCloudProvisionerRecordOnVMRemoval">
+    <display-name><![CDATA[remove Remedy Record]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").deleteCloudProvisionerRecordOnVMRemoval(apiBaseUrl,contentJson,action,headers);
+]]></script>
+    <in-binding>
+      <bind name="apiBaseUrl" type="string" export-name="remedyBaseUrl"/>
+      <bind name="contentJson" type="Any" export-name="contentJsonRemedy"/>
+      <bind name="action" type="string" export-name="remedyActionUrl">
+        <description><![CDATA[action e.g ptr_record_decom or ]]></description>
+      </bind>
+      <bind name="headers" type="Properties" export-name="remedyHeaders">
+        <description><![CDATA[optional input for headers]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="remedyActionResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="680.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item16" out-name="item15" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[System.warn("Error occurs while removing AD Records : " + errorMsgRSA);]]></script>
+    <in-binding>
+      <bind name="errorMsgRSA" type="string" export-name="errorMsgRSA"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="630.0" x="286.6666666666667"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="inputProperties">
+      <desc><![CDATA[inputProperties]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

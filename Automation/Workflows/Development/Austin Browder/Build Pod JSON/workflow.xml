@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="2d9ba2ca-9107-4a6c-b0f0-4e9161c84b80" editor-version="2.0" version="0.0.0" api-version="6.0.0" allowed-operations="evf" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Build Pod JSON</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="Environment" type="string"/>
+        <param name="Region" type="string"/>
+        <param name="PodID" type="string"/>
+    </input>
+    <output/>
+    <attrib name="configName" type="string">
+        <value encoded="n">WellsFargoPodAutomation</value>
+    </attrib>
+    <attrib name="configPath" type="string">
+        <value encoded="n">WellsFargo</value>
+    </attrib>
+    <attrib name="podJSON" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <attrib name="continueOnFail" type="boolean">
+        <value encoded="n">true</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="520.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Build Pod JSON</display-name>
+        <script encoded="false">"use strict";
+
+var configElement = System.getModule("com.vmware.pso.configurations").getConfigurationElementSimple(configName,configPath);
+var githubHost = configElement.getAttributeWithKey("GitHost").value;
+var githubUser = configElement.getAttributeWithKey("GitUser").value;
+var githubToken = configElement.getAttributeWithKey("GitUserToken").value;
+var baseURL = configElement.getAttributeWithKey("GitRepoContentURL").value;
+var lcmUser = configElement.getAttributeWithKey("lcmApiUser").value;
+var lcmPassword = configElement.getAttributeWithKey("lcmApiPassword").value;
+var lcmRootPassword = configElement.getAttributeWithKey("lcmRootPassword").value;
+
+podJSON = System.getModule("com.vmware.pso.github").getPodJSON(githubHost,githubUser,githubToken,baseURL,Environment,Region,PodID);
+var podConfig = JSON.parse(podJSON);
+var lcmHost = podConfig.vRLCM.Hostname;
+System.log("Virgin JSON:");
+System.log(JSON.stringify(JSON.parse(podJSON),null,2));
+
+podJSON = System.getModule("com.vmware.pso.wellsfargo.json").updateCredentialsFromLCM(lcmHost, lcmUser, lcmPassword, lcmRootPassword, podJSON);
+System.log("Updated Creds from LCM, Starteing on getting details from SDDC Manager");
+podJSON = System.getModule("com.vmware.pso.wellsfargo.json").updateJsonFromSddcManager(podJSON);
+System.log(JSON.stringify(JSON.parse(podJSON),null,2));</script>
+        <in-binding>
+            <bind name="configName" type="string" export-name="configName"/>
+            <bind name="configPath" type="string" export-name="configPath"/>
+            <bind name="Environment" type="string" export-name="Environment"/>
+            <bind name="Region" type="string" export-name="Region"/>
+            <bind name="PodID" type="string" export-name="PodID"/>
+        </in-binding>
+        <out-binding>
+            <bind name="podJSON" type="string" export-name="podJSON"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <presentation>
+        <p-param name="Environment">
+            <desc>Environment</desc>
+        </p-param>
+        <p-param name="Region">
+            <desc>Region</desc>
+        </p-param>
+        <p-param name="PodID">
+            <desc>PodID</desc>
+        </p-param>
+    </presentation>
+</ns2:workflow>

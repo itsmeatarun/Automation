@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="disableCSRValidation" result-type="void" api-version="6.0.0" id="f2fe218e-e3c5-4ce5-8519-ecf6423a4aba" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="vcfqdn" t="string"><![CDATA[vCenter sddc manager is on]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter user]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter password]]></param>
+  <param n="vmName" t="string"><![CDATA[VM name of the sddc manager in vCenter]]></param>
+  <param n="remoteuser" t="string"><![CDATA[SDDC manager user]]></param>
+  <param n="remotepassword" t="SecureString"><![CDATA[SDDC Manager password]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[Ignore SSL certificate issues]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vcfqdn, "vcfqdn");
+dbc.ensureNotNullOrEmpty(vcuser, "vcuser");
+dbc.ensureNotNullOrEmpty(vcpassword, "vcpassword");
+dbc.ensureNotNullOrEmpty(vmName, "vmName");
+dbc.ensureNotNullOrEmpty(remoteuser, "remoteuser");
+dbc.ensureNotNullOrEmpty(remotepassword, "remotepassword");
+
+System.getModule("com.vmware.pso.vcf.sddcmanager.powercli.certificates").disableCSRValidation(
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    vmName,
+    remoteuser, 
+    remotepassword,
+    ignoreSSLCertificate
+);]]></script>
+</dunes-script-module>

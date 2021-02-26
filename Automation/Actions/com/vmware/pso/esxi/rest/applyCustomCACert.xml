@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="applyCustomCACert" result-type="void" api-version="6.0.0" id="f41397db-b6e8-48d3-a3d6-b266ddc3a825" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.esxi.rest">
+  <param n="esxifqdn" t="string"><![CDATA[]]></param>
+  <param n="esxiUser" t="string"><![CDATA[]]></param>
+  <param n="esxiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="caCert" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(esxifqdn,"Input var: esxifqdn");
+dbc.ensureNotNullOrEmpty(esxiUser,"Input var: esxiUser");
+dbc.ensureNotNullOrEmpty(esxiPassword,"Input var: esxiPassword");
+dbc.ensureNotNullOrEmpty(caCert,"Input var: caCert");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(esxifqdn);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(esxiUser + ":" + esxiPassword);
+var headers = new Properties();
+headers.put("Content-Type","text/plain");
+headers.put("Authorization","Basic " + auth);
+var url = "/host/ssl_cert";
+
+//The following lines are idealy not necessary but will help to catch invalid special character formating
+caCert = caCert.replace(/ /gm,'\n');
+caCert = caCert.replace("-----BEGIN\nCERTIFICATE-----","-----BEGIN CERTIFICATE-----");
+caCert = caCert.replace("-----END\nCERTIFICATE-----","-----END CERTIFICATE-----");
+caCert = caCert.replace(/\r/gm,'');
+caCert = caCert.replace(/\n/gm,'\n');
+caCert = caCert.replace(/\\n/gm,'\n');
+
+var method = "PUT";
+var content = caCert;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

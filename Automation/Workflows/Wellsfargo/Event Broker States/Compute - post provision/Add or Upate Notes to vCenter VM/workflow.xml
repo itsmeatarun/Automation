@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="ec93323e-d5ff-41cf-98c0-7c46c6655f1d" version="0.1.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add or Upate Notes to vCenter VM]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+    <param name="jsonObj" type="Any"/>
+  </input>
+  <attrib name="projectId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="projectName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="userId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="netModule" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="120.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Updates Notes to VM]]></display-name>
+    <script encoded="false"><![CDATA[var metaDataObj = jsonObj;
+var projectName = metaDataObj["customProperties"].app_id;
+var netModule = metaDataObj["customProperties"].netModule;
+var userId = metaDataObj["userId"];
+
+var existingNotes = vm.config.annotation;
+System.log(vm.config.annotation);
+var vmConfigSpec = new VcVirtualMachineConfigSpec();
+var customNotes = "\n" +"projectname:" + projectName + "\n" + "userid:" + userId +"\n"+ "netmodule:" +netModule +"\n"+"source:vra";
+System.log(customNotes);
+vmConfigSpec.annotation = existingNotes + customNotes;
+vm.reconfigVM_Task(vmConfigSpec);]]></script>
+    <in-binding>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

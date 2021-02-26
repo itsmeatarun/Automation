@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setProxy" result-type="string" api-version="6.0.0" id="656697f3-657b-4da4-bf24-f2dd0e66a7c1" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="proxyHost" t="string"><![CDATA[]]></param>
+  <param n="proxyPort" t="string"><![CDATA[]]></param>
+  <param n="sddcManagerVmName" t="string"><![CDATA[]]></param>
+  <param n="sddcManagervCenterFQDN" t="string"><![CDATA[]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="sddcManagerUser" t="string"><![CDATA[]]></param>
+  <param n="sddcManagerPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(proxyHost,"Input var: proxyHost");
+dbc.ensureNotNullOrEmpty(proxyPort,"Input var: proxyPort");
+dbc.ensureNotNullOrEmpty(sddcManagerVmName,"Input var: sddcManagerVmName");
+dbc.ensureNotNullOrEmpty(sddcManagervCenterFQDN,"Input var: sddcManagervCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(sddcManagerUser,"Input var: sddcManagerUser");
+dbc.ensureNotNullOrEmpty(sddcManagerPassword,"Input var: sddcManagerPassword");
+
+var script = 'cp /opt/vmware/vcf/lcm/lcm-app/conf/application-prod.properties /opt/vmware/vcf/lcm/lcm-app/conf/application-prod.bak\n'
+script += 'sed -i "s/\\(lcm\\.depot\\.adapter\\.proxyEnabled=\\).*\\$/\\1true/" /opt/vmware/vcf/lcm/lcm-app/conf/application-prod.properties\n'
+script += 'sed -i "s/\\(lcm\\.depot\\.adapter\\.proxyHost=\\).*\\$/\\1<<<<<proxyHostVar>>>>>>/" /opt/vmware/vcf/lcm/lcm-app/conf/application-prod.properties\n'
+script += 'sed -i "s/\\(lcm\\.depot\\.adapter\\.proxyPort=\\).*\\$/\\1<<<<<proxyPortVar>>>>>>/" /opt/vmware/vcf/lcm/lcm-app/conf/application-prod.properties\n'
+script += 'systemctl restart lcm'
+
+script = script.replace("<<<<<proxyHostVar>>>>>>",proxyHost);
+script = script.replace("<<<<<proxyPortVar>>>>>>",proxyPort);
+System.debug(script);
+
+var scriptResult = System.getModule("com.vmware.pso.remoteScript").runRemoteScript([sddcManagerVmName],sddcManagervCenterFQDN,vCenterUser,vCenterPassword,script,sddcManagerUser,sddcManagerPassword,ignoreSSLCertificate);
+
+var status = scriptResult.get("status");
+System.log("Set proxy completed with status: " + status);
+if (status != "success") {
+    throw "Set proxy failed with error: " + scriptResult.get("error");
+}
+
+return status;]]></script>
+</dunes-script-module>

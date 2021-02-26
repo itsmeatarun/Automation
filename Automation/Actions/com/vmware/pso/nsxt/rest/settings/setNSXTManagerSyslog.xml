@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setNSXTManagerSyslog" result-type="void" api-version="6.0.0" id="6182817b-3420-4298-bad2-fc6f676ca8d9" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt.rest.settings">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="exporterName" t="string"><![CDATA[Syslog exporter name]]></param>
+  <param n="logLevel" t="string"><![CDATA[EMERG, ALERT, CRIT, ERR, WARNING, NOTICE, INFO, DEBUG]]></param>
+  <param n="port" t="number"><![CDATA[Default: "514". Ex: 9543 for LI-TLS]]></param>
+  <param n="exportProtocol" t="string"><![CDATA[TCP, TLS, UDP, LI, LI-TLS]]></param>
+  <param n="syslogServer" t="string"><![CDATA[]]></param>
+  <param n="caCert" t="string"><![CDATA[Required if TLS. This is the root certificate for the Syslog server.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(exporterName,"Input var: exporterName");
+dbc.ensureIsOneOf(logLevel, ["EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG"], "Input var: logLevel");
+dbc.ensureNotNullOrEmpty(port,"Input var: port");
+dbc.ensureIsOneOf(exportProtocol, ["TCP", "TLS", "UDP", "LI", "LI-TLS"], "Input var: exportProtocol");
+dbc.ensureNotNullOrEmpty(syslogServer,"Input var: syslogServer");
+
+if (exportProtocol.indexOf("TLS") >= 0) {
+    dbc.ensureNotNullOrEmpty(caCert,"Input var: caCert");
+}
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+var url = "/api/v1/node/services/syslog/exporters";
+
+if (!dbc.isNullOrEmpty(caCert)) {
+    //The following lines are idealy not necessary but will help to catch invalid formating for embedding cert in json
+    caCert = caCert.replace(/ /gm,'\n');
+    caCert = caCert.replace("-----BEGIN\nCERTIFICATE-----","-----BEGIN CERTIFICATE-----");
+    caCert = caCert.replace("-----END\nCERTIFICATE-----","-----END CERTIFICATE-----");
+    caCert = caCert.replace(/\r/gm,'');
+    caCert = caCert.replace(/\n/gm,'\n');
+    caCert = caCert.replace(/\\n/gm,'\n');
+}
+
+var body = {
+    "exporter_name": exporterName,
+    "level": logLevel,
+    "port": port,
+    "protocol": exportProtocol,
+    "server": syslogServer,
+    "tls_ca_pem": caCert
+};
+System.debug(JSON.stringify(body));
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

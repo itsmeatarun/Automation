@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="patchVraMachineProperties" result-type="string" api-version="6.0.0" id="3b7e5c7b-9156-4b7c-8784-f641bcd0f1ae" version="0.0.1" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <description><![CDATA[Set custom properties on a vRA machine]]></description>
+  <param n="accessToken" t="string"><![CDATA[Access Token for vRA API call]]></param>
+  <param n="vraBaseUrl" t="string"><![CDATA[URL of the vRA API]]></param>
+  <param n="vraId" t="string"><![CDATA[vRA id of the virtual machine to patch]]></param>
+  <param n="content" t="string"><![CDATA[Content (properties) to patch VM with]]></param>
+  <script encoded="false"><![CDATA[const opMethod = "PATCH";
+const opUrl = "/iaas/api/machines/" + vraId;
+const contentType = "application/json";
+
+var headers = new Properties();
+headers.put("Authorization", "Bearer " + accessToken);
+
+var createOpResponse  = System.getModule("com.vmware.pso.wellsfargo").executeTransientRESTOperationWithTimeOutAndApiVersion(vraBaseUrl, null, null, opMethod, opUrl, null, headers, contentType, content, null, null);
+
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to patch iaas machine (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+
+return createOpResponse.responseString;]]></script>
+</dunes-script-module>

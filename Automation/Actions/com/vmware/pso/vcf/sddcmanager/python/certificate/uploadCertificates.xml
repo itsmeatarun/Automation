@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="uploadCertificates" result-type="string" api-version="6.0.0" id="d89fd7bd-a1a0-4c36-a044-c3ccc9223483" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.python.certificate">
+  <runtime><![CDATA[python:3.7]]></runtime>
+  <param n="certificatesData" t="Array"><![CDATA[]]></param>
+  <param n="rootCA" t="string"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <param n="domain" t="string"><![CDATA[]]></param>
+  <param n="host" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[import json
+
+def handler(context, inputs):
+    jsonOut=json.dumps(inputs, separators=(',', ':'))
+    print("Inputs were {0}".format(jsonOut))
+
+    outputs = {
+      "status": "done"
+    }
+
+    return outputs
+]]></script>
+</dunes-script-module>

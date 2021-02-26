@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="verifySolutionUserCertificates" result-type="Properties" api-version="6.0.0" id="7efd72ef-b002-417a-a6a6-634365a53750" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.certificates.solutionuser" memory-limit="512000000" timeout="900">
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").verifyCertificate(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, "wcp", "wcp");
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").verifyCertificate(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, "machine", "machine");
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").verifyCertificate(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, "vpxd", "vpxd");
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").verifyCertificate(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, "vpxd-extension", "vpxd-extension");
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").verifyCertificate(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, "vsphere-webclient", "vsphere-webclient");
+System.getModule("com.vmware.pso.vcenter.powercli.certificates").verifyCertificate(vcfqdn, vcuser, vcpassword, vcVM, vcGuestUser, vcGuestPassword, ignoreSSLCertificate, "hvc", "hvc");
+]]></script>
+</dunes-script-module>

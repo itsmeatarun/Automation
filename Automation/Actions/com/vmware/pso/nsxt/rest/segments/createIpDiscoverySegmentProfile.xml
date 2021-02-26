@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createIpDiscoverySegmentProfile" result-type="string" api-version="6.0.0" id="e39c91f2-c7b6-4e86-b610-bae4692422ae" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.nsxt.rest.segments">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="profileName" t="string"><![CDATA[]]></param>
+  <param n="dup_ip_detection" t="boolean"><![CDATA[]]></param>
+  <param n="arp_snooping" t="boolean"><![CDATA[]]></param>
+  <param n="arp_limit" t="number"><![CDATA[]]></param>
+  <param n="nd_snooping" t="boolean"><![CDATA[]]></param>
+  <param n="nd_limit" t="number"><![CDATA[]]></param>
+  <param n="arp_nd_timeout" t="number"><![CDATA[]]></param>
+  <param n="enable_on_first_use" t="boolean"><![CDATA[]]></param>
+  <param n="dhcp_snooping" t="boolean"><![CDATA[]]></param>
+  <param n="dhcp_v6_snooping" t="boolean"><![CDATA[]]></param>
+  <param n="vmtools" t="boolean"><![CDATA[]]></param>
+  <param n="vmtools_v6" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(profileName,"Input var: profileName");
+dbc.ensureNotNullOrEmpty(dup_ip_detection,"Input var: dup_ip_detection");
+dbc.ensureNotNullOrEmpty(arp_snooping,"Input var: arp_snooping");
+dbc.ensureNotNullOrEmpty(arp_limit,"Input var: arp_limit");
+dbc.ensureNotNullOrEmpty(nd_snooping,"Input var: nd_snooping");
+dbc.ensureNotNullOrEmpty(nd_limit,"Input var: nd_limit");
+dbc.ensureNotNullOrEmpty(arp_nd_timeout,"Input var: arp_nd_timeout");
+dbc.ensureNotNullOrEmpty(enable_on_first_use,"Input var: enable_on_first_use");
+dbc.ensureNotNullOrEmpty(dhcp_snooping,"Input var: dhcp_snooping");
+dbc.ensureNotNullOrEmpty(dhcp_v6_snooping,"Input var: dhcp_v6_snooping");
+dbc.ensureNotNullOrEmpty(vmtools,"Input var: vmtools");
+dbc.ensureNotNullOrEmpty(vmtools_v6,"Input var: vmtools_v6");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+
+var profileId = profileName.replace(/ /g,"_");
+var url = "/policy/api/v1/infra/ip-discovery-profiles/" + profileId;
+
+var body = {
+  "display_name": profileName,
+  "resource_type": "IPDiscoveryProfile",
+  "arp_nd_binding_timeout": arp_nd_timeout,
+  "tofu_enabled": enable_on_first_use,
+  "duplicate_ip_detection": {
+    "duplicate_ip_detection_enabled": dup_ip_detection
+  },
+  "ip_v4_discovery_options": {
+    "arp_snooping_config": {
+      "arp_snooping_enabled": arp_snooping,
+      "arp_binding_limit": arp_limit
+    },
+    "dhcp_snooping_enabled": dhcp_snooping,
+    "vmtools_enabled": vmtools
+  },
+  "ip_v6_discovery_options": {
+    "nd_snooping_config": {
+      "nd_snooping_enabled": nd_snooping,
+      "nd_snooping_limit": nd_limit
+    },
+    "dhcp_snooping_v6_enabled": dhcp_v6_snooping,
+    "vmtools_v6_enabled": vmtools_v6
+  }
+};
+
+var method = "PATCH";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return profileId;]]></script>
+</dunes-script-module>

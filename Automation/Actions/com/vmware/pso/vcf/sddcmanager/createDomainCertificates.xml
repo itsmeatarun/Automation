@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createDomainCertificates" result-type="Array/Properties" api-version="6.0.0" id="22bc3146-a14f-408b-9de3-52da610e30c1" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager">
+  <param n="venafiHost" t="string"><![CDATA[Venafi host]]></param>
+  <param n="venafiUser" t="string"><![CDATA[Venafi User]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[Venafi Password]]></param>
+  <param n="venafiPolicyDN" t="string"><![CDATA[Veanfi Policy DN]]></param>
+  <param n="certificatesData" t="Array/Properties"><![CDATA[{"name": element.resource.fqdn, "csr": element.csrEncodedContent}]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(venafiHost,"Input var: venafiHost");
+dbc.ensureNotNullOrEmpty(venafiUser,"Input var: venafiUser");
+dbc.ensureNotNullOrEmpty(venafiPassword,"Input var: venafiPassword");
+dbc.ensureNotNullOrEmpty(venafiPolicyDN,"Input var: venafiPolicyDN");
+dbc.ensureNotNullOrEmpty(certificatesData,"Input var: certificatesData");
+
+for(var x=0; x < certificatesData.length; x++) {
+    var certificateData = certificatesData[x];
+
+    certificateData.certificateDN = System.getModule("com.vmware.pso.venafi").createAndApproveCertificateWithCSR(
+        venafiHost,
+        venafiUser,
+        venafiPassword,
+        venafiPolicyDN,
+        certificateData.name,
+        certificateData.csr,
+        false
+    );
+}
+
+return certificatesData;]]></script>
+</dunes-script-module>

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="a0f69683-24a1-4a01-86d4-bab1c0aba634" version="0.0.0">
+  <display-name><![CDATA[vRA Decommission]]></display-name>
+  <atts>
+    <att name="apiBaseUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[https://runtime01.devint.cloud.wellsfargo.net:18000]]></value>
+    </att>
+    <att name="domainName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[devint.cloud.wellsfargo.net]]></value>
+    </att>
+    <att name="nameRecordActionUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/infoblox/name_record_decom]]></value>
+    </att>
+    <att name="ptrRecordActionUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/infoblox/ptr_record_decom]]></value>
+    </att>
+    <att name="boksActionUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/boks/boks_dereg]]></value>
+    </att>
+    <att name="rsaActionurl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/rsa/rsa_2fa_dereg]]></value>
+    </att>
+    <att name="remedyBaseUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[http://batch01.devint.cloud.wellsfargo.net:9989 ]]></value>
+    </att>
+    <att name="remedyActionUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/decommission ]]></value>
+    </att>
+    <att name="remedyToken" type="string" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+  </atts>
+</config-element>

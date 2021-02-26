@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getDefaultVLANTransportZone" result-type="string" api-version="6.0.0" id="e560c9b4-38ee-4303-9643-b225c42d5363" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt.rest.segments">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+
+var url = "/policy/api/v1/infra/sites/default/enforcement-points/default/transport-zones";
+
+var method = "GET";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+dbc.ensureNotNullOrEmpty(response.results,"Default Transport Zone GET response");
+
+var vlanZones = response.results.filter(function(element) { return (element.tz_type == "VLAN_BACKED" && element.is_default) });
+if (dbc.isNullOrEmpty(vlanZones)) {
+  throw "No Default VLAN Transport Zones found."
+}
+
+return JSON.stringify(vlanZones[0]);
+]]></script>
+</dunes-script-module>

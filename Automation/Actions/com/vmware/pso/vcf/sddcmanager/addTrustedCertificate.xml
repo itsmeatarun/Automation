@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addTrustedCertificate" result-type="void" api-version="6.0.0" id="ac4ee2bf-dfe3-49eb-96f7-a1e00987ee96" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager" memory-limit="512000000">
+  <param n="vcfqdn" t="string"><![CDATA[vCenter Host where the sddc-manager vm is running]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter Username where the sddc-manager vm is running]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter Password where the sddc-manager vm is running]]></param>
+  <param n="sddcManagerVM" t="string"><![CDATA[Name of the SDDC Manager VM]]></param>
+  <param n="sddcManagerGuestUser" t="string"><![CDATA[Username to run commands as on SDDC Manager]]></param>
+  <param n="sddcManagerGuestPassword" t="SecureString"><![CDATA[Password to run commands as on SDDC Manager]]></param>
+  <param n="rootCert" t="string"><![CDATA[Root certificate to use]]></param>
+  <param n="keystoreAlias" t="string"><![CDATA[Alias of the certificate in the stores]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[Ignore SSL Connection issues]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vcfqdn,"Input var: vcfqdn");
+dbc.ensureNotNullOrEmpty(vcuser,"Input var: vcuser");
+dbc.ensureNotNullOrEmpty(vcpassword,"Input var: vcpassword");
+dbc.ensureNotNullOrEmpty(sddcManagerVM,"Input var: sddcManagerVM");
+dbc.ensureNotNullOrEmpty(sddcManagerGuestUser,"Input var: sddcManagerGuestUser");
+dbc.ensureNotNullOrEmpty(sddcManagerGuestPassword,"Input var: sddcManagerGuestPassword");
+dbc.ensureNotNullOrEmpty(ignoreSSLCertificate,"Input var: ignoreSSLCertificate");
+dbc.ensureNotNullOrEmpty(rootCert,"Input var: rootCert");
+dbc.ensureNotNullOrEmpty(keystoreAlias,"Input var: keystoreAlias");
+
+var assignResult = System.getModule("com.vmware.pso.vcf.sddcmanager.powercli.certificates").addTrustedCertificate(
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    sddcManagerVM,
+    sddcManagerGuestUser,
+    sddcManagerGuestPassword, 
+    ignoreSSLCertificate,    
+    rootCert, 
+    keystoreAlias
+)
+
+var assignStatus = assignResult.get("status");
+System.debug("addTrustedCertificate completed with status: " + assignStatus);
+if (assignStatus != "success") {
+    throw "addTrustedCertificate failed with error: " + assignResult.get("error");
+}
+]]></script>
+</dunes-script-module>

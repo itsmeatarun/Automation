@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getRepoContent" result-type="string" api-version="6.0.0" id="87d02e3b-4454-4e44-a6ee-8478fbfbaf91" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.github.rest">
+  <param n="githubHost" t="string"><![CDATA[]]></param>
+  <param n="githubUser" t="string"><![CDATA[]]></param>
+  <param n="githubToken" t="SecureString"><![CDATA[]]></param>
+  <param n="baseURL" t="string"><![CDATA[]]></param>
+  <param n="contentPath" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(githubHost,"Input var: githubHost");
+dbc.ensureNotNullOrEmpty(githubUser,"Input var: githubUser");
+dbc.ensureNotNullOrEmpty(githubToken,"Input var: githubToken");
+dbc.ensureNotNullOrEmpty(baseURL,"Input var: baseURL");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(githubHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(githubUser + ":" + githubToken);
+var headers = new Properties();
+headers.put("Accept","application/vnd.github.v3+json");
+headers.put("Authorization","Basic " + auth);
+
+var url = baseURL;
+
+if (!dbc.isNullOrEmpty(contentPath)) {
+    url = url + "/" + contentPath;
+}
+
+var method = "GET";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return JSON.stringify(response);]]></script>
+</dunes-script-module>

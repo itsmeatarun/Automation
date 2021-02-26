@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="holdPythonSell" result-type="string" api-version="6.0.0" id="54e1b40f-0965-467c-866e-b67408eb55d5" version="0.0.0" allowed-operations="vfe" category-name="scott.w.python" timeout="28800">
+  <runtime><![CDATA[python:3.7]]></runtime>
+  <param n="input" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[import time
+import json
+
+def handler(context, inputs):
+    jsonOut=json.dumps(inputs, separators=(',', ':'))
+    print("Inputs were {0}".format(jsonOut))
+
+
+    while(True):
+        print("Sleeping...")
+        time.sleep(60000)
+
+    outputs = {
+      "status": "done"
+    }
+
+    return outputs
+]]></script>
+</dunes-script-module>

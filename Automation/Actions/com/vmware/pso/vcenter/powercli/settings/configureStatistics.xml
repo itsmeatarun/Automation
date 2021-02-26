@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="configureStatistics" result-type="Properties" api-version="6.0.0" id="786dfa5d-de54-49d7-b2b9-04d93d13c7c9" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.settings" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="statKey" t="number"><![CDATA[]]></param>
+  <param n="logLevel" t="number"><![CDATA[]]></param>
+  <param n="retentionName" t="string"><![CDATA['Past day','Past week','Past month','Past year']]></param>
+  <param n="retentionPeriod" t="number"><![CDATA[Seconds]]></param>
+  <param n="samplePeriod" t="number"><![CDATA[Seconds]]></param>
+  <param n="enabled" t="boolean"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $statKey = $inputs.statKey
+        $logLevel = $inputs.logLevel
+        $retentionName = $inputs.retentionName
+        $retentionPeriod = $inputs.retentionPeriod
+        $samplePeriod = $inputs.samplePeriod
+        $enabled = $inputs.enabled
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Getting vCenter statistic key '$statKey'"
+        $statsView = Get-View -Id 'PerformanceManager-PerfMgr'
+        $statistic = $statsView.HistoricalInterval | where{$_.Key -eq $statKey}
+        $changed = $false
+
+        if($logLevel -ne $null -And $statistic.Level -ne $logLevel) {
+            Write-Host "Received updated 'Statistics Level' ($logLevel) for key: $statKey"
+            $statistic.Level = $logLevel
+            $changed = $true
+        }
+        if($retentionName -ne $null -And $statistic.Name -ne $retentionName) {
+            Write-Host "Received updated 'Save For' name ($retentionName) for key: $statKey"
+            $statistic.Name = $retentionName
+            $changed = $true
+        }
+        if($retentionPeriod -ne $null -And $statistic.Length -ne $retentionPeriod) {
+            Write-Host "Received updated 'Save For' period ($retentionPeriod) for key: $statKey"
+            $statistic.Length = $retentionPeriod
+            $changed = $true
+        }
+        if($samplePeriod -ne $null -And $statistic.SamplingPeriod -ne $samplePeriod) {
+            Write-Host "Received updated 'Interval Duration' ($samplePeriod) for key: $statKey"
+            $statistic.SamplingPeriod = $samplePeriod
+            $changed = $true
+        }
+        if($enabled -ne $null -And $statistic.Enabled -ne $enabled) {
+            Write-Host "Received updated 'Enabled' status ($enabled) for key: $statKey"
+            $statistic.Enabled = $enabled
+            $changed = $true
+        }
+
+        if($changed) {
+            Write-Host "Updating vCenter statistics settings for key: $statKey"
+            $statsView.UpdatePerfInterval($statistic)
+        } else {
+            Write-Host "No updates to existing values were received. Exiting."
+        }
+
+    } catch {
+        Write-Host "Failed updating vCenter statistics settings for key: $statKey. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

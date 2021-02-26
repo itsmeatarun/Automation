@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="203af330-5f33-4fe4-844b-6b9e04962c09" editor-version="2.0" version="0.0.2" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
+    <display-name>PodAutomation</display-name>
+    <position y="50.0" x="80.0"/>
+    <input>
+        <param name="Environment" type="string"/>
+        <param name="Region" type="string"/>
+        <param name="PodID" type="string"/>
+        <param name="inputJSON" type="string"/>
+    </input>
+    <output/>
+    <attrib name="configName" type="string">
+        <value encoded="n">WellsFargoPodAutomation</value>
+    </attrib>
+    <attrib name="configPath" type="string">
+        <value encoded="n">WellsFargo</value>
+    </attrib>
+    <attrib name="continueOnFail" type="boolean">
+        <value encoded="n">true</value>
+    </attrib>
+    <attrib name="podJSON" type="string">
+        <value encoded="n"></value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="440.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="task" comparator="0">
+        <display-name>Build Pod JSON</display-name>
+        <script encoded="false">"use strict";
+
+if(inputJSON == null || inputJSON == "") {
+    var configElement = System.getModule("com.vmware.pso.configurations").getConfigurationElementSimple(configName,configPath);
+    var githubHost = configElement.getAttributeWithKey("GitHost").value;
+    var githubUser = configElement.getAttributeWithKey("GitUser").value;
+    var githubToken = configElement.getAttributeWithKey("GitUserToken").value;
+    var baseURL = configElement.getAttributeWithKey("GitRepoContentURL").value;
+    var lcmUser = configElement.getAttributeWithKey("lcmApiUser").value;
+    var lcmPassword = configElement.getAttributeWithKey("lcmApiPassword").value;
+    var lcmRootPassword = configElement.getAttributeWithKey("lcmRootPassword").value;
+
+    podJSON = System.getModule("com.vmware.pso.github").getPodJSON(githubHost,githubUser,githubToken,baseURL,Environment,Region,PodID);
+    var podConfig = JSON.parse(podJSON);
+    var lcmHost = podConfig.vRLCM.Hostname;
+
+    podJSON = System.getModule("com.vmware.pso.wellsfargo.json").updateCredentialsFromLCM(lcmHost, lcmUser, lcmPassword, lcmRootPassword, podJSON);
+    podJSON = System.getModule("com.vmware.pso.wellsfargo.json").updateJsonFromSddcManager(podJSON);
+    //System.log(JSON.stringify(JSON.parse(podJSON),null,2));
+} else {
+    System.log("Using Input JSON");
+    podJSON = inputJSON;
+}</script>
+        <in-binding>
+            <bind name="configName" type="string" export-name="configName"/>
+            <bind name="configPath" type="string" export-name="configPath"/>
+            <bind name="Environment" type="string" export-name="Environment"/>
+            <bind name="Region" type="string" export-name="Region"/>
+            <bind name="PodID" type="string" export-name="PodID"/>
+            <bind name="inputJSON" type="string" export-name="inputJSON"/>
+        </in-binding>
+        <out-binding>
+            <bind name="podJSON" type="string" export-name="podJSON"/>
+        </out-binding>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="160.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="task" comparator="0">
+        <display-name>Execute POD Customization</display-name>
+        <script encoded="false">"use strict";
+
+var podConfig = JSON.parse(podJSON);
+var sddcManager = podConfig.SDDCManager;
+var vCenters = podConfig.vCenter;
+var vrzAccess = vCenters.Access.vRealizeRoles;
+var hznAccess = vCenters.Access.HorizonRoles;
+var mgmtvCenter = vCenters.mgmtvCenter;
+var vivCenters = vCenters.wldvCenters;
+var certDetails = podConfig.CertificateDetails;
+var esxi = podConfig.ESXi;
+var nsxt = podConfig.NSXT;
+var ad = podConfig.ActiveDirectory;
+var webProxy = podConfig.WebProxy;
+var vrli = podConfig.vRLI;
+var vidm = podConfig.vIDM;
+var lcmHostname = podConfig.vRLCMHostname;
+var automationSwitchs = podConfig.AutomationSwitches;
+var ignoreSSLCertificate = true;
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+//GIT Config
+var configElement = System.getModule("com.vmware.pso.configurations").getConfigurationElementSimple(configName,configPath);
+var githubHost = configElement.getAttributeWithKey("GitHost").value;
+var githubUser = configElement.getAttributeWithKey("GitUser").value;
+var githubToken = configElement.getAttributeWithKey("GitUserToken").value;
+var baseURL = configElement.getAttributeWithKey("GitRepoContentURL").value;
+
+//Get Root Certificate
+var rootCert = System.getModule("com.vmware.pso.github").getEnvironmentCert(githubHost,githubUser,githubToken,baseURL,certDetails.RootCertificate);
+
+//SDDC Manager
+if (automationSwitchs.SDDCManager["Opt out of CEIP"]) {
+    System.log("SDDC Manager: Opt out of VMware CEIP");
+    try {
+        System.getModule("com.vmware.pso.vcf.sddcmanager").setCEIP(sddcManager.SSOAdminUser,sddcManager.SSOAdminPassword,sddcManager.Hostname,sddcManager.EnableCeip);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setCEIP failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+}
+
+if (automationSwitchs.SDDCManager["Trust Root Cert"]) {
+    System.log("SDDC Manager: Add Wells Fargo Root Cert to Trusted Certs");
+    try {
+        System.getModule("com.vmware.pso.vcf.sddcmanager").addTrustedCertificate(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,sddcManager.VMName,sddcManager.LocalUser,
+                                                                                sddcManager.LocalPassword,rootCert,sddcManager.RootCertKeystoreAlias,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action addTrustedCertificate failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+}
+
+if (automationSwitchs.SDDCManager["Configure Proxy"]) {
+    System.log("SDDC Manager: Configure Proxy");
+    try {
+        System.getModule("com.vmware.pso.vcf.sddcmanager").setProxy(webProxy.Hostname,webProxy.Port,sddcManager.VMName,mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,
+                                                                    mgmtvCenter.SSOAdminPassword,sddcManager.LocalUser,sddcManager.LocalPassword,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setProxy failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+}
+
+if (automationSwitchs.SDDCManager["Update Managed Certs"]) {
+    System.log("SDDC Manager: Update Certs for all VCF Managed Components (Except VxRail Manager)");
+    try {
+        System.getModule("com.vmware.pso.vcf.sddcmanager").disableCSRValidation(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,
+                                                                                sddcManager.VMName,sddcManager.LocalUser,sddcManager.LocalPassword,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action disableCSRValidation failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+
+    var sddcResources = System.getModule("com.vmware.pso.vcf.sddcmanager").parseCSRResourcesFromJson(podJSON,true,true,true);
+
+    for each (var domain in sddcManager.Domains) {
+        try{
+            System.log("SDDC Manager: Getting CSRs for domain " + domain);
+            System.log(JSON.stringify(sddcResources[domain].resources));
+            
+            var certData = System.getModule("com.vmware.pso.vcf.sddcmanager").createAndGetDomainCSRs(sddcManager.SSOAdminUser,sddcManager.SSOAdminPassword,sddcManager.Hostname,domain,certDetails.Country,
+                                                                                                    certDetails.Locality,certDetails.Organization,certDetails.OrganizationUnit,certDetails.Email,
+                                                                                                    sddcManager.CertKeySize,sddcManager.CertKeyAlgorithm,certDetails.State,sddcResources[domain].resources);
+            System.log("Cert Data (CSR Data): " + JSON.stringify(certData));                                                                                   
+            
+            System.log("SDDC Manager: Creating certificates for domain " + domain);
+            certData = System.getModule("com.vmware.pso.vcf.sddcmanager").createDomainCertificates(certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword,sddcManager.VenafiPolicyDN,certData);
+            System.log("Cert Data (Venefi Policy): " + JSON.stringify(certData));                                                                                   
+
+            System.log("SDDC Manager: Downloading certificates for domain " + domain);
+            certData = System.getModule("com.vmware.pso.vcf.sddcmanager").getDomainCertificates(certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword,certData);
+            System.log("Cert Data (Cert Data): " + JSON.stringify(certData));                                                                                   
+
+            System.log("SDDC Manager: Install certificates for domain " + domain);
+            System.getModule("com.vmware.pso.vcf.sddcmanager").uploadAndInstallDomainCertificates(sddcManager.Hostname,sddcManager.SSOAdminUser,sddcManager.SSOAdminPassword,certData,domain);
+            
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action update certificates on resources for domain " + domain + " failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+
+    System.log("SDDC Manager: restarting all services");
+    System.getModule("com.vmware.pso.vcf.sddcmanager").restartAllServices(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,sddcManager.VMName,
+                                                                          sddcManager.LocalUser,sddcManager.LocalPassword,ignoreSSLCertificate);
+    
+    //Update VAMI Cert
+    System.log("vCenter: restarting vami for mgmt vCenter");
+    try {
+        System.getModule("com.vmware.pso.vcenter").restartVAMI(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,mgmtvCenter.VMName,"root",mgmtvCenter.RootPassword,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action restartVAMI failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: restarting vami for vi vCenter");
+            System.getModule("com.vmware.pso.vcenter").restartVAMI(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,vc.VMName,"root",vc.RootPassword,ignoreSSLCertificate);        
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action restartVAMI failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }         
+}
+
+if (automationSwitchs.SDDCManager["Configure Backup"]) {
+    System.log("SDDC Manager: Configure Backup");
+    try {
+        System.getModule("com.vmware.pso.vcf.sddcmanager").setBackup_Configuration(sddcManager.SSOAdminUser,sddcManager.SSOAdminPassword,sddcManager.Hostname,sddcManager.BackupHostname,sddcManager.BackupHostPassword,
+                                                                                sddcManager.BackupHostPort,sddcManager.BackupHostUsername,sddcManager.BackupHostDirectoryPath,sddcManager.BackupHostSSHFingerPrint);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setBackup_Configuration failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+}
+
+//vCenter
+if (automationSwitchs.vCenter["Update Solution User Certs"]) {
+    System.log("vCenter: Update Solution User Certs for Mgmt vCenter");
+    try {
+        System.getModule("com.vmware.pso.vcenter").createSolutionUserCertificates(certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword,vCenters.SolutionUserPolicyDN,certDetails.OrganizationUnit,
+                                                                                certDetails.Organization,certDetails.City,certDetails.State,certDetails.Country,mgmtvCenter.Hostname,mgmtvCenter.IPAddress);
+
+        var mgmtVmParentHostName = System.getModule("com.vmware.pso.vcenter.powercli.vm").getVMParentHost(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,mgmtvCenter.VMName,ignoreSSLCertificate);
+        var mgmtVmParentHost = esxi.Hosts.filter(function (host) {
+            return host.Hostname == this;
+        }, mgmtVmParentHostName)[0];
+        var mgmtVmParentHostUser = mgmtVmParentHost.User
+        var mgmtVmParentHostPass = mgmtVmParentHost.Password
+
+        System.getModule("com.vmware.pso.vcenter").downloadAndInstallSolutionUserCertificates(mgmtvCenter.Hostname,mgmtVmParentHostName,mgmtVmParentHostUser,mgmtVmParentHostPass,mgmtvCenter.VMName,"root",
+                                                                                            mgmtvCenter.RootPassword,ignoreSSLCertificate,vCenters.CustomizationsLoggingDir,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,
+                                                                                            vCenters.SolutionUserPolicyDN,certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action createSolutionUserCertificates/downloadAndInstallSolutionUserCertificates failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    System.log("vCenter: Update Solution User Certs for VI vCenters");
+    for each (var vc in vivCenters) {
+        try {
+            System.getModule("com.vmware.pso.vcenter").createSolutionUserCertificates(certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword,vCenters.SolutionUserPolicyDN,certDetails.OrganizationUnit,
+                                                                                    certDetails.Organization,certDetails.City,certDetails.State,certDetails.Country,vc.Hostname,vc.IPAddress);
+
+            System.getModule("com.vmware.pso.vcenter").downloadAndInstallSolutionUserCertificates(vc.Hostname,mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,vc.VMName,"root",
+                                                                                                vc.RootPassword,ignoreSSLCertificate,vCenters.CustomizationsLoggingDir,vc.SSOAdminUser,vc.SSOAdminPassword,
+                                                                                                vCenters.SolutionUserPolicyDN,certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action createSolutionUserCertificates/downloadAndInstallSolutionUserCertificates failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+if (automationSwitchs.vCenter["Configure Proxy"]) {
+    System.log("vCenter: Configure System Proxy on " + mgmtvCenter.Hostname);
+
+    var vCenterDetails = [];
+    try {
+        System.getModule("com.vmware.pso.vcenter").setvCenterWebProxyv2(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,mgmtvCenter.VMName,
+                                                                        mgmtvCenter.RootPassword,webProxy.Hostname,webProxy.Port,ignoreSSLCertificate);
+        vCenterDetails.push(JSON.stringify({
+            "vCenterHostname": mgmtvCenter.Hostname,
+            "vCenterUser": mgmtvCenter.SSOAdminUser,
+            "vCenterPassword": mgmtvCenter.SSOAdminPassword
+        }));
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setvCenterWebProxy failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Configure System Proxy on " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setvCenterWebProxyv2(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,vc.VMName,
+                                                                            vc.RootPassword,webProxy.Hostname,webProxy.Port,ignoreSSLCertificate);
+            vCenterDetails.push(JSON.stringify({
+                "vCenterHostname": vc.Hostname,
+                "vCenterUser": vc.SSOAdminUser,
+                "vCenterPassword": vc.SSOAdminPassword
+            }));
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setvCenterWebProxy failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+    try {
+        System.getModule("com.vmware.pso.vcenter").rebootvCentersAndWait(vCenterDetails,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action rebootvCentersAndWait failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+}
+
+if (automationSwitchs.vCenter["Set ESXi Cert Mode"]) {
+    System.log("vCenter: Configure ESXi Cert Mode to Custom on " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").setvSphereCustomCertMode(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setvSphereCustomCertMode failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Configure ESXi Cert Mode to Custom on " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setvSphereCustomCertMode(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setvSphereCustomCertMode failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+}
+
+if (automationSwitchs.vCenter["Set Stats and Logging Level"]) {
+    System.log("vCenter: Edit vCenter Statistics Interval and Logging Level on " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").setvCenterStatsSettings(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setvCenterStatsSettings failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Edit vCenter Statistics Interval and Logging Level on " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setvCenterStatsSettings(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setvCenterStatsSettings failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+}
+
+if (automationSwitchs.vCenter["Enable Dump Collector"]) {
+    System.log("vCenter: Enable ESXi Dump Collector Service on " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").setvCenterDumpService(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setvCenterDumpService failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Enable ESXi Dump Collector Service on " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setvCenterDumpService(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setvCenterDumpService failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+}
+
+if (automationSwitchs.vCenter["Configure Hzn and vRZ Port Groups"]) {
+    System.log("vCenter: Configure Port Groups for Horizon and vRealize on " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").configurePortGroupsForHorizonAndvRealize(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,podConfig.podID,mgmtvCenter.vdsName,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action configurePortGroupsForHorizonAndvRealize failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+}
+
+if (automationSwitchs.vCenter["Add NFS Storage"]) {
+    System.log("vCenter: Add NFS Storage on " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").createAndMountNFSDatastore(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,vCenters.NFSDatastoreName,vCenters.NFSHostnameIP,vCenters.NFSSharePath,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action createAndMountNFSDatastore failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Add NFS Storage on " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").createAndMountNFSDatastore(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,vCenters.NFSDatastoreName,vCenters.NFSHostnameIP,vCenters.NFSSharePath,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action createAndMountNFSDatastore failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+}
+
+if (automationSwitchs.vCenter["Create VDI Folder"]) {
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Create Desktop Pools folder on " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter.powercli.vm").createVDIFolder(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,vCenters.VDIFolderName,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action createVDIFolder failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+}
+
+if (automationSwitchs.vCenter["Configure AD Settings"]) {
+    System.log("vCenter: Join vCenter to Active Directory, Configure AD Identity Source, Change SSO Default Domain in VCSA on " + mgmtvCenter.Hostname);
+    var vCenterDetails = [];
+    try {
+        var addNewIdentitySource = true;
+        System.getModule("com.vmware.pso.vcenter").joinADandSetDefaultIdentity(mgmtvCenter.VMName,mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,mgmtvCenter.RootPassword,
+                                                                               ad.ADJoinUser,ad.ADJoinPassword,ad.DomainFQDN,ad.ADOrgUnit,addNewIdentitySource,ignoreSSLCertificate);
+        vCenterDetails.push(JSON.stringify({
+            "vCenterHostname": mgmtvCenter.Hostname,
+            "vCenterUser": mgmtvCenter.SSOAdminUser,
+            "vCenterPassword": mgmtvCenter.SSOAdminPassword
+        }));
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action joinADandSetDefaultIdentity/rebootvCenterAndWait failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Join vCenter to Active Directory, Configure AD Identity Source, Change SSO Default Domain in VCSA on " + vc.Hostname);
+            addNewIdentitySource = false;
+            System.getModule("com.vmware.pso.vcenter").joinADandSetDefaultIdentity(vc.VMName,mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,vc.RootPassword,
+                                                                                   ad.ADJoinUser,ad.ADJoinPassword,ad.DomainFQDN,ad.ADOrgUnit,addNewIdentitySource,ignoreSSLCertificate);
+            vCenterDetails.push(JSON.stringify({
+                "vCenterHostname": vc.Hostname,
+                "vCenterUser": vc.SSOAdminUser,
+                "vCenterPassword": vc.SSOAdminPassword
+            }));
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action joinADandSetDefaultIdentity/rebootvCenterAndWait failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+    if (!dbc.isNullOrEmpty(vCenterDetails)){
+        try {
+            System.getModule("com.vmware.pso.vcenter").rebootvCentersAndWait(vCenterDetails,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action rebootvCentersAndWait failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+if (automationSwitchs.vCenter["Create and Assign Roles"]) {
+    System.log("vCenter: Assign AD groups to vCenter Roles on " + mgmtvCenter.Hostname);
+    try {
+        //Create and assign vRealize Roles and AD groups
+        var adUsers = null;
+        System.getModule("com.vmware.pso.vcenter").createAndAssignvRLCMRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,vrzAccess.LCMADGroupsUsers,ignoreSSLCertificate);
+        System.getModule("com.vmware.pso.vcenter").createAndAssignvRLIRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,vrzAccess.vRLIADGroupsUsers,ignoreSSLCertificate);
+        System.getModule("com.vmware.pso.vcenter").createAndAssignvROPsRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,vrzAccess.vROPSADGroupsUsers,ignoreSSLCertificate);
+        System.getModule("com.vmware.pso.vcenter").createAndAssignvRARole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,vrzAccess.vRAADGroupsUsers,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action createAndAssign vRealize Roles failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+
+    var adUsers = null;
+    try {
+        //Create and assign Horizon Roles
+        if (!dbc.isNullOrEmpty(hznAccess.App_Vol_Dist_Mgmt)){
+            var role = hznAccess.App_Vol_Dist_Mgmt;
+            System.getModule("com.vmware.pso.vcenter").createAppVolDistMgmtRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.App_Vol_Pckg_Mgmt)){
+            var role = hznAccess.App_Vol_Pckg_Mgmt;
+            System.getModule("com.vmware.pso.vcenter").createAppVolPkgMgmtRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            } 
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.App_Vol_vC_Admin)){    
+            var role = hznAccess.App_Vol_vC_Admin;
+            System.getModule("com.vmware.pso.vcenter").createAppVolvCAdmRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.Hzn_vC_Admin)){
+            var role = hznAccess.Hzn_vC_Admin;
+            System.getModule("com.vmware.pso.vcenter").createHznvCAdmRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.Hzn_Img_Mgmt)){
+            var role = hznAccess.Hzn_Img_Mgmt;
+            System.getModule("com.vmware.pso.vcenter").createHznImgMgmtRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.Hzn_vC_Infra_Admin)){
+            var role = hznAccess.Hzn_vC_Infra_Admin;
+            System.getModule("com.vmware.pso.vcenter").createHznvCInfAdmRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.Appliance_Deployment)){
+            var role = hznAccess.Appliance_Deployment;
+            var datacenterName = podConfig.podID + "-mgmt-dc";
+            System.getModule("com.vmware.pso.vcenter").createVMApplianceDeploymentRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.getModule("com.vmware.pso.vcenter").assignDatacenterPermissionbyRoleName(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,datacenterName,ignoreSSLCertificate);
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.DTO_Lvl1_Vxrail)){
+            var role = hznAccess.DTO_Lvl1_Vxrail;
+            System.getModule("com.vmware.pso.vcenter").createDTOLvl1VxrRole(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,role.RoleName,ignoreSSLCertificate);
+            System.sleep(15*1000);
+            System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.Content_Lib_Admin)){
+            var role = hznAccess.Content_Lib_Admin;
+            System.getModule("com.vmware.pso.vcenter").assignGlobalPermissionbyRoleName(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.Read_Only)){
+            var role = hznAccess.Read_Only;
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignvCenterPermissionbyRoleName(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,ignoreSSLCertificate);
+            }
+        }
+        if (!dbc.isNullOrEmpty(hznAccess.No_Access)){
+            var role = hznAccess.No_Access;
+            for each (var vc in vivCenters) {
+                System.getModule("com.vmware.pso.vcenter").assignFolderPermissionbyRoleAndFolder(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,vCenters.VDIFolderName,"VM",ignoreSSLCertificate);
+                System.getModule("com.vmware.pso.vcenter").assignFolderPermissionbyRoleAndFolder(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,adUsers,role.ADGroups,role.RoleName,vCenters.BootDeviceFolder,"Datastore",ignoreSSLCertificate);
+            }
+        }
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action create and assign Horizon Roles failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    } 
+}
+
+//ESXi
+
+if (automationSwitchs.ESXi["Rotate Host Certs"]) {
+    System.log("ESXi: Update ESXi Certs");
+    
+    var mgmtESXiHostNames = System.getModule("com.vmware.pso.vcenter.powercli.host").getHostsofvCenter(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,ignoreSSLCertificate);
+    var mgmtVCHost = esxi.Hosts.filter(function (host) {
+        return host.Hostname == this;
+    }, mgmtESXiHostNames[0])[0];
+    var mgmtVCHostUser = mgmtVCHost.User;
+    var mgmtVcHostPass = mgmtVCHost.Password;
+
+    try {
+        System.log("ESXi: Rotating Management vCenter " + mgmtvCenter.Hostname + " ESXi Certs");
+        System.getModule("com.vmware.pso.esxi").rotateHostsCustomCerts(mgmtESXiHostNames,mgmtVCHostUser,mgmtVcHostPass,mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,
+                                                                       certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword,ignoreSSLCertificate,esxi.esxiPolicyDN);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action rotateHostsCustomCerts failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        var viESXiHostNames = System.getModule("com.vmware.pso.vcenter.powercli.host").getHostsofvCenter(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,ignoreSSLCertificate);
+        var viVCHost = esxi.Hosts.filter(function (host) {
+            return host.Hostname == this;
+        }, viESXiHostNames[0])[0];
+        var viVCHostUser = viVCHost.User;
+        var viVcHostPass = viVCHost.Password;
+
+        try {
+            System.log("ESXi: Rotating VI vCenter " + vc.Hostname + " ESXi Certs");
+            //System.getModule("com.vmware.pso.esxi").rotateHostsCustomCerts(viESXiHostNames,viVCHostUser,viVcHostPass,vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,
+            //                                                               certDetails.VenafiHostname,certDetails.VenafiUser,certDetails.VenafiPassword,ignoreSSLCertificate,esxi.esxiPolicyDN);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action rotateHostsCustomCerts failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    } 
+}
+
+if (automationSwitchs.ESXi["Set Shell Timeout"]) {
+    System.log("ESXi: Configure ESXi Shell Timeout for hosts in " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").setShellTimeout(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,
+                                                                   esxi.ShellTimeout,esxi.ShellInteractiveTimeout,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setShellTimeout failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("ESXi: Configure ESXi Shell Timeout for hosts in " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setShellTimeout(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,esxi.ShellTimeout,esxi.ShellInteractiveTimeout,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setShellTimeout failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+if (automationSwitchs.ESXi["Set Welcome Banner"]) {
+    System.log("ESXi: Configure ESXi Welcome Banner for hosts in " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").setWelcomeBanner(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,esxi.WelcomeBanner,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setWelcomeBanner failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("ESXi: Configure ESXi Welcome Banner for hosts in " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setWelcomeBanner(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,esxi.WelcomeBanner,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setWelcomeBanner failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+if (automationSwitchs.ESXi["Set Dump Collector"]) {
+    System.log("ESXi: Configure Dump Collector for hosts in " + mgmtvCenter.Hostname);
+    try {
+        System.getModule("com.vmware.pso.vcenter").setDumpCollector(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,esxi.DumpvNIC,
+                                                                    mgmtvCenter.IPAddress,vCenters.DumpPort,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action setDumpCollector failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("ESXi: Configure Dump Collector for hosts in " + vc.Hostname);
+            System.getModule("com.vmware.pso.vcenter").setDumpCollector(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,esxi.DumpvNIC,vc.IPAddress,vCenters.DumpPort,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setDumpCollector failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+//Set NTP
+//Set DNS
+//Join ESXi to AD
+//Assign AD Group Permissions to ESXi Host
+//Assign Qualys and Hardware Monitor Accounts
+//Set Path Selection Policy 
+    //We did not have a story for these.
+
+//vSAN
+
+if (automationSwitchs.vSAN["Set Kms Provider"]) {
+    System.log("vCenter: Configure KMS Provider on " + mgmtvCenter.Hostname);
+    var kmsNames = [];
+    var kmsAddresses = [];
+    var kmsPorts = [];
+    for each (var kms in vCenters.KMS.KmsServers) {
+        kmsNames.push(kms.FriendlyName);
+        kmsAddresses.push(kms.Hostname);
+        kmsPorts.push(kms.Port);
+    }
+    try {
+        var kmsUsername = mgmtvCenter.Hostname;
+        var kmsProvider = mgmtvCenter.Hostname + "-" + vCenters.KMS.ProviderName;
+        System.getModule("com.vmware.pso.vcenter").addUpdateKmsProvider(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,kmsNames,
+                                                                        kmsProvider,kmsAddresses,kmsPorts,kmsUsername,vCenters.KMS.KmsPassword,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action addUpdateKmsProvider failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Configure KMS Provider on " + vc.Hostname);
+            var kmsUsername = vc.Hostname;
+            var kmsProvider = vc.Hostname + "-" + vCenters.KMS.ProviderName;
+            System.getModule("com.vmware.pso.vcenter").addUpdateKmsProvider(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,kmsNames,kmsProvider,
+                                                                            kmsAddresses,kmsPorts,kmsUsername,vCenters.KMS.KmsPassword,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action addUpdateKmsProvider failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+if (automationSwitchs.vSAN["Enable vSan Encryption"]) {
+    System.log("vCenter: Configure Encryption using KMS on " + mgmtvCenter.Hostname);
+    try {
+        var kmsProvider = mgmtvCenter.Hostname + "-" + vCenters.KMS.ProviderName;
+        System.getModule("com.vmware.pso.vcenter").enablevSanEncryption(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,mgmtvCenter.vSanClusterName,kmsProvider,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action enablevSanEncryption failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        for each (var cluster in vc.vSanClusterNames) {
+            try {
+                System.log("vCenter: Configure Encryption using KMS on " + vc.Hostname);
+                var kmsProvider = vc.Hostname + "-" + vCenters.KMS.ProviderName;
+                System.getModule("com.vmware.pso.vcenter").enablevSanEncryption(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,cluster,kmsProvider,ignoreSSLCertificate);
+            } catch (e) {
+                if (continueOnFail) {
+                    System.error("Action enablevSanEncryption failed with error:\n" + JSON.stringify(e));
+                } else { throw e; }
+            }
+        }
+    }
+}
+
+if (automationSwitchs.vSAN["Create Storage Policy"]) {
+    System.log("vCenter: Configure vSAN Storage Policy on " + mgmtvCenter.Hostname);
+    try {
+        var spName = "vSAN-" + mgmtvCenter.VMName;
+        System.getModule("com.vmware.pso.vcenter").createvSanStoragePolicy(mgmtvCenter.Hostname,mgmtvCenter.SSOAdminUser,mgmtvCenter.SSOAdminPassword,spName,
+                                                                        vCenters.CustomStoragePolicyDiskStripes,vCenters.CustomStoragePolicyFTT,ignoreSSLCertificate);
+    } catch (e) {
+        if (continueOnFail) {
+            System.error("Action createvSanStoragePolicy failed with error:\n" + JSON.stringify(e));
+        } else { throw e; }
+    }
+    for each (var vc in vivCenters) {
+        try {
+            System.log("vCenter: Configure vSAN Storage Policy on " + vc.Hostname);
+            var spName = "vSAN-" + vc.VMName;
+            System.getModule("com.vmware.pso.vcenter").createvSanStoragePolicy(vc.Hostname,vc.SSOAdminUser,vc.SSOAdminPassword,spName,
+                                                                            vCenters.CustomStoragePolicyDiskStripes,vCenters.CustomStoragePolicyFTT,ignoreSSLCertificate);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action createvSanStoragePolicy failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+//NSX-T
+
+if (automationSwitchs.NSXT["Enable IPv6"]) {
+    for each (var nsx in nsxt.wldNSXT) {
+        try {
+            System.log("NSXT: Enable IPv6 on " + nsx.ManagerVIP);
+            System.getModule("com.vmware.pso.nsxt.rest.settings").toggleIPv6(nsx.ManagerVIP,nsx.AdminUser,nsx.AdminPassword,nsxt.EnableIPv6);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action toggleIPv6 failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+}
+
+if (automationSwitchs.NSXT["Create VDI Segments"]) {
+    for each (var nsx in nsxt.wldNSXT) {
+        System.log("NSXT: Create each VDI-T Guest Segment using Wells Segment Profile on " + nsx.ManagerVIP);
+        for each (var seg in nsx.vdiSegments) {
+            try {
+                System.getModule("com.vmware.pso.nsxt").createVDISegmentwithIPDiscoveryProfile(nsx.ManagerVIP,nsx.AdminUser,nsx.AdminPassword,nsxt.ipDiscoveryProfileName,seg.Name,seg.VLAN);
+            } catch (e) {
+                if (continueOnFail) {
+                    System.error("Action createVDISegmentwithIPDiscoveryProfile failed with error:\n" + JSON.stringify(e));
+                } else { throw e; }
+            }
+        }
+    }
+}
+
+if (automationSwitchs.NSXT["Configure Syslog"]) {
+    for each (var nsx in nsxt.wldNSXT) {
+        System.log("NSXT: Setup Syslog on " + nsx.ManagerVIP);
+        for each (var mgr in nsx.ManagerHostnames) {
+            try {
+                System.getModule("com.vmware.pso.nsxt").configureSyslogNSXTManagers(mgr,nsx.AdminUser,nsx.AdminPassword,vrli.Hostname,rootCert);
+            } catch (e) {
+                if (continueOnFail) {
+                    System.error("Action configureSyslogNSXTManagers failed with error:\n" + JSON.stringify(e));
+                } else { throw e; }
+            }
+        }
+    }
+}
+
+if (automationSwitchs.NSXT["Configure AD Settings"]) {
+
+    for each (var nsx in nsxt.wldNSXT) {
+        System.log("NSXT: Configure LDAP Settings " + nsx.ManagerVIP);
+        try {
+            System.getModule("com.vmware.pso.nsxt.rest.settings").setLDAPIntegration(nsx.ManagerVIP,nsx.AdminUser,nsx.AdminPassword,ad.DomainFQDN,ad.DomainBaseDN,ad.ADJoinUser,ad.ADJoinPassword);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action setLDAPIntegration failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+
+        System.log("NSXT: Add AD users/groups " + nsx.ManagerVIP);
+        var userOrGroupNames = [];
+        var userOrGroupBools = [];
+        var userOrGroupRoles = [];
+        for each (var userOrGroup in nsxt.LDAPUsersOrGroups) {
+            userOrGroupNames.push(userOrGroup.Name);
+            userOrGroupBools.push(userOrGroup.isGroup);
+            userOrGroupRoles.push(userOrGroup.RoleName);
+        }
+        try {
+            System.getModule("com.vmware.pso.nsxt").assignLDAPUsersGroups(nsx.ManagerVIP,nsx.AdminUser,nsx.AdminPassword,userOrGroupNames,userOrGroupRoles,userOrGroupBools,ad.DomainFQDN);
+        } catch (e) {
+            if (continueOnFail) {
+                System.error("Action assignLDAPUsersGroups failed with error:\n" + JSON.stringify(e));
+            } else { throw e; }
+        }
+    }
+
+}
+</script>
+        <in-binding>
+            <bind name="podJSON" type="string" export-name="podJSON"/>
+            <bind name="continueOnFail" type="boolean" export-name="continueOnFail"/>
+            <bind name="configName" type="string" export-name="configName"/>
+            <bind name="configPath" type="string" export-name="configPath"/>
+            <bind name="Environment" type="string" export-name="Environment"/>
+        </in-binding>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="260.0"/>
+    </workflow-item>
+    <presentation>
+        <p-param name="Environment">
+            <desc>Environment</desc>
+        </p-param>
+        <p-param name="Region">
+            <desc>Region</desc>
+        </p-param>
+        <p-param name="PodID">
+            <desc>PodID</desc>
+        </p-param>
+    </presentation>
+</ns2:workflow>

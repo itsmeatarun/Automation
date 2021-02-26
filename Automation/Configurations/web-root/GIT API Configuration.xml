@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" version="0.1.0">
+  <display-name><![CDATA[GIT API Configuration]]></display-name>
+  <description><![CDATA[Configuration related to accessing vRA REST API, including recently used Access Token and date token was issued.]]></description>
+  <atts>
+    <att name="gitBaseUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[https://github.wellsfargo.com]]></value>
+    </att>
+    <att name="gitAccessToken" type="string" read-only="false">
+      <value encoded="n"><![CDATA[9a1fa5665fb4f3e27a1f9dd9706b4c4abfad92ef]]></value>
+    </att>
+    <att name="rhelProvisionerFileName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[vm_provisioner.py]]></value>
+    </att>
+    <att name="gitBranchName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[develop]]></value>
+    </att>
+    <att name="gitRepoZipDownloadUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[https://github.wellsfargo.com/api/v3/repos/pce-eng/vm-provisioner-nextgen]]></value>
+    </att>
+    <att name="gitZipExtractPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/gitDownloads]]></value>
+    </att>
+    <att name="gitZipFileName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[pce-eng-repo.tar]]></value>
+    </att>
+    <att name="pipFolderPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[instance-prep]]></value>
+    </att>
+    <att name="tempRepoName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[pce-eng-repo]]></value>
+    </att>
+    <att name="puppetScriptName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[install_puppet.py]]></value>
+    </att>
+    <att name="puppetRepoPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/pce-eng/wf-install_puppet]]></value>
+    </att>
+    <att name="puppetBranch" type="string" read-only="false">
+      <value encoded="n"><![CDATA[master]]></value>
+    </att>
+    <att name="gitHosProjectEnvUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/raw/pce-eng/hos_project_onboard_env/prod/projects.yaml]]></value>
+    </att>
+    <att name="winProvisionerFileName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[vm_provisioner.py]]></value>
+    </att>
+    <att name="cmInstallername" type="string" read-only="false">
+      <value encoded="n"><![CDATA[cm_install.ps1]]></value>
+    </att>
+    <att name="cmInstallerRepo" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/pce-eng/vm-provisioner-nextgen]]></value>
+    </att>
+    <att name="cmInstallerFilePath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/vm_provisioner/cm_install.ps1]]></value>
+    </att>
+    <att name="gitCloudProvisionerZipUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[]]></value>
+    </att>
+    <att name="cpFolderName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[vm_provisioner]]></value>
+    </att>
+    <att name="cloudProvisionerRepoPath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[/pce-eng/vm-provisioner-nextgen]]></value>
+    </att>
+    <att name="cloudProvisionerFilePath" type="string" read-only="false">
+      <value encoded="n"><![CDATA[vm_provisioner/vm_provisioner.py]]></value>
+    </att>
+  </atts>
+</config-element>

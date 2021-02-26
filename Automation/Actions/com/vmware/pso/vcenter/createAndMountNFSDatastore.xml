@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createAndMountNFSDatastore" result-type="void" api-version="6.0.0" id="37f1bb86-ad76-4424-acb8-e08cd0efa1fb" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="datastoreName" t="string"><![CDATA[]]></param>
+  <param n="nfsServer" t="string"><![CDATA[]]></param>
+  <param n="nfsSharePath" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(datastoreName,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(nfsServer,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(nfsSharePath,"Input var: nfsSharePath");
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.storage").createNFSDatastore(vCenterFQDN, vCenterUser, vCenterPassword, datastoreName, nfsServer, nfsSharePath, ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+System.log("createNFSDatastore completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createAndMountNFSDatastore failed with error: " + createResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

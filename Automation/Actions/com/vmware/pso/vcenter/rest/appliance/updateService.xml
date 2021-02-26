@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="updateService" result-type="string" api-version="6.0.0" id="458aaa2f-4fbd-43a5-94ca-4aaf5a44e328" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.rest.appliance">
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionToken" t="string"><![CDATA[vCenter Session Token]]></param>
+  <param n="serviceID" t="string"><![CDATA[]]></param>
+  <param n="startupType" t="string"><![CDATA[One of: "AUTOMATIC", "DISABLED", "MANUAL"]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHost,"Input var: vCenterHost");
+dbc.ensureNotNullOrEmpty(sessionToken,"Input var: sessionToken");
+dbc.ensureNotNullOrEmpty(serviceID,"Input var: serviceID");
+dbc.ensureIsOneOf(startupType, ["AUTOMATIC", "DISABLED", "MANUAL"], "Input var: startupType");
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-api-session-id", sessionToken);
+var url = "/vcenter/services/" + serviceID;
+
+var body = {
+  "spec": {
+    "startup_type": startupType
+  }
+};
+
+var method = "PATCH";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return "success";]]></script>
+</dunes-script-module>

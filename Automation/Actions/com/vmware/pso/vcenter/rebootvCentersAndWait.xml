@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="rebootvCentersAndWait" result-type="void" api-version="6.0.0" id="110b9c6a-c537-4e82-bc61-df35da370f66" version="0.0.1" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterDetails" t="Array/string"><![CDATA[{ 	"vCenterHostname": "asdf", 	"vCenterUser": "asdf", 	"vCenterPassword": "asdf" }]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"/>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vCenterDetails,"Input var: vCenterDetails");
+dbc.ensureNotNullOrEmpty(ignoreSSLCertificate,"Input var: ignoreSSLCertificate");
+
+var actionJSONTemplate = {
+    "module": "com.vmware.pso.vcenter",
+    "action": "rebootvCenterAndWait",
+    "inputs": {
+        "parameters": []
+    }
+};
+var parameterJSONTemplate = {
+    "name": "string",
+    "scope": "local",
+    "type": "string",
+    "value": {
+        "string": {
+            "value": "string"
+        }
+    }
+};
+
+var actionInput = [];
+for each (var vCenter in vCenterDetails) {
+    var vC = JSON.parse(vCenter);
+    var input = JSON.parse(JSON.stringify(actionJSONTemplate));
+    
+    System.log("Preparing to reboot vCenter " + vC.vCenterHostname);
+
+    var vCenterHostname = JSON.parse(JSON.stringify(parameterJSONTemplate));
+    vCenterHostname.name = "vCenterHostname";
+    vCenterHostname.value.string.value = vC.vCenterHostname;
+    input.inputs.parameters.push(vCenterHostname);
+
+    var vCenterUser = JSON.parse(JSON.stringify(parameterJSONTemplate));
+    vCenterUser.name = "vCenterUser";
+    vCenterUser.value.string.value = vC.vCenterUser;
+    input.inputs.parameters.push(vCenterUser);
+
+    var vCenterPass = JSON.parse(JSON.stringify(parameterJSONTemplate));
+    vCenterPass.name = "vCenterPassword";
+    vCenterPass.value.string.value = vC.vCenterPassword;
+    input.inputs.parameters.push(vCenterPass);
+
+    actionInput.push(JSON.stringify(input));
+}
+
+System.log("Rebooting vCenters now.");
+
+System.getModule("com.vmware.pso.util").executeActionsParallel(actionInput,ignoreSSLCertificate);
+
+System.log("Reboot of all vCenters is complete.");
+return;]]></script>
+</dunes-script-module>

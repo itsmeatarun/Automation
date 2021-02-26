@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="executeRestOperation" result-type="Any" api-version="6.0.0" id="9ae77c2f-c652-44c6-a6ea-e992669d1d95" version="1.1.1" allowed-operations="evf" category-name="com.vmware.pso.rest.util">
+  <description><![CDATA[Execute Rest Operation, Return Response ]]></description>
+  <param n="url" t="string"><![CDATA[Rest Operation URL]]></param>
+  <param n="method" t="string"><![CDATA[Request Method (POST/GET/PUT)]]></param>
+  <param n="content" t="string"><![CDATA[Request Contents]]></param>
+  <param n="inParamtersValues" t="Array/string"><![CDATA[In Paramters Values]]></param>
+  <param n="contentType" t="string"><![CDATA[Default Request Content Type (Can be overridden by headers)]]></param>
+  <param n="headers" t="Properties"><![CDATA[Request Headers]]></param>
+  <param n="restHost" t="REST:RESTHost"><![CDATA[Rest Host]]></param>
+  <script encoded="false"><![CDATA["use strict";
+System.debug("====== Begin Action " + arguments.callee.name.substr(6) + " ======");
+
+if (!url) { throw "URL Blank"; }
+if (!method) { throw "method Blank"; }
+if (!contentType) { throw "ContentType Blank"; }
+if (!headers) { throw "headers Blank"; }
+if (!restHost) { throw "RestHost Blank"; }
+
+var restOp = new RESTOperation("Rest Operation");
+restOp.method = method;
+restOp.urlTemplate = url;
+restOp.defaultContentType = contentType;
+var operation = restHost.addOperation(restOp);
+// RESTHostManager.updateHost(restHost);
+
+System.debug("Operations = " + operation);
+//System.debug("Content: " + content + " ; InParams: " + inParamtersValues);
+var request = operation.createRequest(inParamtersValues, content);
+
+request.contentType = contentType;
+for each (key in headers.keys) {
+    System.debug("header: '" + key + "', value: '" + headers.get(key) + "'");
+	request.setHeader(key,headers.get(key));
+}
+// System.log("Executing...");
+var response = request.execute();
+return response;]]></script>
+</dunes-script-module>

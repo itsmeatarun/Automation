@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="91c0d597-1e08-4db3-b267-bb6b94edd4e3" version="0.0.3" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Onboard VM Decommissioning]]></display-name>
+  <description><![CDATA[This workflow will lookup the additional disks (vms) of onboarded openstacks VMS and destroy one by one.]]></description>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+  </input>
+  <attrib name="vms" type="Array/VC:VirtualMachine" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="175.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[Lookup the additional disks]]></display-name>
+    <script encoded="false"><![CDATA[var vcHost = vm.sdkConnection;
+var vDiskMgr = vcHost.virtualDiskManager;
+var vms = [];
+// for each disk
+for each(var device in vm.config.hardware.device){
+    if (device instanceof VcVirtualDisk) {  
+        if (device.backing instanceof VcVirtualDiskFlatVer2BackingInfo) {
+            if (device.deviceInfo.label != "Hard disk 1") {
+                var dsPath = device.backing.fileName;
+                var vmdkName = dsPath.split("/").pop().split(".")[0];
+                if(lookupVm(vmdkName)) {
+                    vms.push(lookupVm(vmdkName)); 
+                }
+            }
+        }
+    }
+}
+
+function lookupVm(vmdkName) {
+    var vmdisks = vcHost.getAllVirtualMachines(null, "xpath:name[matches(.,'"+vmdkName.replace("(","\\(").replace(")","\\)")+"')]");
+    if ( (vmdisks[0] != null) && (vmdisks.length == 1) ) 
+    {
+        System.log("External Disk VM  : " + vmdisks[0].name); 
+        return vmdisks[0];
+    } else {
+        System.warn("Unable to find volume vm: " + vmdkName);
+        return null;
+    }
+} ]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vms" type="Array/VC:VirtualMachine" export-name="vms"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="foreach">
+    <display-name><![CDATA[Foreach - Delete Virtual Machine]]></display-name>
+    <in-binding>
+      <bind name="vm" type="Array/VC:VirtualMachine" export-name="*vms">
+        <description><![CDATA[Virtual machine to delete]]></description>
+      </bind>
+    </in-binding>
+    <out-binding/>
+    <reference type="Workflow" id="BD80808080808080808080808080808003C180800122528313869552e41805bb1"/>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

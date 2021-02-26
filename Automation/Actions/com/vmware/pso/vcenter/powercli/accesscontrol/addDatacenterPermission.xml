@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addDatacenterPermission" result-type="Properties" api-version="6.0.0" id="4b18ac6e-2c28-461f-a79c-3678cb38e572" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.accesscontrol" memory-limit="256000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleusers" t="Array/string"><![CDATA[Array of username to assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="rolegroups" t="Array/string"><![CDATA[Array of group name assign role (Ex: domain\user; domain\group)]]></param>
+  <param n="roleName" t="string"><![CDATA[Name of roll to apply]]></param>
+  <param n="propogate" t="boolean"><![CDATA[true/false propogate permissions]]></param>
+  <param n="datacenterName" t="string"><![CDATA[Optional, if blank, will use all found datacenters.]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        $roleusers = $inputs.roleusers
+        $rolegroups = $inputs.rolegroups
+        [ValidateNotNullorEmpty()]
+        $roleName = $inputs.roleName
+        [ValidateNotNullorEmpty()]
+        $propogate = $inputs.propogate
+        $datacenterName = $inputs.datacenterName
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        if ($datacenterName -eq $null -or $datacenterName -eq "") {
+            $datacenterName = "*"
+        }
+        $datacenter = Get-Datacenter -Name $datacenterName
+        $authmgr = Get-View $viConnection.ExtensionData.Client.ServiceContent.AuthorizationManager
+
+        if ($roleusers -ne $null -And $roleusers.count -gt 0) {
+            Write-Host "Creating new datacenter user permission(s) for $($datacenter.Name) now."
+            foreach ($roleUser in $roleusers){
+                $perm = New-Object VMware.VIM.Permission
+                $perm.Principal = $roleUser
+                $perm.group = $false
+                $perm.propagate = $propogate
+                $perm.RoleId = $authmgr.RoleList | where {$_.Name -eq $roleName} | Select -ExpandProperty RoleId
+                $authmgr.SetEntityPermissions($datacenter.ExtensionData.MoRef,$perm)
+            }
+            Write-Host "datacenter user permission(s) creation successful."
+        }
+        if ($rolegroups -ne $null -And $rolegroups.count -gt 0) {
+            Write-Host "Creating new datacenter group permission(s) for $($datacenter.Name) now."
+            foreach ($roleGroup in $rolegroups){
+                $perm = New-Object VMware.VIM.Permission
+                $perm.Principal = $roleGroup
+                $perm.group = $true
+                $perm.propagate = $propogate
+                $perm.RoleId = $authmgr.RoleList | where {$_.Name -eq $roleName} | Select -ExpandProperty RoleId
+                $authmgr.SetEntityPermissions($datacenter.ExtensionData.MoRef,$perm)
+            }
+            Write-Host "datacenter group permission(s) creation successful."
+        }
+    } catch {
+        Write-Host "Failed creating new datacenter permission(s). Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+    
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

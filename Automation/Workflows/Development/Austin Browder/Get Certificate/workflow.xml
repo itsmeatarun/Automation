@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="55e2795b-89dc-497d-a657-b0ff17b0dbd0" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get Certificate]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <attrib name="result" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[#[##]#]]></value>
+  </attrib>
+  <attrib name="certificateDN_1" type="string" read-only="false">
+    <value encoded="n"><![CDATA[\VED\Policy\Code Signing\Certificates\162 Lab\esxi14.pso.vsphere.local]]></value>
+  </attrib>
+  <attrib name="includeChain_1" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="privateKey_1" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="password_1" type="SecureString" read-only="false">
+    <value encoded="n"><![CDATA[12BI56J4DO77T61L72S65S31N32H33P34U35S21X472E91DOC2ED96EYF415B87TB745803P7E532AWB7C347FZB323756IE3594C6OD94EFAENF9215B6KA7677CAKBE68FF9YE17C589HE18D0A9V719F95BU5552F0BLC4A03B7R1443C9AXD7E5F10S8F760ABJ]]></value>
+  </attrib>
+  <attrib name="host_1" type="string" read-only="false">
+    <value encoded="n"><![CDATA[10.0.0.11]]></value>
+  </attrib>
+  <attrib name="user_1" type="string" read-only="false">
+    <value encoded="n"><![CDATA[admin]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="400.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.vmware.pso.venafi/getCertificate">
+    <display-name><![CDATA[Action element]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.venafi").getCertificate(host,user,password,certificateDN,privateKey,includeChain);
+]]></script>
+    <in-binding>
+      <bind name="host" type="string" export-name="host_1"/>
+      <bind name="user" type="string" export-name="user_1"/>
+      <bind name="password" type="SecureString" export-name="password_1"/>
+      <bind name="certificateDN" type="string" export-name="certificateDN_1"/>
+      <bind name="privateKey" type="boolean" export-name="privateKey_1"/>
+      <bind name="includeChain" type="boolean" export-name="includeChain_1"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Properties" export-name="result"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[System.log(JSON.stringify(result));]]></script>
+    <in-binding>
+      <bind name="result" type="Properties" export-name="result"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="280.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

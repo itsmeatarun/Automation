@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="unmountvCenterVMcdromDevice" result-type="string" api-version="6.0.0" id="dfa74fc9-b682-452f-af59-a5557e334b88" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.vcenter.rest">
+  <description><![CDATA[Unmounts specified cdrom device on specified vm. Sets the cdrom back to client device passthrough.]]></description>
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionID" t="string"><![CDATA[vCenter Session Token]]></param>
+  <param n="vmID" t="string"><![CDATA[VM ID to modify cdrom device]]></param>
+  <param n="cdromID" t="string"><![CDATA[cdrom device id]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHost,"vCenterHost");
+dbc.ensureNotNullOrEmpty(sessionID,"sessionID");
+dbc.ensureNotNullOrEmpty(vmID,"vmID");
+dbc.ensureNotNullOrEmpty(cdromID,"cdromID");
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-api-session-id", sessionID);
+var url = "/vcenter/vm/" + vmID + "/hardware/cdrom/" + cdromID;
+
+var body = {
+  "spec": {
+    "start_connected": false,
+    "allow_guest_control": true,
+    "backing": {
+      "device_access_type": "PASSTHRU",
+      "type": "CLIENT_DEVICE"
+    }
+  }
+};
+
+var method = "PATCH";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return "success";]]></script>
+</dunes-script-module>

@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="00383034-c96d-4867-82ff-b5c0d06e8aab" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set Proxy]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <attrib name="proxyHost" type="string" read-only="false">
+    <value encoded="n"><![CDATA[10.0.0.254]]></value>
+  </attrib>
+  <attrib name="proxyPort" type="string" read-only="false">
+    <value encoded="n"><![CDATA[3128]]></value>
+  </attrib>
+  <attrib name="sddcManagerVmName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[sddc-manager]]></value>
+  </attrib>
+  <attrib name="sddcManagervCenterFQDN" type="string" read-only="false">
+    <value encoded="n"><![CDATA[vcenter-m01.pso.vsphere.local]]></value>
+  </attrib>
+  <attrib name="vCenterUser" type="string" read-only="false">
+    <value encoded="n"><![CDATA[administrator@vsphere.local]]></value>
+  </attrib>
+  <attrib name="vCenterPassword" type="SecureString" read-only="false">
+    <value encoded="n"><![CDATA[12BS56N4DZ77S61U72K65K31X32T33G34I35X21R6C73702X994E1CQ79F8B89MBCEFFF3M21C63D0T1AF6ECEZD4AC0B0N86FA048HE97F547ZA388498NE2248R8FECC35O12B4B48J1476A90UD0E3134WA4E0323Z739143W211120EY1C11B9AODAB7592T]]></value>
+  </attrib>
+  <attrib name="sddcManagerUser" type="string" read-only="false">
+    <value encoded="n"><![CDATA[root]]></value>
+  </attrib>
+  <attrib name="sddcManagerPassword" type="SecureString" read-only="false">
+    <value encoded="n"><![CDATA[12BK56J4DJ77O61X72O65R31S32K33O34Z35W21WB055E7CH85F020FL8A29CE8KDB121AAZA4DC550PAE49135I7E494A2WC676DAEUAF0F16EI32C230YB0F10EDK79F605LD463E2BGBB42375Z9D9C196IAAE9FA7V1490B2FN71C3FB4ID5E25A2S8596B4DL]]></value>
+  </attrib>
+  <attrib name="result" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="327.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vcf.sddcmanager/setProxy">
+    <display-name><![CDATA[Set Proxy]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.vcf.sddcmanager").setProxy(proxyHost,proxyPort,sddcManagerVmName,sddcManagervCenterFQDN,vCenterUser,vCenterPassword,sddcManagerUser,sddcManagerPassword);
+]]></script>
+    <in-binding>
+      <bind name="proxyHost" type="string" export-name="proxyHost"/>
+      <bind name="proxyPort" type="string" export-name="proxyPort"/>
+      <bind name="sddcManagerVmName" type="string" export-name="sddcManagerVmName"/>
+      <bind name="sddcManagervCenterFQDN" type="string" export-name="sddcManagervCenterFQDN"/>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="sddcManagerUser" type="string" export-name="sddcManagerUser"/>
+      <bind name="sddcManagerPassword" type="SecureString" export-name="sddcManagerPassword"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="result"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="180.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

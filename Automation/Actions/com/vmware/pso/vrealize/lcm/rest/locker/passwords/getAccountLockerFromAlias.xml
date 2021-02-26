@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getAccountLockerFromAlias" result-type="string" api-version="6.0.0" id="4a6a78ff-2b9c-4079-92e9-973843996ff6" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vrealize.lcm.rest.locker.passwords">
+  <param n="lcmHost" t="string"><![CDATA[]]></param>
+  <param n="lcmUsername" t="string"><![CDATA[]]></param>
+  <param n="lcmPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="lockerAlias" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(lcmHost, "Input var: lcmHost");
+dbc.ensureNotNullOrEmpty(lcmUsername, "Input var: lcmUsername");
+dbc.ensureNotNullOrEmpty(lcmPassword, "Input var: lcmPassword");
+dbc.ensureNotNullOrEmpty(lockerAlias, "Input var: lockerAlias");
+
+var restHost = System.getModule("com.vmware.pso.vrealize.lcm.rest").getTransientRESTHost(lcmHost, lcmUsername, lcmPassword);
+dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+
+var url = "/lcm/locker/api/v2/passwords?size=19&from=0&aliasQuery={lockerAlias}";
+
+var method = "GET";
+var content = null;
+var inParametersValues = [lockerAlias]
+
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+dbc.ensureNotNullOrEmpty(response.passwords,"response.passwords");
+
+if (response.total != 1) {
+    throw "Invalid number of passwords (" + response.total + ") found for provided alias: " + lockerAlias;
+}
+
+return JSON.stringify(response.passwords[0]);]]></script>
+</dunes-script-module>

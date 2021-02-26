@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="installDomainCertificates" result-type="string" api-version="6.0.0" id="a6c08d35-33e8-42af-ab13-53d8e377ebe6" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.rest.domains">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="token" t="string"><![CDATA[]]></param>
+  <param n="domain" t="string"><![CDATA[]]></param>
+  <param n="certificatesData" t="Array"><![CDATA[{"fqdn": certificateData.name, "type": certificateData.type}]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"host");
+dbc.ensureNotNullOrEmpty(token,"token");
+
+var restHost = System.getModule("com.vmware.pso.vcf.sddcmanager.rest").getTransientSDDCManagerHost(host);
+dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+return main();
+
+function main() { 
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	headers.put("Authorization", token);
+	var url = "/v1/domains/" + domain + "/certificates";
+	
+	var method = "PATCH";
+    var content = {
+        "operationType" : "INSTALL",
+        "resources" : []
+    }; 
+
+    for(var x=0; x < certificatesData.length; x++) {
+        var certificateData = certificatesData[x];
+
+        content.resources.push(
+            {
+                "fqdn": certificateData.name,
+                "type": certificateData.type
+            }
+        );
+    };
+    content = JSON.stringify(content);
+	var inParametersValues = null;
+	
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug("install domain certificates response'" + JSON.stringify(response) + "'");	
+	
+	return JSON.stringify(response);
+}]]></script>
+</dunes-script-module>

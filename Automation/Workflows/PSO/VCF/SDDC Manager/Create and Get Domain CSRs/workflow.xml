@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="9eb48520-b6a4-45a2-b1a5-d624fc354f1c" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create and Get Domain CSRs]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="user" type="string"/>
+    <param name="password" type="SecureString"/>
+    <param name="host" type="string"/>
+    <param name="domain" type="string"/>
+    <param name="country" type="string"/>
+    <param name="locality" type="string"/>
+    <param name="organization" type="string"/>
+    <param name="organizationUnit" type="string"/>
+    <param name="email" type="string"/>
+    <param name="keyAlgorithm" type="string"/>
+    <param name="state" type="string"/>
+    <param name="resources" type="Array/Properties"/>
+    <param name="keySize" type="string"/>
+  </input>
+  <output>
+    <param name="certificatesData" type="Array/Properties"/>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="326.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" business-status="" type="task" script-module="com.vmware.pso.vcf.sddcmanager/createAndGetDomainCSRs">
+    <display-name><![CDATA[createAndGetDomainCSRs]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.vcf.sddcmanager").createAndGetDomainCSRs(user,password,host,domain,country,locality,organization,organizationUnit,email,keySize,keyAlgorithm,state,resources);
+]]></script>
+    <in-binding>
+      <bind name="user" type="string" export-name="user">
+        <description><![CDATA[SDDC Manager username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[SDDC Manager password]]></description>
+      </bind>
+      <bind name="host" type="string" export-name="host">
+        <description><![CDATA[SDDC Manager host]]></description>
+      </bind>
+      <bind name="domain" type="string" export-name="domain">
+        <description><![CDATA[SDDC Manager vcf domain]]></description>
+      </bind>
+      <bind name="country" type="string" export-name="country">
+        <description><![CDATA[CSR Country]]></description>
+      </bind>
+      <bind name="locality" type="string" export-name="locality">
+        <description><![CDATA[CSR Locality]]></description>
+      </bind>
+      <bind name="organization" type="string" export-name="organization">
+        <description><![CDATA[CSR Organization]]></description>
+      </bind>
+      <bind name="organizationUnit" type="string" export-name="organizationUnit">
+        <description><![CDATA[CSR Organization Unit]]></description>
+      </bind>
+      <bind name="email" type="string" export-name="email">
+        <description><![CDATA[CSR email]]></description>
+      </bind>
+      <bind name="keySize" type="string" export-name="keySize">
+        <description><![CDATA[CSR Key Size]]></description>
+      </bind>
+      <bind name="keyAlgorithm" type="string" export-name="keyAlgorithm">
+        <description><![CDATA[CSR Key Algorith]]></description>
+      </bind>
+      <bind name="state" type="string" export-name="state">
+        <description><![CDATA[CSR State]]></description>
+      </bind>
+      <bind name="resources" type="Array/Properties" export-name="resources">
+        <description><![CDATA[{"fqdn": "vcenter-vi01.pso.vsphere.local", "type": "VCENTER"}]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/Properties" export-name="certificatesData"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

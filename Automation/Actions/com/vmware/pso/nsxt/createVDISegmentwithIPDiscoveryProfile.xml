@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createVDISegmentwithIPDiscoveryProfile" result-type="void" api-version="6.0.0" id="f2a58b50-9ff6-4ff8-9072-4a8971409568" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ipDiscoveryProfileName" t="string"><![CDATA[]]></param>
+  <param n="vdiSegmentName" t="string"><![CDATA[]]></param>
+  <param n="vdiSegmentVLAN" t="number"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(ipDiscoveryProfileName,"Input var: ipDiscoveryProfileName");
+dbc.ensureNotNullOrEmpty(vdiSegmentName,"Input var: vdiSegmentName");
+dbc.ensureNotNullOrEmpty(vdiSegmentVLAN,"Input var: vdiSegmentVLAN");
+
+System.log("Creating Ip Discovery Segment Profile");
+var dup_ip_detection = true;
+var arp_snooping = true;
+var arp_limit = 1;
+var nd_snooping = true;
+var nd_limit = 3;
+var arp_nd_timeout = 10;
+var enable_on_first_use = true;
+var dhcp_snooping = true;
+var dhcp_v6_snooping = true;
+var vmtools = true;
+var vmtools_v6 = true;
+var ipDiscoveryProfileID = System.getModule("com.vmware.pso.nsxt.rest.segments").createIpDiscoverySegmentProfile(nsxtHost,nsxtAdmin,nsxtPassword,ipDiscoveryProfileName,dup_ip_detection,arp_snooping,arp_limit,nd_snooping,nd_limit,arp_nd_timeout,enable_on_first_use,dhcp_snooping,dhcp_v6_snooping,vmtools,vmtools_v6);
+System.debug("ipDiscoveryProfileID: " + ipDiscoveryProfileID);
+
+System.log("Getting Default VLAN Transport Zone");
+var defaultVLAN_TZ = System.getModule("com.vmware.pso.nsxt.rest.segments").getDefaultVLANTransportZone(nsxtHost,nsxtAdmin,nsxtPassword);
+System.debug("defaultVLAN_TZ: " + defaultVLAN_TZ);
+var defaultVLAN_TZ_Path = JSON.parse(defaultVLAN_TZ).path;
+
+System.log("Creating Segment: " + vdiSegmentName);
+var segmentId = System.getModule("com.vmware.pso.nsxt.rest.segments").createSegment(nsxtHost,nsxtAdmin,nsxtPassword,vdiSegmentName,defaultVLAN_TZ_Path,vdiSegmentVLAN);
+System.debug("segmentId: " + segmentId);
+
+System.log("Getting segment discovery profile binding map id");
+var sdpBindingMapId = System.getModule("com.vmware.pso.nsxt.rest.segments").getSegmentDiscoveryProfileBindingMapId(nsxtHost,nsxtAdmin,nsxtPassword,segmentId);
+if (dbc.isNullOrEmpty(sdpBindingMapId)) {
+    sdpBindingMapId = segmentId + "_sdpbm_1";
+}
+
+System.log("Mapping VDI Ip Discovery profile to VDI Segment");
+System.getModule("com.vmware.pso.nsxt.rest.segments").patchSegmentDiscoveryProfileBindingMap(nsxtHost,nsxtAdmin,nsxtPassword,segmentId,sdpBindingMapId,ipDiscoveryProfileID);
+
+return;]]></script>
+</dunes-script-module>

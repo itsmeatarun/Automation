@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setVsanEncryption" result-type="Properties" api-version="6.0.0" id="730c9a6c-8597-4737-8497-77fedc08989f" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.storage" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="clusterName" t="string"><![CDATA[]]></param>
+  <param n="kmsClusterName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        $clusterName = $inputs.clusterName
+        $kmsClusterName = $inputs.kmsClusterName
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        if ($clusterName -eq $null -or $clusterName -eq "") {
+            Write-Host "Input: clusterName not specified, assuming that we want to enable encryption on all clusters."
+            $clusterName = "*"
+        }
+        if ($kmsClusterName -eq $null -or $kmsClusterName -eq "") {
+            Write-Host "WARNING: Input: kmsClusterName not specified. We will try to find the KMS provider anyways."
+            $kmsClusterName = "*"
+        }
+
+        $encryptionTasks = Set-VsanEncryption -ClusterName $clusterName -KmsClusterName $kmsClusterName
+        Write-Host "vSAN encryption task(s) successfully started."
+
+    } catch {
+        Write-Host "Failed enabling vSAN encryption. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+
+Function Set-VsanEncryption {
+    # Set our Parameters
+    [CmdletBinding()]Param(
+    [Parameter(Mandatory = $false)][String]$ClusterName="*",
+    [Parameter(Mandatory = $false)][String]$KmsClusterName="*"
+    )
+ 
+    # Get the Cluster 
+
+    $vsanClusters = Get-Cluster -Name $ClusterName
+ 
+    # Get the list of KMS Servers that are included 
+    $KmsCluster = Get-KmsCluster -Name $KmsClusterName -ErrorAction SilentlyContinue
+
+    if ($KmsCluster.count -eq 0) {
+        throw "No KMS provider found matching input name $KmsClusterName"
+    }
+    if ($KmsCluster.count -ne 1) {
+        throw "Too many KMS providers found matching input name $KmsClusterName"
+    }
+    # Get the vSAN Cluster Configuration View
+    $vsanVcClusterConfig = Get-VsanView -Id "VsanVcClusterConfigSystem-vsan-cluster-config-system"
+    $encryptionTasks = @()
+
+    foreach ($cluster in $vsanClusters) { 
+        # Get Encryption State
+        $EncryptedVsan = $vsanVcClusterConfig.VsanClusterGetConfig($cluster.ExtensionData.MoRef).DataEncryptionConfig
+ 
+        # If vSAN is enabled
+        if ($cluster.vSanEnabled) {
+            if ($EncryptedVsan.KmsProviderId.Id -eq $KmsCluster.Name -and $EncryptedVsan.EncryptionEnabled) {
+                # If the Specified KMS Profile is the KMS Profile being used, then don't do anything
+                Write-Host "Encryption is already enabled and $($EncryptedVsan.KmsProviderId.Id) is already the assigned KMS Cluster Profile"
+            } else {
+                Write-Host "Enablind encryption and setting the KMS provider to $KmsCluster on Cluster $($cluster.Name)"
+
+                # Setup the KMS Provider Id Specification
+                $KmsProviderIdSpec = New-Object VMware.Vim.KeyProviderId
+                $KmsProviderIdSpec.Id = $KmsCluster.Name
+
+                # Setup the Data Encryption Configuration Specification
+                $DataEncryptionConfigSpec = New-Object VMware.Vsan.Views.VsanDataEncryptionConfig
+                $DataEncryptionConfigSpec.KmsProviderId = $KmsProviderIdSpec
+                $DataEncryptionConfigSpec.EncryptionEnabled = $true
+
+                # Set the Reconfigure Specification to use the Data Encryption Configuration Spec
+                $vsanReconfigSpec = New-Object VMware.Vsan.Views.VimVsanReconfigSpec
+                $vsanReconfigSpec.DataEncryptionConfig = $DataEncryptionConfigSpec
+            
+                # Execute the task of changing the KMS Cluster Profile Being Used
+                $encryptionTasks += $vsanVcClusterConfig.VsanClusterReconfig($cluster.ExtensionData.MoRef,$vsanReconfigSpec)
+            }
+        } else {
+            Write-Host "Warning: vSAN not enabled on cluster $($cluster.Name)"
+        }
+    }
+    return $encryptionTasks
+}]]></script>
+</dunes-script-module>

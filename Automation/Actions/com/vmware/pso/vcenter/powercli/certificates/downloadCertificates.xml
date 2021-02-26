@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="downloadCertificates" result-type="string" api-version="6.0.0" id="afb7ab75-1d98-4e2f-9a1c-d1969e0cb9e9" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.certificates">
+  <param n="certificateDNs" t="Properties"><![CDATA[]]></param>
+  <param n="venafiHost" t="string"><![CDATA[]]></param>
+  <param n="venafiUser" t="string"><![CDATA[]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var types = certificateDNs.keys;
+
+for(var x=0; x < types.length; x++) {
+    var type = types[x];
+    var certificateDN = certificateDNs.get(type);
+    var certificateData = System.getModule("com.vmware.pso.venafi").getCertificate(venafiHost, venafiUser, venafiPassword, certificateDN, true, true);
+
+    var certificates = certificateData.certificates;
+    var privateKey = certificateData.privateKey;
+
+    System.getModule("com.vmware.pso.remoteScript").copyFileToGuest(
+        vcVM,
+        vcfqdn, 
+        vcuser, 
+        vcpassword, 
+        privateKey, 
+        type + ".key", 
+        "/tmp/certs", 
+        vcGuestUser, 
+        vcGuestPassword, 
+        ignoreSSLCertificate
+    );
+
+    var deviceCertificate;
+    var issuerChain = "";
+    
+    for(var y=0; y < certificates.length; y++) {
+        if(y == 0) {
+            deviceCertificate = certificates[y];
+        } else {
+            issuerChain += certificates[y] + "\r\n";
+        }
+    }
+
+    System.getModule("com.vmware.pso.remoteScript").copyFileToGuest(
+        vcVM,
+        vcfqdn, 
+        vcuser, 
+        vcpassword, 
+        deviceCertificate, 
+        type + ".pub", 
+        "/tmp/certs", 
+        vcGuestUser, 
+        vcGuestPassword, 
+        ignoreSSLCertificate
+    );
+
+    System.getModule("com.vmware.pso.remoteScript").copyFileToGuest(
+        vcVM,
+        vcfqdn, 
+        vcuser, 
+        vcpassword, 
+        issuerChain, 
+        type + "-issuer.pub", 
+        "/tmp/certs", 
+        vcGuestUser, 
+        vcGuestPassword, 
+        ignoreSSLCertificate
+    );
+}]]></script>
+</dunes-script-module>

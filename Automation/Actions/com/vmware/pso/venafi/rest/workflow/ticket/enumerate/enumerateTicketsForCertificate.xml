@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="enumerateTicketsForCertificate" result-type="string" api-version="6.0.0" id="24f7d32a-0c73-4ab5-a586-31de3650fe21" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi.rest.workflow.ticket.enumerate">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="apiKey" t="string"><![CDATA[]]></param>
+  <param n="objectDN" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(apiKey, "apiKey");
+dbc.ensureNotNullOrEmpty(objectDN, "objectDN");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.venafi.rest").getTransientRESTHost(host);
+	dbc.ensureNotNullOrEmpty(restHost,"restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+    headers.put("x-venafi-api-key", apiKey);
+	var url = "/workflow/ticket/enumerate";
+	
+	var method = "POST";
+	var content = JSON.stringify(
+        {
+            "ObjectDN": objectDN
+        }
+	);
+	
+	var inParametersValues = null;
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": Enumerate ticket response '" + JSON.stringify(response) + "'");
+	
+	return JSON.stringify(response);
+}
+	]]></script>
+</dunes-script-module>

@@ -1,0 +1,561 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item4" object-name="workflow:name=generic" id="d1f29ad0-d4d4-4705-a759-f64c2620818b" version="1.1.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Compute Post Provision - Create Metadata File In Guest]]></display-name>
+  <description><![CDATA[Properties of virtual machine are written to JSON and copied to the provisioned VM.]]></description>
+  <error-handler name="item45">
+    <position y="10.0" x="385.0"/>
+  </error-handler>
+  <position y="10.0" x="255.0"/>
+  <input>
+    <param name="inputProperties" type="Properties"/>
+  </input>
+  <attrib name="vm" type="VC:VirtualMachine" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[Virtual Machine (VC)]]></description>
+  </attrib>
+  <attrib name="lvl" type="number" read-only="false">
+    <value encoded="n"><![CDATA[5.0]]></value>
+  </attrib>
+  <attrib name="vmUuid" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vcUuid" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorText" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Unable to find VM in vCenter]]></value>
+  </attrib>
+  <attrib name="jsonObj" type="Any" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="osFamily" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vraBaseUrl" type="string" read-only="false" conf-id="3c2e0092-6448-49f4-8b5f-eaea26743b0c" conf-key="vraBaseUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="accessToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="machineId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="networkIds" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <attrib name="networkId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="networkArray" type="Array/Any" read-only="false">
+    <value encoded="n"><![CDATA[[]]]></value>
+  </attrib>
+  <attrib name="delay" type="number" read-only="false">
+    <value encoded="n"><![CDATA[30.0]]></value>
+    <description><![CDATA[Delay to wait for Windows VM to reboot]]></description>
+  </attrib>
+  <attrib name="osTypeFailureCount" type="number" read-only="false">
+    <value encoded="n"><![CDATA[0.0]]></value>
+  </attrib>
+  <attrib name="diskDetails" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="networkDetails" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vendorData" type="ResourceElement" read-only="false">
+    <value encoded="n"><![CDATA[dunes://service.dunes.ch/ResourceElement?id='51476e9c-58c0-4551-ae44-30a2c5cd7047'&dunesName='ResourceElement']]></value>
+  </attrib>
+  <attrib name="isNeedImageBuild" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="virtualEnvPath" type="string" read-only="false" conf-id="6e14f691-e880-4f61-a60e-a3600e3684bc" conf-key="virtualEnvPath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitRepoZipDownloadUrl" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="gitRepoZipDownloadUrl">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitZipExtractPath" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="gitZipExtractPath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="gitZipFileName" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="gitZipFileName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="rhelVersion" type="string" read-only="false">
+    <value encoded="n"><![CDATA[rhel8]]></value>
+  </attrib>
+  <attrib name="tempRepoName" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="tempRepoName">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="pipFolderPath" type="string" read-only="false" conf-id="f8bae1f9-c57b-424c-b0a9-5adf6b421f34" conf-key="pipFolderPath">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="isRebuild" type="boolean" read-only="false">
+    <value encoded="n"><![CDATA[false]]></value>
+  </attrib>
+  <attrib name="actionResultRemedy" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item1" out-name="item5" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Create JSON]]></display-name>
+    <script encoded="false"><![CDATA[var customProperties = inputProperties.customProperties;
+var vmUuid = inputProperties.externalIds[0];
+var vcUuid = customProperties.vcUuid;
+var owner = System.getContext().getParameter("__metadata_userName");//unused
+
+vmName = inputProperties.resourceNames[0];
+machineId = inputProperties.resourceIds[0];
+System.log("VirtualMachineId : " + machineId);
+
+for each (var ips in inputProperties.addresses) {
+	for each (var ip in ips) {
+		//System.log("  item[0][0] type:" + System.getObjectType(inputProperties.addresses[0][0]));
+		ipaddress = ip;
+		if (ipaddress) break;
+	}
+}
+
+var jsonObj = new  Object();
+jsonObj["userId"] = owner;
+for each (key in inputProperties.keys) {
+    jsonObj[key]=inputProperties.get(key);
+}
+
+
+var mimeAttachment = vendorData.getContentAsMimeAttachment();
+
+if (mimeAttachment != null) {
+	var content = mimeAttachment.content;
+	if (content != "") {
+		 jsonObj["vendorData"] = JSON.parse(content);
+        //System.debug(content);
+	}
+}]]></script>
+    <in-binding>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+      <bind name="vendorData" type="ResourceElement" export-name="vendorData"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vmUuid" type="string" export-name="vmUuid"/>
+      <bind name="vcUuid" type="string" export-name="vcUuid"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="machineId" type="string" export-name="machineId"/>
+    </out-binding>
+    <position y="130.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="945.0" x="180.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item1" type="task">
+    <display-name><![CDATA[Log Properties]]></display-name>
+    <script encoded="false"><![CDATA[// Dump Properties to log
+if (lvl == null){
+	lvl = 10;
+}
+dumpProperties(inputProperties,lvl);
+
+function dumpProperties (payload, lvl) {
+	var keys = payload.keys;
+	var prefix = ""
+	    for (var i=0; i<lvl; i++){
+		prefix = prefix + " ";
+	} 
+	for (k in keys){
+		var key = keys[k];
+		var value = payload.get(keys[k]);
+		if ("Properties" == System.getObjectType(value)){
+		  System.debug(prefix + key + "[" );
+		  dumpProperties(value, (lvl+2));
+		  System.debug(prefix + "]" );
+		} else {
+		  System.debug( prefix + key + ":" + value);
+		}
+	}
+}]]></script>
+    <in-binding>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+      <bind name="lvl" type="number" export-name="lvl"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item7" type="task" script-module="com.vmware.pso.wellsfargo/findVcVmByUuid">
+    <display-name><![CDATA[findVcVmByUuid]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").findVcVmByUuid(vmUuid,vcUuid);
+]]></script>
+    <in-binding>
+      <bind name="vmUuid" type="string" export-name="vmUuid"/>
+      <bind name="vcUuid" type="string" export-name="vcUuid"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="VC:VirtualMachine" export-name="vm"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="185.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item6" type="end" end-mode="0">
+    <in-binding/>
+    <position y="340.0" x="125.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item43" type="custom-condition" alt-out-name="item8">
+    <display-name><![CDATA[VM Found?]]></display-name>
+    <script encoded="false"><![CDATA[return (vm);]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="230.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item8" prototype-id="system-error" out-name="item6" type="task" interaction="l">
+    <display-name><![CDATA[VM Not Found]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+System.error(text);]]></script>
+    <in-binding>
+      <bind name="text" type="string" export-name="errorText">
+        <description><![CDATA[The text to log]]></description>
+      </bind>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA['Log the input text to the console log with the level "error".']]></description>
+    <position y="295.0" x="85.0"/>
+  </workflow-item>
+  <workflow-item name="item15" out-name="item16" type="task" script-module="com.vmware.coe.vcenter.vm.guest/getVmGuestFamily">
+    <display-name><![CDATA[getVmGuestFamily]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.coe.vcenter.vm.guest").getVmGuestFamily(vm);
+]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="osFamily"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="790.0" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item16" type="switch">
+    <display-name><![CDATA[OS Flavor]]></display-name>
+    <script encoded="false"><![CDATA[// Generated by the system, cannot be edited
+if (osFamily === "windowsGuest") {
+  return "item41";
+} else if (osFamily === "linuxGuest") {
+  return "item42";
+} else if (osFamily === "") {
+  return "item35";
+} else if (true) {
+  return "item35";
+}
+]]></script>
+    <in-binding>
+      <bind name="osFamily" type="string" export-name="osFamily"/>
+    </in-binding>
+    <out-binding/>
+    <condition name="osFamily" type="string" comparator="0" label="item41">windowsGuest</condition>
+    <condition name="osFamily" type="string" comparator="0" label="item42">linuxGuest</condition>
+    <condition name="osFamily" type="string" comparator="0" label="item35"/>
+    <condition name="" type="boolean" comparator="6" label="item35"/>
+    <description><![CDATA[Basic switch activity based on a workflow attribute or parameter.]]></description>
+    <position y="845.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item19" out-name="item46" type="task">
+    <display-name><![CDATA[Add Network to JSON]]></display-name>
+    <script encoded="false"><![CDATA[jsonObj["networkProperties"] = networkArray;]]></script>
+    <in-binding>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="networkArray" type="Array/Any" export-name="networkArray"/>
+    </in-binding>
+    <out-binding>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="625.0" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item20" out-name="item25" type="task" script-module="com.vmware.pso.csp/getVraDiskDetailsString">
+    <display-name><![CDATA[getVraDiskDetailsString]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.csp").getVraDiskDetailsString(vraBaseUrl,access_token,machineId);
+]]></script>
+    <in-binding>
+      <bind name="vraBaseUrl" type="string" export-name="vraBaseUrl"/>
+      <bind name="access_token" type="string" export-name="accessToken"/>
+      <bind name="machineId" type="string" export-name="machineId"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="diskDetails"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="405.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item25" out-name="item26" type="task" script-module="com.vmware.pso.csp/getVraNetworkIds">
+    <display-name><![CDATA[getVraNetworkIds]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.csp").getVraNetworkIds(vraBaseUrl,access_token,machineId);
+]]></script>
+    <in-binding>
+      <bind name="vraBaseUrl" type="string" export-name="vraBaseUrl"/>
+      <bind name="access_token" type="string" export-name="accessToken"/>
+      <bind name="machineId" type="string" export-name="machineId"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/string" export-name="networkIds"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="460.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item26" out-name="item28" type="task">
+    <display-name><![CDATA[Prepare Network Lookup]]></display-name>
+    <script encoded="false"><![CDATA[var networkArray = [];]]></script>
+    <in-binding/>
+    <out-binding>
+      <bind name="networkArray" type="Array/Any" export-name="networkArray"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="515.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item28" out-name="item29" type="custom-condition" alt-out-name="item19">
+    <display-name><![CDATA[More Networks?]]></display-name>
+    <script encoded="false"><![CDATA[return networkIds.length > 0;]]></script>
+    <in-binding>
+      <bind name="networkIds" type="Array/string" export-name="networkIds"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="560.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item29" out-name="item30" type="task">
+    <display-name><![CDATA[Get Network ID]]></display-name>
+    <script encoded="false"><![CDATA[var networkId = networkIds.pop();]]></script>
+    <in-binding>
+      <bind name="networkIds" type="Array/string" export-name="networkIds"/>
+    </in-binding>
+    <out-binding>
+      <bind name="networkId" type="string" export-name="networkId"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="625.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item30" out-name="item31" type="task" script-module="com.vmware.pso.csp/getVraNetworkDetails">
+    <display-name><![CDATA[getVraNetworkMetadata]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.csp").getVraNetworkDetails(vraBaseUrl,access_token,machineId,networkId);
+]]></script>
+    <in-binding>
+      <bind name="vraBaseUrl" type="string" export-name="vraBaseUrl"/>
+      <bind name="access_token" type="string" export-name="accessToken"/>
+      <bind name="machineId" type="string" export-name="machineId"/>
+      <bind name="networkId" type="string" export-name="networkId"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="networkDetails"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="680.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item31" out-name="item28" type="task">
+    <display-name><![CDATA[Parse Network JSON]]></display-name>
+    <script encoded="false"><![CDATA[var nicObj = JSON.parse(networkDetails);
+
+var devices = vm.config.hardware.device;
+
+
+var networkJson = {
+    "deviceIndex" : nicObj.deviceIndex,
+    "addresses" : FormatIpv4AndIpv6Addresses(nicObj.addresses.filter(ValidateAddress)),
+    "attributes" : nicObj.customProperties
+}
+
+networkArray.push(networkJson);
+
+function ValidateAddress(address) {
+    return address.substring(0,6) != "fe80::";
+}
+
+function FormatIpv4AndIpv6Addresses(addresses) {
+    var addressObj = new Object;
+    var ipv4Address = "";
+    var ipv6Address = "";
+    for (var addIndex = 0; addIndex < addresses.length; addIndex++) {
+        if (addresses[addIndex].trim().split(".").length == 4) {
+            ipv4Address += addresses[addIndex] + ",";
+        } else {
+            ipv6Address += addresses[addIndex] + ",";
+        }
+    }
+    addressObj = {
+        "ipv4":ipv4Address.split(",").slice(0,ipv4Address.split(",").length-1).join(","),
+        "ipv6":ipv6Address.split(",").slice(0,ipv6Address.split(",").length-1).join(","),
+    }
+    return addressObj;
+}]]></script>
+    <in-binding>
+      <bind name="networkArray" type="Array/Any" export-name="networkArray"/>
+      <bind name="networkDetails" type="string" export-name="networkDetails"/>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding>
+      <bind name="networkArray" type="Array/Any" export-name="networkArray"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="735.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item35" prototype-id="increase-counter" out-name="item37" content-mode="x" type="task">
+    <display-name><![CDATA[Add Failure Count]]></display-name>
+    <script encoded="false"><![CDATA[//Auto-generated script
+counter = counter + 1;]]></script>
+    <in-binding>
+      <bind name="counter" type="number" export-name="osTypeFailureCount">
+        <description><![CDATA[Item to increase]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="counter" type="number" export-name="osTypeFailureCount">
+        <description><![CDATA[Increased item]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Increment a counter by one.]]></description>
+    <position y="900.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item36" type="end" end-mode="0">
+    <in-binding/>
+    <position y="1055.0" x="515.0"/>
+  </workflow-item>
+  <workflow-item name="item37" out-name="item38" type="custom-condition" alt-out-name="item39">
+    <display-name><![CDATA[Check Count]]></display-name>
+    <script encoded="false"><![CDATA[return (osTypeFailureCount < 5);]]></script>
+    <in-binding>
+      <bind name="osTypeFailureCount" type="number" export-name="osTypeFailureCount"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="945.0" x="270.0"/>
+  </workflow-item>
+  <workflow-item name="item38" out-name="item15" type="link" linked-workflow-id="7ced6eda-298e-4d62-9811-7cb9c61f382b">
+    <display-name><![CDATA[Improved Sleep]]></display-name>
+    <in-binding>
+      <bind name="delay" type="number" export-name="delay"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="1010.0" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item39" out-name="item36" type="task">
+    <display-name><![CDATA[Log Issue]]></display-name>
+    <script encoded="false"><![CDATA[System.error("Unable to determine OS Family");]]></script>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="1010.0" x="475.0"/>
+  </workflow-item>
+  <workflow-item name="item41" out-name="item0" type="link" linked-workflow-id="8873ca93-a834-4721-9ca9-908f41bfc65c">
+    <display-name><![CDATA[Compute Post Provision - Windows]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="diskDetails" type="string" export-name="diskDetails"/>
+      <bind name="isNeedImageBuild" type="boolean" export-name="isNeedImageBuild"/>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitZipExtractPath" type="string" export-name="gitZipExtractPath"/>
+      <bind name="gitZipFileName" type="string" export-name="gitZipFileName"/>
+      <bind name="rhelVersion" type="string" export-name="rhelVersion"/>
+      <bind name="tempRepoName" type="string" export-name="tempRepoName"/>
+      <bind name="pipFolderPath" type="string" export-name="pipFolderPath"/>
+      <bind name="scriptTimeout" type="number" export-name=""/>
+      <bind name="scriptRefreshTime" type="number" export-name=""/>
+      <bind name="scriptWorkingDirectory" type="string" export-name=""/>
+      <bind name="interactiveSession" type="boolean" export-name=""/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="900.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item42" out-name="item0" type="link" linked-workflow-id="79b07ec2-ef26-4aee-a210-083a390a3a41">
+    <display-name><![CDATA[Compute Post Provision - Linux]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+      <bind name="diskDetails" type="string" export-name="diskDetails"/>
+      <bind name="virtualEnvPath" type="string" export-name="virtualEnvPath"/>
+      <bind name="isNeedImageBuild" type="boolean" export-name="isNeedImageBuild"/>
+      <bind name="gitRepoZipDownloadUrl" type="string" export-name="gitRepoZipDownloadUrl"/>
+      <bind name="gitZipExtractPath" type="string" export-name="gitZipExtractPath"/>
+      <bind name="gitZipFileName" type="string" export-name="gitZipFileName"/>
+      <bind name="rhelVersion" type="string" export-name="rhelVersion"/>
+      <bind name="tempRepoName" type="string" export-name="tempRepoName"/>
+      <bind name="pipFolderPath" type="string" export-name="pipFolderPath"/>
+      <bind name="isRebuild" type="boolean" export-name="isRebuild"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="900.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item43" out-name="item47" type="link" linked-workflow-id="370295ac-0d2b-48a9-a59a-c0083ae693e9">
+    <display-name><![CDATA[Get Access Token]]></display-name>
+    <in-binding/>
+    <out-binding>
+      <bind name="accessToken" type="string" export-name="accessToken"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="295.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item44" type="end" end-mode="0">
+    <in-binding/>
+    <position y="120.0" x="385.0"/>
+  </workflow-item>
+  <workflow-item name="item45" out-name="item44" type="task">
+    <display-name><![CDATA[Default Exception]]></display-name>
+    <script encoded="false"><![CDATA[System.error("Exception occurred.");]]></script>
+    <in-binding/>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item46" out-name="item48" type="task">
+    <display-name><![CDATA[Prepare Image Build]]></display-name>
+    <script encoded="false"><![CDATA[var isGoldenImage = jsonObj["customProperties"].isGoldenImage;
+isNeedImageBuild = (isGoldenImage =="true")? true:false;]]></script>
+    <in-binding>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding>
+      <bind name="isNeedImageBuild" type="boolean" export-name="isNeedImageBuild"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="680.0" x="345.0"/>
+  </workflow-item>
+  <workflow-item name="item47" out-name="item20" type="link" linked-workflow-id="ec93323e-d5ff-41cf-98c0-7c46c6655f1d">
+    <display-name><![CDATA[Add or Upate Notes to vCenter VM]]></display-name>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[ ]]></description>
+    <position y="350.0" x="215.0"/>
+  </workflow-item>
+  <workflow-item name="item48" out-name="item15" type="link" linked-workflow-id="c369c88b-7810-4ad6-97a9-f5989fe58db2">
+    <display-name><![CDATA[Add Remedy Property to VM]]></display-name>
+    <in-binding>
+      <bind name="accessToken" type="string" export-name="accessToken"/>
+      <bind name="vraBaseUrl" type="string" export-name="vraBaseUrl"/>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResultRemedy" type="string" export-name="actionResultRemedy"/>
+    </out-binding>
+    <description><![CDATA[ ]]></description>
+    <position y="735.0" x="345.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="inputProperties">
+      <desc><![CDATA[machine]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

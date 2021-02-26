@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setShellTimeout" result-type="Properties" api-version="6.0.0" id="f6db308f-674c-4a4d-98fa-2253d1c08de7" version="0.0.0" category-name="com.vmware.pso.vcenter.powercli.host" memory-limit="512000000">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="shellTimeout" t="string"><![CDATA[]]></param>
+  <param n="shellInteractiveTimeout" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        $inputsString = $inputs | ConvertTo-Json -Compress
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $shellTimeout = $inputs.shellTimeout
+        [ValidateNotNullorEmpty()]
+        $shellInteractiveTimeout = $inputs.shellInteractiveTimeout
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate        
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter: " + $_.Exception
+        Write-Host "Exiting."
+
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output        
+    } 
+    try {
+        Write-Host "Setting UserVars.ESXiShellInteractiveTimeOut"
+        $null = Get-VMHost | Get-AdvancedSetting -Name 'UserVars.ESXiShellInteractiveTimeOut' | Set-AdvancedSetting -Value $shellInteractiveTimeout -Confirm:$false
+        Write-Host "Setting UserVars.ESXiShellTimeOut"
+        $null = Get-VMHost | Get-AdvancedSetting -Name 'UserVars.ESXiShellTimeOut' | Set-AdvancedSetting -Value $shellTimeout -Confirm:$false
+
+        Write-Host "Restarting Shell Service"
+        $null = Get-VMHost | Get-VMHostService | where {$_.Key -eq 'TSM'} | Restart-VMHostService -Confirm:$false
+
+        Write-Host "Restarting Shell SSH Service"
+        $null = Get-VMHost | Get-VMHostService | where {$_.Key -eq 'TSM-SSH'} | Restart-VMHostService -Confirm:$false
+
+    } catch {
+        Write-Host "Failed setting shell timeout. Exiting." -ForegroundColor red
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

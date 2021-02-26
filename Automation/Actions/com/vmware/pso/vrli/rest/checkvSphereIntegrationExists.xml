@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="checkvSphereIntegrationExists" result-type="boolean" api-version="6.0.0" id="61685f91-517e-4f56-8377-fc8e5e4b10d6" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vrli.rest">
+  <param n="vrliHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vrliSessionId" t="string"><![CDATA[]]></param>
+  <param n="vcHostname" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vrliHost,"Input var: vrliHost");
+dbc.ensureNotNullOrEmpty(vrliSessionId,"Input var: vrliSessionId");
+dbc.ensureNotNullOrEmpty(vcHostname,"Input var: vcHostname");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(vrliHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Bearer "+ vrliSessionId);
+
+var url = "/api/v1/vsphere";
+
+var method = "GET";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+var requestedIntegration = response.vCenterServers.filter(function(element) {return element.hostname == vcHostname});
+return !dbc.isNullOrEmpty(requestedIntegration);]]></script>
+</dunes-script-module>

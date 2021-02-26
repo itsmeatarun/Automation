@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="86cff245-7562-4d77-b660-8e42361299c2" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add KMS and enable vSAN encryption]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="vCenterFQDN" type="string">
+      <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+    </param>
+    <param name="vCenterUser" type="string"/>
+    <param name="vCenterPassword" type="SecureString"/>
+    <param name="kmsName" type="Array/string">
+      <description><![CDATA[Array of KMS names for KMS Cluster]]></description>
+    </param>
+    <param name="kmsProviderName" type="string">
+      <description><![CDATA[KMS Cluster name]]></description>
+    </param>
+    <param name="kmsAddress" type="Array/string">
+      <description><![CDATA[Array of KMS servers for KMS Cluster]]></description>
+    </param>
+    <param name="kmsPort" type="Array/number">
+      <description><![CDATA[Array of KMS server ports for KMS Cluster]]></description>
+    </param>
+    <param name="ignoreSSLCertificate" type="boolean"/>
+  </input>
+  <attrib name="clusterName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="175.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.vmware.pso.vcenter/addUpdateKmsProvider">
+    <display-name><![CDATA[addUpdateKmsProvider]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").addUpdateKmsProvider(vCenterFQDN,vCenterUser,vCenterPassword,kmsName,kmsProviderName,kmsAddress,kmsPort,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="kmsName" type="Array/string" export-name="kmsName">
+        <description><![CDATA[Array of KMS names for KMS Cluster]]></description>
+      </bind>
+      <bind name="kmsProviderName" type="string" export-name="kmsProviderName">
+        <description><![CDATA[KMS Cluster name]]></description>
+      </bind>
+      <bind name="kmsAddress" type="Array/string" export-name="kmsAddress">
+        <description><![CDATA[Array of KMS servers for KMS Cluster]]></description>
+      </bind>
+      <bind name="kmsPort" type="Array/number" export-name="kmsPort">
+        <description><![CDATA[Array of KMS server ports for KMS Cluster]]></description>
+      </bind>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task" script-module="com.vmware.pso.vcenter/enablevSanEncryption">
+    <display-name><![CDATA[enablevSanEncryption]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vcenter").enablevSanEncryption(vCenterFQDN,vCenterUser,vCenterPassword,clusterName,kmsProviderName,ignoreSSLCertificate);
+]]></script>
+    <in-binding>
+      <bind name="vCenterFQDN" type="string" export-name="vCenterFQDN">
+        <description><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></description>
+      </bind>
+      <bind name="vCenterUser" type="string" export-name="vCenterUser"/>
+      <bind name="vCenterPassword" type="SecureString" export-name="vCenterPassword"/>
+      <bind name="clusterName" type="string" export-name="clusterName">
+        <description><![CDATA[Optional clsstername to enable encryp. If blank, all clusters will be enabled.]]></description>
+      </bind>
+      <bind name="kmsProviderName" type="string" export-name="kmsProviderName">
+        <description><![CDATA[KMS Cluster name to use as KMS.]]></description>
+      </bind>
+      <bind name="ignoreSSLCertificate" type="boolean" export-name="ignoreSSLCertificate"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

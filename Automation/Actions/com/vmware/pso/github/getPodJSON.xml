@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getPodJSON" result-type="string" api-version="6.0.0" id="a37b76b6-6c70-4782-8a73-d8ee692664a4" version="0.0.3" allowed-operations="vfe" category-name="com.vmware.pso.github">
+  <param n="githubHost" t="string"><![CDATA[]]></param>
+  <param n="githubUser" t="string"><![CDATA[]]></param>
+  <param n="githubToken" t="SecureString"><![CDATA[]]></param>
+  <param n="baseURL" t="string"><![CDATA[]]></param>
+  <param n="environment" t="string"><![CDATA["DEV", "TEST", "UAT", "PROD"]]></param>
+  <param n="region" t="string"><![CDATA[]]></param>
+  <param n="podID" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(githubHost,"Input var: githubHost");
+dbc.ensureNotNullOrEmpty(githubUser,"Input var: githubUser");
+dbc.ensureNotNullOrEmpty(githubToken,"Input var: githubToken");
+dbc.ensureNotNullOrEmpty(baseURL,"Input var: baseURL");
+dbc.ensureIsOneOf(environment, ["LAB", "DEV", "TEST", "UAT", "PROD"], "Input var: environment");
+dbc.ensureIsOneOf(region, ["Oxmoor", "Silas", "CIC"], "Input var: region");
+dbc.ensureNotNullOrEmpty(podID,"Input var: podID");
+
+var globalConfigFile = "Global.json";
+var response = System.getModule("com.vmware.pso.github.rest").getRepoContent(githubHost,githubUser,githubToken,baseURL,globalConfigFile);
+var encodedContent = JSON.parse(response).content;
+var globalConfig = System.getModule("com.vmware.pso.cryptojs").base64Decode(encodedContent);
+
+var regionPath = environment + "/" + region + "/RegionDetails.json";
+var response = System.getModule("com.vmware.pso.github.rest").getRepoContent(githubHost,githubUser,githubToken,baseURL,regionPath);
+var encodedContent = JSON.parse(response).content;
+var regionConfig = System.getModule("com.vmware.pso.cryptojs").base64Decode(encodedContent);
+
+var podPath = environment + "/" + region + "/PODs/" + podID + "/PodConfiguration.json";
+var response = System.getModule("com.vmware.pso.github.rest").getRepoContent(githubHost,githubUser,githubToken,baseURL,podPath);
+var encodedContent = JSON.parse(response).content;
+var podConfig = System.getModule("com.vmware.pso.cryptojs").base64Decode(encodedContent);
+
+var mergedJSON = System.getModule("com.vmware.pso.json.util").mergeJSON([globalConfig, regionConfig, podConfig]);
+
+System.debug(mergedJSON);
+
+return mergedJSON;]]></script>
+</dunes-script-module>

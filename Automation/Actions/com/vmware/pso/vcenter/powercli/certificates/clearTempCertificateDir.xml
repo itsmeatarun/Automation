@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="clearTempCertificateDir" result-type="Properties" api-version="6.0.0" id="be94c719-0077-4965-ada3-cbaeb1103e0b" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.certificates" memory-limit="512000000" timeout="900">
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vcVM" t="string"><![CDATA[]]></param>
+  <param n="vcGuestUser" t="string"><![CDATA[]]></param>
+  <param n="vcGuestPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+System.log("Deleting the /tmp/certs directory...");
+
+var command = "rm -rf /tmp/certs; mkdir /tmp/certs"
+
+System.debug("command: '" + command + "'");
+
+response = System.getModule(
+    "com.vmware.pso.remoteScript").runRemoteScript(
+    [vcVM],
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    command,
+    vcGuestUser, 
+    vcGuestPassword, 
+    ignoreSSLCertificate
+) ;
+
+if(response["status"] == "failed") {
+    throw response["error"]  ;
+}]]></script>
+</dunes-script-module>

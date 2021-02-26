@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="7f1f0e36-2cb0-4c94-9975-160f53dd12fe" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set vSphere Syslog]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="vrliHost" type="string"/>
+    <param name="vrliUser" type="string"/>
+    <param name="vrliPassword" type="SecureString"/>
+    <param name="vcHostname" type="string"/>
+    <param name="vcUsername" type="string"/>
+    <param name="vcPassword" type="SecureString"/>
+    <param name="acceptUntrustedvCCert" type="boolean"/>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.vmware.pso.vrli/setvSphereSyslog">
+    <display-name><![CDATA[setvSphereSyslog]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+System.getModule("com.vmware.pso.vrli").setvSphereSyslog(vrliHost, vrliUser, vrliPassword, vcHostname, vcUsername, vcPassword, acceptUntrustedvCCert);
+]]></script>
+    <in-binding>
+      <bind name="vrliHost" type="string" export-name="vrliHost"/>
+      <bind name="vrliUser" type="string" export-name="vrliUser"/>
+      <bind name="vrliPassword" type="SecureString" export-name="vrliPassword"/>
+      <bind name="vcHostname" type="string" export-name="vcHostname"/>
+      <bind name="vcUsername" type="string" export-name="vcUsername"/>
+      <bind name="vcPassword" type="SecureString" export-name="vcPassword"/>
+      <bind name="acceptUntrustedvCCert" type="boolean" export-name="acceptUntrustedvCCert"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="140.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="vrliHost">
+      <desc><![CDATA[vrliHost]]></desc>
+    </p-param>
+    <p-param name="vrliUser">
+      <desc><![CDATA[vrliUser]]></desc>
+    </p-param>
+    <p-param name="vrliPassword">
+      <desc><![CDATA[vrliPassword]]></desc>
+    </p-param>
+    <p-param name="vcHostname">
+      <desc><![CDATA[vcHostname]]></desc>
+    </p-param>
+    <p-param name="vcUsername">
+      <desc><![CDATA[vcUsername]]></desc>
+    </p-param>
+    <p-param name="vcPassword">
+      <desc><![CDATA[vcPassword]]></desc>
+    </p-param>
+    <p-param name="acceptUntrustedvCCert">
+      <desc><![CDATA[acceptUntrustedvCCert]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createAndApproveCertificate" result-type="string" api-version="6.0.0" id="8714af12-b8e6-4b27-9532-ed33e6d43d7d" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.venafi" memory-limit="512000000">
+  <param n="host" t="string"><![CDATA[Venafi Host]]></param>
+  <param n="user" t="string"><![CDATA[Venafi Username]]></param>
+  <param n="password" t="SecureString"><![CDATA[Venafi Password]]></param>
+  <param n="policyDN" t="string"><![CDATA[Venafi Policy DN]]></param>
+  <param n="objectName" t="string"><![CDATA[Venafi Object name inside the policy]]></param>
+  <param n="subject" t="string"><![CDATA[Cert Subject]]></param>
+  <param n="organizationalUnit" t="string"><![CDATA[Cert Organization Unit]]></param>
+  <param n="organization" t="string"><![CDATA[Cert Organization]]></param>
+  <param n="city" t="string"><![CDATA[Cert City]]></param>
+  <param n="state" t="string"><![CDATA[Cert State]]></param>
+  <param n="country" t="string"><![CDATA[Cert Country]]></param>
+  <param n="subjectAltNames" t="Array/Properties"><![CDATA[Cert SAN { "Name": "altname", "TypeName": "DNS"}]]></param>
+  <param n="approve" t="boolean"><![CDATA[Approve the certificate]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host,"Input var: host");
+dbc.ensureNotNullOrEmpty(user,"Input var: user");
+dbc.ensureNotNullOrEmpty(password,"Input var: password");
+dbc.ensureNotNullOrEmpty(policyDN,"Input var: policyDN");
+dbc.ensureNotNullOrEmpty(objectName,"Input var: objectName");
+dbc.ensureNotNullOrEmpty(subject, "Input var: subject");
+
+var response;
+
+response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.authorize").getAPIKey(user, password, host));
+
+var apiKey = response.APIKey;
+
+response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.certificate.request").requestCertificate(host, apiKey, policyDN, objectName, subject, organizationalUnit, organization, city, state, country, subjectAltNames));
+
+var certificateDN = response.CertificateDN;
+
+if(approve) {
+    var guid = response.GUID;
+
+    waitOnCertificateStatus(0, 600000, 2000, host, apiKey, certificateDN, "Pending workflow resolution");
+
+    response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.workflow.ticket.enumerate").enumerateTicketsForCertificate(host, apiKey, certificateDN));
+
+    var guids = response.GUIDs;
+
+    for(var x=0; x < guids.length; x++) {
+        var guid = guids[x];
+        response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.workflow.ticket.updatestatus").updateTicketStatus(host, apiKey, guid, "Approved"));
+    }
+}
+
+waitOnCertificateStatus(0, 600000, 2000, host, apiKey, certificateDN, undefined);
+
+return certificateDN;
+
+function waitOnCertificateStatus(retryCount, retryMax, retryWait, host, apiKey, certificateDN, status) {
+    var retryCount = 0;
+
+    while(true) {
+        System.debug("Waiting " + retryWait + " millis to check certificate status...");
+        System.sleep(retryWait);
+
+        System.debug("Checking on certificate status...");
+        response = JSON.parse(System.getModule("com.vmware.pso.venafi.rest.certificate.retrieve").retrieveCertificate(host, apiKey, certificateDN, "Base64", false, "nope", false));
+
+        System.debug("Got certificate status: '" + response.Status + "'");
+        if(response.Status == status) {
+            System.debug("Status match, exiting loop");
+            break;
+        }
+
+        retryCount++;
+        if(retryCount > retryMax) {
+            throw "Timed out waiting on certificate status: '" + response.Status + "'"; 
+        }
+
+    }
+}]]></script>
+</dunes-script-module>

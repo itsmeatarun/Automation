@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="testProxy" result-type="boolean" api-version="6.0.0" id="1de623f0-ef00-4e2b-b02f-e03042454844" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.rest.appliance.proxy">
+  <description><![CDATA[boolean response true indicates that the proxy test succeeded.]]></description>
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionToken" t="string"><![CDATA[vCenter Session Token]]></param>
+  <param n="proxyHost" t="string"><![CDATA[]]></param>
+  <param n="proxyPort" t="string"><![CDATA[]]></param>
+  <param n="proxyUser" t="string"><![CDATA[]]></param>
+  <param n="proxyPassword" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHost,"Input var: vCenterHost");
+dbc.ensureNotNullOrEmpty(sessionToken,"Input var: sessionToken");
+dbc.ensureNotNullOrEmpty(proxyHost,"Input var: proxyHost");
+dbc.ensureNotNullOrEmpty(proxyPort,"Input var: proxyPort");
+
+var pxyUser = "";
+var pxyPass = "";
+
+if (!dbc.isNullOrEmpty(proxyUser) && !dbc.isNullOrEmpty(proxyPassword)) {
+    pxyUser = proxyUser;
+    pxyPass = proxyPassword;
+}
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-api-session-id", sessionToken);
+var url = "/appliance/networking/proxy/https?action=test";
+
+var body = {
+    "config": {
+        "enabled": true,
+        "port": proxyPort,
+        "server": "https://" + proxyHost,
+        "username": pxyUser,
+        "password": pxyPass
+    },
+    "host": "hostupdate.vmware.com/software/VUM/PRODUCTION/main/vmw-depot-index.xml"
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+dbc.ensureNotNullOrEmpty(response.value,"Invalid response for testProxy");
+
+System.debug("Proxy test result: "+ response.value.message.default_message);
+
+return (response.value.status == "SERVER_REACHABLE");]]></script>
+</dunes-script-module>

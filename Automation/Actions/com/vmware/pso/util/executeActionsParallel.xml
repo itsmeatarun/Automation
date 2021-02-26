@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="executeActionsParallel" result-type="Properties" api-version="6.0.0" id="7b6cdc81-8460-4044-b3c5-9e299ddca44a" version="0.1.2" category-name="com.vmware.pso.util" memory-limit="256000000" timeout="1200">
+  <description><![CDATA[Example input element:
+{
+		"module": "com.vmware.pso.austin",
+		"action": "executionTest",
+		"inputs": {
+			"parameters": [
+				{
+					"name": "testinput",
+					"scope": "local",
+					"type": "string",
+					"value": {
+						"string": {
+							"value": "myinputdata1"
+						}
+					}
+				}
+			]
+		}
+	}]]></description>
+  <runtime><![CDATA[powercli:12-powershell-7.0]]></runtime>
+  <param n="actionJSONArray" t="Array/string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $actionJSONArray = $inputs.actionJSONArray
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        $token = $context.GetToken()
+        $vROHost = $context.vcoUrl
+        $funcDef = $function:ExecutevRORest.ToString()
+        $actionJSONArray | ForEach-Object -Parallel {
+            $token = $using:token
+            $vROHost = $using:vROHost
+            $ignoreSSLCertificate = $using:ignoreSSLCertificate
+            $function:ExecutevRORest = $using:funcDef
+
+            $action = $_ | Convertfrom-Json
+            $inputJSON = ($action.inputs | convertto-json -Depth 4)
+            ExecutevRORest -baseURL $vROHost -module $action.module -action $action.action -input $inputJSON -token $token -ignoreSSLCertificate $ignoreSSLCertificate
+        }
+    } catch {
+        Write-Host "Failed executing action(s). Exiting."
+        Write-Host $_.Exception.Message
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output        
+    }
+    
+    $output.add("status","success")
+    return $output
+}
+
+Function ExecutevRORest {
+    param(
+        [Parameter(Mandatory=$true)][String]$baseURL,
+        [Parameter(Mandatory=$true)][String]$module,
+        [Parameter(Mandatory=$true)][String]$action,
+        [Parameter(Mandatory=$true)][String]$inputs,
+        [Parameter(Mandatory=$true)][String]$token,
+        [Parameter(Mandatory=$true)][Boolean]$ignoreSSLCertificate
+    )
+
+    $auth = "Bearer $($token)"
+    $apiFormat = 'json'
+    $headers = @{"Authorization"=$auth;"Content-Type"="application/$($apiFormat)";"Accept"="application/$($apiFormat)"}
+    #Write-Host "Using body: " + $inputs
+    $URL = "$baseURL/api/actions/$module/$action/executions"
+    #Write-Host $URL
+    if($ignoreSSLCertificate) {
+        $ret = Invoke-WebRequest -Method Post -uri $URL -Headers $headers -body $inputs -SkipCertificateCheck
+    } else {
+        $ret = Invoke-WebRequest -Method Post -uri $URL -Headers $headers -body $inputs
+    }
+    <#
+    $headers = $ret.Headers
+    ForEach ($header in $headers){
+        Write-Host $header
+    }#>
+}
+]]></script>
+</dunes-script-module>

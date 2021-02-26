@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="621d65cf-19ca-4643-a89f-79a445d1e04f" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get Credentials]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="host" type="string"/>
+    <param name="username" type="string"/>
+    <param name="password" type="SecureString"/>
+  </input>
+  <output>
+    <param name="csv" type="string"/>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="340.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Get Credentials]]></display-name>
+    <script encoded="false"><![CDATA[var credentials = System.getModule("com.vmware.pso.vcf.sddcmanager").getCredentials(username, password, host);
+
+var csv = ""
+
+System.log(credentials.length)
+
+for(var x=0; x < credentials.length; x++) {
+    var credential = credentials[x];
+
+    if(x == 0) {
+        csv += getHeaders(credential) + "\n";
+    }
+
+    csv += getData(credential) + "\n";
+}
+
+System.log(csv);
+
+
+function getHeaders(credential) {
+    var keys = credential.keys;
+
+    var headers = "";
+    for(var x=0; x < keys.length; x++) {
+        var key = keys[x];
+
+        if(x > 0) {
+            headers += ","
+        }
+        headers += '"' + key + '"';
+    }
+
+    return headers;
+}
+
+function getData(credential) {
+    var keys = credential.keys;
+
+    var headers = "";
+    for(var x=0; x < keys.length; x++) {
+        var key = keys[x];
+
+        if(x > 0) {
+            headers += ","
+        }
+        headers += '"' + credential.get(key) + '"';
+    }
+
+    return headers;
+}]]></script>
+    <in-binding>
+      <bind name="host" type="string" export-name="host"/>
+      <bind name="username" type="string" export-name="username"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+    </in-binding>
+    <out-binding>
+      <bind name="csv" type="string" export-name="csv"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="180.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

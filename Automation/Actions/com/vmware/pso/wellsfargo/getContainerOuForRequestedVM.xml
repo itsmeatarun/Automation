@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getContainerOuForRequestedVM" result-type="string" api-version="6.0.0" id="d7af3828-0e44-40e9-b66a-8a46aea53d8b" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="nonFactoryXnetOU" t="string"><![CDATA[]]></param>
+  <param n="nonFactoryXtchOU" t="string"><![CDATA[]]></param>
+  <param n="nonFactoryEntOU" t="string"><![CDATA[]]></param>
+  <param n="factoryEntOU" t="string"><![CDATA[]]></param>
+  <param n="adEntDomain" t="string"><![CDATA[]]></param>
+  <param n="qaEntDomain" t="string"><![CDATA[]]></param>
+  <param n="factoryXOU" t="string"><![CDATA[]]></param>
+  <param n="xnetDomain" t="string"><![CDATA[]]></param>
+  <param n="xtchDomain" t="string"><![CDATA[]]></param>
+  <param n="isFactory" t="boolean"><![CDATA[]]></param>
+  <param n="wfDomain" t="string"><![CDATA[]]></param>
+  <param n="osVersion" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var baseDN = "";
+var jointer = ",";
+var parentContainerOU="";
+if(isFactory == true)
+{
+    baseDN = GetFactoryOUByEndpoint() + jointer + GetADEndpointByDomain();
+    parentContainerOU = GetFactoryOUByEndpoint();
+    System.log("Factory OU is selected");
+}
+else
+{
+    baseDN = GetNonFactoryOUByEndpoint() + jointer + GetADEndpointByDomain();
+    parentContainerOU = GetNonFactoryOUByEndpoint();
+    System.log("Non-Factory OU is selected");
+}
+
+var vmADContainer = "ou=" + osVersion + jointer + baseDN;
+
+System.log( "AD base DN : " + vmADContainer);
+
+function GetADEndpointByDomain()
+{
+    var endpointDN = "";
+    switch(wfDomain.toLowerCase())
+    {
+        case "ad-ent":
+            endpointDN = adEntDomain;
+            break;
+        case "qa-ent":
+            endpointDN = qaEntDomain;
+            break;
+        case "xnet":
+            endpointDN = xnetDomain;
+            break;
+        case "xtch":
+            endpointDN = xtchDomain;
+            break;
+    }
+
+    return endpointDN;
+}
+
+function GetFactoryOUByEndpoint()
+{
+    var factoryOU = "";
+    switch(wfDomain.toLowerCase())
+    {
+        case "ad-ent":
+        case "qa-ent":
+            factoryOU = factoryEntOU;
+            break;
+        case "xnet":
+        case "xtch":
+            factoryOU = factoryXOU;
+            break;
+    }
+
+    return factoryOU;
+}
+
+function GetNonFactoryOUByEndpoint()
+{
+    var nonFactoryOU = "";
+    switch(wfDomain.toLowerCase())
+    {
+        case "ad-ent":
+        case "qa-ent":
+            nonFactoryOU = nonFactoryEntOU;
+            break;
+        case "xnet":
+            nonFactoryOU = nonFactoryXnetOU;
+            break;
+        case "xtch":
+            nonFactoryOU = nonFactoryXtchOU;
+            break;
+    }
+
+    return nonFactoryOU;
+}
+
+var result = {
+    "vmADContainer":vmADContainer,
+    "parentContainerOU":parentContainerOU
+};
+
+return JSON.stringify(result);
+]]></script>
+</dunes-script-module>

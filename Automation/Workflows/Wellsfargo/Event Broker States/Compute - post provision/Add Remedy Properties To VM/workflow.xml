@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="c369c88b-7810-4ad6-97a9-f5989fe58db2" version="0.0.0" api-version="6.0.0" allowed-operations="evf" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add Remedy Properties To VM]]></display-name>
+  <position y="10.0" x="50.0"/>
+  <input>
+    <param name="accessToken" type="string"/>
+    <param name="vraBaseUrl" type="string"/>
+    <param name="jsonObj" type="Any"/>
+  </input>
+  <output>
+    <param name="actionResultRemedy" type="string"/>
+  </output>
+  <attrib name="vraId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[VirtualMachine Id]]></description>
+  </attrib>
+  <attrib name="contentRemedyProperties" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="175.0" x="50.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[prepare to create or update properties]]></display-name>
+    <script encoded="false"><![CDATA[
+vraId = jsonObj.resourceIds[0];
+var remedyProperty = {
+    "customProperties": {
+        "isReadyForRemedy": "true"
+    }
+};
+contentRemedyProperty = JSON.stringify(remedyProperty);
+System.debug(JSON.stringify(jsonObj));
+System.log("Remedy Property : " + contentRemedyProperty);
+System.log("vraId : " + vraId);
+]]></script>
+    <in-binding>
+      <bind name="jsonObj" type="Any" export-name="jsonObj"/>
+    </in-binding>
+    <out-binding>
+      <bind name="contentRemedyProperty" type="string" export-name="contentRemedyProperties"/>
+      <bind name="vraId" type="string" export-name="vraId"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="75.0" x="10.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task" script-module="com.vmware.pso.wellsfargo/patchVraMachineProperties">
+    <display-name><![CDATA[Add or Create property for remedy]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.wellsfargo").patchVraMachineProperties(accessToken,vraBaseUrl,vraId,content);
+]]></script>
+    <in-binding>
+      <bind name="accessToken" type="string" export-name="accessToken">
+        <description><![CDATA[Access Token for vRA API call]]></description>
+      </bind>
+      <bind name="vraBaseUrl" type="string" export-name="vraBaseUrl">
+        <description><![CDATA[URL of the vRA API]]></description>
+      </bind>
+      <bind name="vraId" type="string" export-name="vraId">
+        <description><![CDATA[vRA id of the virtual machine to patch]]></description>
+      </bind>
+      <bind name="content" type="string" export-name="contentRemedyProperties">
+        <description><![CDATA[Content (properties) to patch VM with]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="actionResultRemedy"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="130.0" x="10.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="restartAllServices" result-type="void" api-version="6.0.0" id="81e98a10-800d-4231-b8f2-0cec351e8483" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vcf.sddcmanager.powercli.appliance">
+  <param n="vcfqdn" t="string"><![CDATA[vCenter SDDC Manager is on]]></param>
+  <param n="vcuser" t="string"><![CDATA[vCenter user]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[vCenter password]]></param>
+  <param n="vmName" t="string"><![CDATA[name of the sddc manager vm]]></param>
+  <param n="remoteuser" t="string"><![CDATA[remote user on the sddc manager]]></param>
+  <param n="remotepassword" t="SecureString"><![CDATA[remote user password]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[ignore ssl certificate issues]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vcfqdn, "vcfqdn");
+dbc.ensureNotNullOrEmpty(vcuser, "vcuser");
+dbc.ensureNotNullOrEmpty(vcpassword, "vcpassword");
+dbc.ensureNotNullOrEmpty(vmName, "vmName");
+dbc.ensureNotNullOrEmpty(remoteuser, "remoteuser");
+dbc.ensureNotNullOrEmpty(remotepassword, "remotepassword");
+
+var script = "yes | sh /opt/vmware/vcf/operationsmanager/scripts/cli/sddcmanager_restart_services.sh";
+
+System.getModule("com.vmware.pso.remoteScript").runRemoteScript(
+    [vmName], //machineName
+    vcfqdn, 
+    vcuser, 
+    vcpassword, 
+    script, 
+    remoteuser, 
+    remotepassword,
+    ignoreSSLCertificate
+);]]></script>
+</dunes-script-module>

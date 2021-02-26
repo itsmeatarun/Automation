@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="addOrUpdateMachineProperties" result-type="string" api-version="6.0.0" id="d9fb497f-51fe-4738-a2e3-ebbafb6e4572" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="machineId" t="string"><![CDATA[]]></param>
+  <param n="customProperties" t="Any"><![CDATA[]]></param>
+  <param n="access_token" t="string"><![CDATA[]]></param>
+  <param n="vraBaseUrl" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[const opMethod = "PATCH";
+const opUrl = "/provisioning/uerp/resources/compute/{0}";
+const contentType = "application/json";
+const urlParamValues = [machineId];
+
+var headers = new Properties();
+headers.put("Authorization", "Bearer " + access_token);
+System.log("Content for Properties : " + customProperties);
+var contentJson = customProperties;
+var content = JSON.stringify(contentJson);
+
+var createOpResponse  = System.getModule("com.vmware.pso.wellsfargo").executeTransientRESTOperationWithTimeOutAndApiVersion(vraBaseUrl, null, null, opMethod, opUrl, urlParamValues, headers, contentType, content, null, null);
+
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to update machine properties  (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+
+var projectDetails = JSON.parse(createOpResponse.responseString)
+return projectDetails;]]></script>
+</dunes-script-module>

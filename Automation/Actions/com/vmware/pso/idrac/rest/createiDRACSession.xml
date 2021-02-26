@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createiDRACSession" result-type="Properties" api-version="6.0.0" id="53b379b6-5b65-4d7a-9d81-af21fead34f1" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.idrac.rest">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="idracUser" t="string"><![CDATA[]]></param>
+  <param n="idracPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(idracUser,"Input var: idracUser");
+dbc.ensureNotNullOrEmpty(idracPassword,"Input var: idracPassword");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(idracHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+var url = "/redfish/v1/Sessions";
+
+var body = {
+  "UserName": idracUser,
+  "Password": idracPassword
+};
+
+var method = "POST";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+
+var applicationSlashJson = "application/json";
+var	response = System.getModule("com.vmware.pso.rest.util").executeRestOperation(url, method, content, inParamtersValues, applicationSlashJson, headers, restHost);
+var responseContentAsString = response.contentAsString;
+System.debug("Status Code: " + response.statusCode);
+
+var	responseJson = "";
+try{
+    responseJson = JSON.parse(responseContentAsString);
+} catch (e) {
+    throw "Response is not valid JSON. " + e;
+}
+
+if (response.statusCode < 200 || response.statusCode > 299) {
+    if (responseJson != null && responseJson.error != null && responseJson.error.message != null && responseJson.error.detail != null) {
+        throw ['Error: ', responseJson.error.message, ', Detail: ', responseJson.error.detail].join('');
+    } else {
+        throw ('Error: ' + responseContentAsString);
+    }
+}
+
+dbc.ensureNotNullOrEmpty(responseJson.Id,"Session Id");
+var sessionId = responseJson.Id;
+var authToken = response.getHeaderValues("X-Auth-Token")[0];
+dbc.ensureNotNullOrEmpty(authToken,"Session Token");
+
+var sessionProps = new Properties();
+sessionProps.put("sessionId", sessionId);
+sessionProps.put("authToken", authToken);
+
+return sessionProps;]]></script>
+</dunes-script-module>

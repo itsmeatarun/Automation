@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="test2" result-type="string" api-version="6.0.0" id="8c831c21-3f74-44ab-9d27-f95d95e365a5" version="0.0.0" category-name="com.vmware.pso.wellsfargo">
+  <script encoded="false"><![CDATA[var result = System.getModule("com.vmware.pso.wellsfargo").test();
+
+System.log("RESULT: " + JSON.stringify(result));]]></script>
+</dunes-script-module>

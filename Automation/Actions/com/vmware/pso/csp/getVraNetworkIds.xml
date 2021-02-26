@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getVraNetworkIds" result-type="Array/string" api-version="6.0.0" id="1043dad0-991f-4a35-9175-5f69e69f320f" version="0.2.0" allowed-operations="evf" category-name="com.vmware.pso.csp">
+  <description><![CDATA[For a given machine, return an array of all attached network ids
+
+Note: Uses the project-service API, which may later be deprecated]]></description>
+  <param n="vraBaseUrl" t="string"><![CDATA[VMware Cloud Services API base URL]]></param>
+  <param n="access_token" t="string"><![CDATA[Auth bearer token]]></param>
+  <param n="machineId" t="string"><![CDATA[VirtualMachine Id]]></param>
+  <script encoded="false"><![CDATA[const opMethod = "GET";
+const opUrl = "/iaas/api/machines/{0}";
+const contentType = "application/json";
+const urlParamValues = [machineId];
+System.log("VM Id from action : "+machineId);
+var headers = new Properties();
+headers.put("Authorization", "Bearer " + access_token);
+
+var contentJson = "";
+var content = JSON.stringify(contentJson);
+
+var createOpResponse  = System.getModule("com.vmware.pso.rest").executeTransientRESTOperation(
+    vraBaseUrl,null,null,opMethod,opUrl,urlParamValues,headers,contentType,content);
+
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to add/update provisioning tags on project (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+
+var machineObject = JSON.parse(createOpResponse.responseString);
+
+var networkIds = [];
+var networkReferences = machineObject._links["network-interfaces"].hrefs;
+
+for (i=0; i< networkReferences.length; i++) {
+    System.debug("Network ID: " + networkReferences[i].split('/').pop());
+    networkIds.push(networkReferences[i].split('/').pop());
+}
+
+return networkIds;
+]]></script>
+</dunes-script-module>

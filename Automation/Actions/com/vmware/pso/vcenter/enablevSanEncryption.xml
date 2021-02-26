@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="enablevSanEncryption" result-type="void" api-version="6.0.0" id="c1c748e3-2ad4-48b9-a0c6-b097cc7b2362" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.vcenter">
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="clusterName" t="string"><![CDATA[Optional clsstername to enable encryp. If blank, all clusters will be enabled.]]></param>
+  <param n="kmsProviderName" t="string"><![CDATA[KMS Cluster name to use as KMS.]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(kmsProviderName,"Input var: kmsProviderName");
+
+var enableResult = System.getModule("com.vmware.pso.vcenter.powercli.storage").setVsanEncryption(vCenterFQDN,vCenterUser,vCenterPassword,clusterName,kmsProviderName,ignoreSSLCertificate);
+var enableStatus = enableResult.get("status");
+System.log("setVsanEncryption completed with status: " + enableStatus);
+if (enableStatus != "success") {
+    throw "enablevSanEncryption failed with error: " + enableResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

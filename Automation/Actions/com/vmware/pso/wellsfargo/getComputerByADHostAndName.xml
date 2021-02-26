@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getComputerByADHostAndName" result-type="AD:ComputerAD" api-version="6.0.0" id="5a7cab36-27d3-4e4e-825c-058ba636176c" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="vmName" t="string"><![CDATA[]]></param>
+  <param n="adHost" t="AD:AdHost"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var computerAD = ActiveDirectory.getComputerAD(vmName, adHost);
+if (computerAD)
+{   
+    System.log("Computer ("+vmName+") is found in selected AD Host ("+ computerAD.distinguishedName+")");
+
+    return computerAD;
+}
+else
+{
+    System.log("Computer ("+vmName+") is not found ");
+    return null;
+}]]></script>
+</dunes-script-module>

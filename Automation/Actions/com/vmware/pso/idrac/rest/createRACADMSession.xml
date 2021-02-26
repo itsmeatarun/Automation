@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createRACADMSession" result-type="string" api-version="6.0.0" id="fb88b777-9dff-414e-9243-d040e4e2692b" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.idrac.rest">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="idracUser" t="string"><![CDATA[]]></param>
+  <param n="idracPassword" t="SecureString"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(idracUser,"Input var: idracUser");
+dbc.ensureNotNullOrEmpty(idracPassword,"Input var: idracPassword");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(idracHost);
+
+var headers = new Properties();
+headers.put("Content-Type","application/xml");
+var url = "/cgi-bin/login";
+
+var body = "<?xml version='1.0'?><LOGIN><REQ><USERNAME>" + idracUser + "</USERNAME><PASSWORD>" + idracPassword + "</PASSWORD></REQ></LOGIN>";
+
+var method = "POST";
+var content = body;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+//System.debug("response xml: " + response);
+dbc.ensureNotNullOrEmpty(response,"Response Body");
+var responseJson = System.getModule("com.vmware.library.http-rest").xml2json(response);
+//System.debug("response json: " + JSON.stringify(responseJson));
+dbc.ensureNotNullOrEmpty(responseJson.LOGIN.RESP.SID,"Session ID");
+
+return responseJson.LOGIN.RESP.SID;]]></script>
+</dunes-script-module>

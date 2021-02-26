@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="rotateiDRACCertificate" result-type="void" api-version="6.0.0" id="51448ca7-df31-40de-898d-0b8d74d452be" version="0.0.2" allowed-operations="vfe" category-name="com.vmware.pso.idrac">
+  <param n="idracHost" t="string"><![CDATA[]]></param>
+  <param n="idracUser" t="string"><![CDATA[]]></param>
+  <param n="idracPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="certCommonName" t="string"><![CDATA[<hostname>r.wellsfargo.net]]></param>
+  <param n="certSAN" t="string"><![CDATA[IPv4 Address of iDRAC]]></param>
+  <param n="venafiHost" t="string"><![CDATA[]]></param>
+  <param n="venafiUser" t="string"><![CDATA[]]></param>
+  <param n="venafiPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="venafiPolicyDN" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(idracHost,"Input var: idracHost");
+dbc.ensureNotNullOrEmpty(idracUser,"Input var: idracUser");
+dbc.ensureNotNullOrEmpty(idracPassword,"Input var: idracPassword");
+dbc.ensureNotNullOrEmpty(certCommonName,"Input var: certCommonName");
+dbc.ensureNotNullOrEmpty(certSAN,"Input var: certSAN");
+dbc.ensureNotNullOrEmpty(venafiHost,"Input var: venafiHost");
+dbc.ensureNotNullOrEmpty(venafiUser,"Input var: venafiUser");
+dbc.ensureNotNullOrEmpty(venafiPassword,"Input var: venafiPassword");
+dbc.ensureNotNullOrEmpty(venafiPolicyDN,"Input var: venafiPolicyDN");
+
+System.log("Creating iDRAC API Session");
+var sessionProps = System.getModule("com.vmware.pso.idrac.rest").createiDRACSession(idracHost,idracUser,idracPassword);
+var idracSessionId = sessionProps.get("sessionId");
+var idracAuthToken = sessionProps.get("authToken");
+var localityName = "San Francisco";
+var organizationName = "Wells Fargo";
+var organizationUnit = "VHS";
+var stateName = "California";
+var emailAddress = "noemail@wellsfargo.com";
+
+System.log("Setting CSR Options");
+System.getModule("com.vmware.pso.idrac.rest").setCsrAttributes(idracHost,idracAuthToken,certCommonName,localityName,organizationName,organizationUnit,stateName,emailAddress,certSAN);
+
+System.log("Creating RACADM API Session");
+var racadmCookie = System.getModule("com.vmware.pso.idrac.rest").createRACADMSession(idracHost,idracUser,idracPassword);
+System.log("Generating CSR");
+var csr = System.getModule("com.vmware.pso.idrac.rest").generateCSR(idracHost,racadmCookie);
+System.debug("CSR: \n" + csr);
+
+System.log("Creating and Approve certificate request in Venafi");
+System.getModule("com.vmware.pso.venafi").createAndApproveCertificateWithCSR(venafiHost,venafiUser,venafiPassword,venafiPolicyDN,certCommonName,csr);
+
+System.log("Downloading certificate from Venafi");
+var certificateDN = venafiPolicyDN + '\\' + certCommonName;
+var privateKey = false;
+var includeChain = false;
+var certProps = System.getModule("com.vmware.pso.venafi").getCertificate(venafiHost,venafiUser,venafiPassword,certificateDN,privateKey,includeChain);
+var certificate = certProps.get("certificates").join("\r\n");
+System.debug("New certificate: \n" + certificate);
+
+System.log("Replacing server certificate in iDRAC");
+System.getModule("com.vmware.pso.idrac.rest").replaceServerCert(idracHost,idracAuthToken,certificate);
+
+System.log("Restarting iDRAC");
+System.getModule("com.vmware.pso.idrac.rest").restartiDRAC(idracHost,idracAuthToken);
+
+System.log("Certificate rotation complete, may be a few minutes before iDRAC is finished restarting.");
+
+return;]]></script>
+</dunes-script-module>

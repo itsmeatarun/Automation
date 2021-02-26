@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getVraDiskDetailsString" result-type="string" api-version="6.0.0" id="59cc0abb-3b53-433f-b463-bf2ec540469a" version="0.2.0" allowed-operations="evf" category-name="com.vmware.pso.csp">
+  <description><![CDATA[Get all vRA Disk Details for a machine, returns string which can be converted to a JSON object.
+
+Note: Uses the project-service API, which may later be deprecated]]></description>
+  <param n="vraBaseUrl" t="string"><![CDATA[VMware Cloud Services API base URL]]></param>
+  <param n="access_token" t="string"><![CDATA[Auth bearer token]]></param>
+  <param n="machineId" t="string"><![CDATA[VirtualMachine Id]]></param>
+  <script encoded="false"><![CDATA[System.log("Starting action: getVraDiskDetailsString");
+const opMethod = "GET";
+const opUrl = "/iaas/api/machines/{0}/disks";
+const contentType = "application/json";
+const urlParamValues = [machineId];
+System.log("VM Id from action : "+machineId);
+var headers = new Properties();
+headers.put("Authorization", "Bearer " + access_token);
+
+var contentJson = "";
+var content = JSON.stringify(contentJson);
+
+var createOpResponse  = System.getModule("com.vmware.pso.rest").executeTransientRESTOperation(
+    vraBaseUrl,null,null,opMethod,opUrl,urlParamValues,headers,contentType,content);
+
+if (createOpResponse.statusCode >= 400) {
+    throw "Failed to add/update provisioning tags on project (" + createOpResponse.statusCode + " Error). Details: " + createOpResponse.responseString;
+}
+
+var disksOutput = JSON.parse(createOpResponse.responseString);
+var disksObject = new  Object();
+
+for (i=0; i< disksOutput.content.length; i++) {
+    disksObject[disksOutput.content[i].externalId.split('-')[1]] = disksOutput.content[i];
+    disksObject[disksOutput.content[i].name] = disksOutput.content[i];
+}
+System.log("Ending action: getVraDiskDetailsString");
+return JSON.stringify(disksObject);]]></script>
+</dunes-script-module>

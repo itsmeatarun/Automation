@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="endvCenterSession" result-type="string" api-version="6.0.0" id="6beda319-6fd1-4db2-a66f-3b4a76f5f347" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.vcenter.rest">
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionID" t="string"><![CDATA[The active session to close.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(vCenterHost,"vCenterHost");
+dbc.ensureNotNullOrEmpty(sessionID,"sessionID");
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-api-session-id", sessionID);
+var url = "/com/vmware/cis/session";
+
+var method = "DELETE";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return response.value;
+]]></script>
+</dunes-script-module>

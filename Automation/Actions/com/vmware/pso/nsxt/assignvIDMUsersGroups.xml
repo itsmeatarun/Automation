@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="assignvIDMUsersGroups" result-type="void" api-version="6.0.0" id="08afbb0e-304a-41a1-934b-9b3046b20c2d" version="0.0.3" allowed-operations="evf" category-name="com.vmware.pso.nsxt">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="usersOrGroups" t="Array/string"><![CDATA[Array of User or Group names as it is displayed in vIDM. Capitalization matters.]]></param>
+  <param n="roles" t="Array/string"><![CDATA[Array of role names that corespond to usersOrGroups parameter]]></param>
+  <param n="isGroup" t="Array/boolean"><![CDATA[Array of boolean values that corespond to usersOrGroups.]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(usersOrGroups,"Input var: usersOrGroups");
+dbc.ensureNotNullOrEmpty(roles,"Input var: roles");
+dbc.ensureNotNullOrEmpty(isGroup,"Input var: isGroup");
+
+if (!(usersOrGroups.length == roles.length && usersOrGroups.length == isGroup.length)) {
+    throw "Input vars usersOrGroups, roles, isGroup all corespond to each other and must have same number of elements."
+}
+
+for (var i = 0; i < usersOrGroups.length; i++) {
+    System.log("Starting addvIDMUserOrGroupWithRole for "+ usersOrGroups[i]);
+	System.getModule("com.vmware.pso.nsxt.rest.settings").addvIDMUserOrGroupWithRole(nsxtHost,nsxtAdmin,nsxtPassword,usersOrGroups[i],roles[i],isGroup[i]);
+}
+
+return;]]></script>
+</dunes-script-module>

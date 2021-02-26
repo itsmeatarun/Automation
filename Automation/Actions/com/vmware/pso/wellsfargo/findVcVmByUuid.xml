@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="findVcVmByUuid" result-type="VC:VirtualMachine" api-version="6.0.0" id="b26803b8-ce5a-464f-a092-c852051d5a13" version="0.3.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="vmUuid" t="string"><![CDATA[VM ID To Find]]></param>
+  <param n="vcUuid" t="string"><![CDATA[VC UUID]]></param>
+  <script encoded="false"><![CDATA[var vCenterVm = null;
+var sdkConnection = VcPlugin.findSdkConnectionForUUID(vcUuid);
+
+try {
+    System.log("Trying to find VM on vCenter " + sdkConnection.name + ", with UUID: "+ vmUuid);
+    vCenterVm = sdkConnection.searchIndex.findByUuid(null, vmUuid, true, true);
+    if (vCenterVm != null) {
+        System.log("Resolved vCenter VM " + vCenterVm.name);
+    }
+} catch(e) {
+    System.warn("Unable to find VM by instance UUID :" + vmUuid + ", for SDK connection " + sdkConnection.name + ", reason : " + e);
+}
+
+return vCenterVm;]]></script>
+</dunes-script-module>

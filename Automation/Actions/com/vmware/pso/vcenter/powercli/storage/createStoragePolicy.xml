@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createStoragePolicy" result-type="Properties" api-version="6.0.0" id="cd01b8dd-6c92-44bc-9b15-25f12bfa3f5c" version="0.1.4" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.storage" memory-limit="512000000" timeout="1200">
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="storagePolicyName" t="string"><![CDATA[]]></param>
+  <param n="sPolicyDescription" t="string"><![CDATA[]]></param>
+  <param n="numDiskStripes" t="number"><![CDATA[]]></param>
+  <param n="failuresToTolerate" t="number"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $storagePolicyName = $inputs.storagePolicyName
+        $sPolicyDescription = $inputs.sPolicyDescription
+        [ValidateNotNullorEmpty()]
+        [int]$numDiskStripes = $inputs.numDiskStripes
+        [ValidateNotNullorEmpty()]
+        [int]$failuresToTolerate = $inputs.failuresToTolerate
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try {
+        Write-Host "Checking to see if Storage Policy '$storagePolicyName' exists"
+        $sPolicy = Get-SpbmStoragePolicy $storagePolicyName -ErrorAction SilentlyContinue
+
+        $spbmRules = @(
+            (New-SpbmRule -Capability (Get-SpbmCapability -Name "VSAN.hostFailuresToTolerate" ) -Value $failuresToTolerate),
+            (New-SpbmRule -Capability (Get-SpbmCapability -Name "VSAN.stripeWidth" ) -Value $numDiskStripes),
+            (New-SpbmRule -Capability (Get-SpbmCapability -Name "VSAN.replicaPreference" ) -Value "RAID-5/6 (Erasure Coding) - Capacity")
+        )
+
+        $spbmRuleSet = New-SpbmRuleSet -AllOfRules $spbmRules
+
+        if ($sPolicy) {
+            Write-Host "Updating Storage Policy '$storagePolicyName'."
+            $null = $sPolicy | Set-SpbmStoragePolicy -Name $storagePolicyName -Description $sPolicyDescription -AnyOfRuleSets $spbmRuleSet
+        } else {
+            Write-Host "Creating Storage Policy '$storagePolicyName'."
+            $null = New-SpbmStoragePolicy -Name $storagePolicyName -Description $sPolicyDescription -AnyOfRuleSets $spbmRuleSet
+        }
+
+    } catch {
+        Write-Host "Failed creating Datastore. Exiting." -ForegroundColor red
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    $output.add("status","success")
+    return $output
+}
+]]></script>
+</dunes-script-module>

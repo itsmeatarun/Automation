@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getCEIP" result-type="string" api-version="6.0.0" id="e2e2fd09-167c-4d9e-98bb-58c654ddf534" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.vcf.sddcmanager.rest.system.ceip">
+  <param n="host" t="string"><![CDATA[CB Host]]></param>
+  <param n="token" t="string"><![CDATA[CB Bearer Token]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(token, "token");
+
+return main();
+
+function main() {
+	var restHost = System.getModule("com.vmware.pso.vcf.sddcmanager.rest").getTransientSDDCManagerHost(host);
+	dbc.ensureNotNullOrEmpty(restHost, "restHost");
+	
+	var headers = new Properties();
+	headers.put("Accept", "application/json");
+	headers.put("Content-Type", "application/json");
+	headers.put("Authorization", token);
+	var url = "/v1/system/ceip";
+	
+	var method = "GET";
+	var content = null;
+	
+	var inParametersValues = null;
+	
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": CEIP status response '" + JSON.stringify(response) + "'");
+	
+	return JSON.stringify(response);
+}]]></script>
+</dunes-script-module>

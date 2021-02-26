@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createDTOLvl1VxrRole" result-type="void" api-version="6.0.0" id="5108040f-53da-4c37-bf1a-277c6eeabd79" version="0.0.2" category-name="com.vmware.pso.vcenter">
+  <description><![CDATA[Create custom role for DTO-Level1-Vxrail in specified vCenter.]]></description>
+  <param n="vCenterFQDN" t="string"><![CDATA[FQDN of the vCenter where vCenterVmName can be found.]]></param>
+  <param n="vCenterUser" t="string"><![CDATA[]]></param>
+  <param n="vCenterPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="roleName" t="string"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict"
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterFQDN,"Input var: vCenterFQDN");
+dbc.ensureNotNullOrEmpty(vCenterUser,"Input var: vCenterUser");
+dbc.ensureNotNullOrEmpty(vCenterPassword,"Input var: vCenterPassword");
+dbc.ensureNotNullOrEmpty(roleName,"Input var: roleName");
+
+var role = {
+  "name": roleName,
+  "privileges": [
+    "Host.Cim.CimInteraction",
+    "Host.Config.AdvancedConfig",
+    "Host.Config.AuthenticationStore",
+    "Host.Config.AutoStart",
+    "Host.Config.Connection",
+    "Host.Config.DateTime",
+    "Host.Config.Firmware",
+    "Host.Config.GuestStore",
+    "Host.Config.HyperThreading",
+    "Host.Config.Image",
+    "Host.Config.Maintenance",
+    "Host.Config.Memory",
+    "Host.Config.NetService",
+    "Host.Config.Network",
+    "Host.Config.Nvdimm",
+    "Host.Config.Patch",
+    "Host.Config.PciPassthru",
+    "Host.Config.Power",
+    "Host.Config.ProductLocker",
+    "Host.Config.Quarantine",
+    "Host.Config.Resources",
+    "Host.Config.Settings",
+    "Host.Config.Snmp",
+    "Host.Config.Storage",
+    "Host.Config.SystemManagement",
+    "Host.Hbr.HbrManagement",
+    "Host.Inventory.AddHostToCluster",
+    "Host.Inventory.AddStandaloneHost",
+    "Host.Inventory.CreateCluster",
+    "Host.Inventory.DeleteCluster",
+    "Host.Inventory.EditCluster",
+    "Host.Inventory.ManageClusterLifecyle",
+    "Host.Inventory.MoveCluster",
+    "Host.Inventory.MoveHost",
+    "Host.Inventory.RemoveHostFromCluster",
+    "Host.Inventory.RenameCluster",
+    "Host.Local.CreateVM",
+    "Host.Local.DeleteVM",
+    "Host.Local.InstallAgent",
+    "Host.Local.ManageUserGroups",
+    "Host.Local.ReconfigVM",
+    "Profile.Edit",
+    "Profile.View",
+    "vxrail.Manage",
+    "vxrail.View"
+  ]
+};
+var roleJSON = JSON.stringify(role);
+var overwriteExisting = true;
+
+var createResult = System.getModule("com.vmware.pso.vcenter.powercli.accesscontrol").createRole(vCenterFQDN,vCenterUser,vCenterPassword,roleJSON,overwriteExisting,ignoreSSLCertificate);
+var createStatus = createResult.get("status");
+System.log("createRole completed with status: " + createStatus);
+if (createStatus != "success") {
+    throw "createDTOLvl1VxrRole failed with error: " + createResult.get("error");
+}
+
+return;]]></script>
+</dunes-script-module>

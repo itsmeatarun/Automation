@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config-element id="3c2e0092-6448-49f4-8b5f-eaea26743b0c" version="0.2.3">
+  <display-name><![CDATA[vRA API Configuration]]></display-name>
+  <description><![CDATA[Configuration related to accessing vRA REST API, including recently used Access Token and date token was issued.]]></description>
+  <atts>
+    <att name="vraBaseUrl" type="string" read-only="false">
+      <value encoded="n"><![CDATA[https://vdsl1-vra.wellsfargo.net/]]></value>
+    </att>
+    <att name="vraApiUserName" type="string" read-only="false">
+      <value encoded="n"><![CDATA[vrealize.admin]]></value>
+    </att>
+    <att name="vraApiUserPassword" type="SecureString" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+    <att name="accessToken" type="string" read-only="false">
+      <value encoded="n"><![CDATA[__NULL__]]></value>
+    </att>
+    <att name="accessTokenIssued" type="Date" read-only="false">
+      <value encoded="n"><![CDATA[20201202185600062+0000]]></value>
+    </att>
+    <att name="apiVersion" type="string" read-only="false">
+      <value encoded="n"><![CDATA[2019-01-15]]></value>
+    </att>
+  </atts>
+</config-element>

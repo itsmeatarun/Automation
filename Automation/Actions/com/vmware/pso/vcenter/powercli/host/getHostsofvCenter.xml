@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getHostsofvCenter" result-type="Array/string" api-version="6.0.0" id="0cc906c1-b187-4707-9bf0-1ff2b7caf82a" version="0.0.1" allowed-operations="vfe" category-name="com.vmware.pso.vcenter.powercli.host" memory-limit="1024000000" timeout="1200">
+  <runtime><![CDATA[powercli:12-powershell-7.0]]></runtime>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate  
+    } catch {
+        throw "Failed Processing Inputs. $($_.Exception.Message)."
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Failed connecting to vCenter. $($_.Exception.Message)."     
+    } 
+    try {
+        Write-Host "Looking ESXi Hosts"
+        $vmHosts = Get-VMHost -ErrorAction SilentlyContinue #| sort -Property @(@{e={$_.parent.name}},@{e={$_.name}})
+
+        if ($vmHosts) {
+            Write-Host "Found $($vmHosts.Count) ESXi Hosts."
+            $vmHostNames = $vmHosts | select -ExpandProperty Name
+        } else {
+            throw "No ESXi Hosts found. In vCenter '$vcfqdn'"
+        }
+
+    } catch {
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        throw "Failed finding hosts. $($_.Exception.Message)."
+    }
+
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+
+    return $vmHostNames
+}
+]]></script>
+</dunes-script-module>

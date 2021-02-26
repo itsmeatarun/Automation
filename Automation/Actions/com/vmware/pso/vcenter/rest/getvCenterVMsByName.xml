@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getvCenterVMsByName" result-type="string" api-version="6.0.0" id="6bd63023-374c-463e-819e-7713b73c859e" version="0.1.2" allowed-operations="evf" category-name="com.vmware.pso.vcenter.rest">
+  <description><![CDATA[Returns JSON array of VM objects matching the names provided.]]></description>
+  <param n="vCenterHost" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="sessionID" t="string"><![CDATA[vCenter Session Token]]></param>
+  <param n="vmNames" t="Array/string"><![CDATA[Array of VM names to find in vCenter.]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(vCenterHost,"vCenterHost");
+dbc.ensureNotNullOrEmpty(sessionID,"sessionID");
+dbc.ensureNotNullOrEmpty(vmNames,"vmNames");
+
+var filterArr = [];
+for each (var name in vmNames){
+    filterArr.push("filter.names=" + name);
+}
+var vmNameURL = filterArr.join('&');
+
+var restHost = System.getModule("com.vmware.pso.vcenter.rest").getTransientvCenterHost(vCenterHost);
+
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("vmware-api-session-id", sessionID);
+var url = "/vcenter/vm?" + vmNameURL;
+
+var method = "GET";
+var content = null;
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+dbc.ensureNotNullOrEmpty(response.value,"No VMs found matching provided name(s). response.value");
+return JSON.stringify(response.value);
+]]></script>
+</dunes-script-module>

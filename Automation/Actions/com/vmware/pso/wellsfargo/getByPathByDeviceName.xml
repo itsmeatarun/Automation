@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getByPathByDeviceName" result-type="string" api-version="6.0.0" id="28c0cfec-8509-4c7a-88ea-8f8aa3810520" version="0.2.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="deviceName" t="string"><![CDATA[Input format (controller : harddisk#)]]></param>
+  <param n="byPathsFromVM" t="string"><![CDATA[All by-path]]></param>
+  <script encoded="false"><![CDATA[    var ctrlIndex = 2;
+    var diskIndex = 4;
+    var ctrlDisk = GetControllerAndDiskIndex (deviceName);
+    
+    var by_paths = ReadByPath(byPathsFromVM);
+    
+    var validatedby_paths = ValidatedByPathFromDevice (by_paths);
+    
+    var by_pathTemplate = LoadScsiTemplate();
+    
+    var updatedby_path = ConvertDeviceNameToBy_Path(ctrlDisk[0], ctrlDisk[1], by_pathTemplate, validatedby_paths);
+    
+    return updatedby_path.trim();
+
+
+    function GetControllerAndDiskIndex (deviceName)
+    {
+        var devices = deviceName.replace("(","").replace(")","");
+        var x = devices.split(":")[0];
+        var y = devices.split(":")[1];
+        if (x == '0')
+        {
+            x = '10';
+        }
+        else 
+        { 
+            System.log("X : " + x);
+            
+            x = String(parseInt(x) + 2);
+            System.log("X+2 : " + x);
+            x = ["0",x].join("");
+        }                              
+
+        return [x,y];
+    }
+
+    function ReadByPath(byPathsOutPut)
+    {   
+        return byPathsOutPut.split(" ");
+    }
+    
+    function ValidatedByPathFromDevice (by_paths) 
+    {   
+        var byPaths =[];
+        var tempPath = [];
+        for(var i=0;i<byPathsFromVM.split("").length; i++)
+        {
+            if(byPathsFromVM[i].toUpperCase() == 'P')
+            {
+                byPaths.push(tempPath.join(""));
+                tempPath = null;
+                tempPath = [];
+                tempPath.push(byPathsFromVM[i]);
+            }
+            else if (byPathsFromVM[i]!= ' ')
+            {
+                tempPath.push(byPathsFromVM[i]);
+            }
+        }
+        
+        byPaths.push(tempPath.join(""));
+        return byPaths;
+    }
+
+    function LoadScsiTemplate()
+    { 
+        var params = ["pci-0000","00", "00.0-scsi-0", "0", "0","0"];
+        return params
+    }
+
+    function ConvertDeviceNameToBy_Path (x,y,by_pathTemplate, by_pathFromDevice)
+    {   
+        by_pathTemplate = UpdateScsiPart(x,by_pathTemplate);
+        returnBy_path = "Couldn't find any path which matches your device name";
+        by_pathTemplate[diskIndex] = y;
+        for  (var i = 0; i < by_pathFromDevice.length; i ++ )
+        {
+            
+            if (GetMatchingBy_Path(by_pathFromDevice[i], by_pathTemplate) == "true")
+            {   
+                by_pathTemplate[0]=by_pathFromDevice[i].split(":")[0];
+                by_pathTemplate[1]=by_pathFromDevice[i].split(":")[1];
+                returnBy_path = by_pathTemplate.join(":");
+            }
+        }                         
+        return returnBy_path                 
+    }
+    
+    function UpdateScsiPart(x,by_path)
+    {   
+        sections = by_path[ctrlIndex].split(".")
+        if (x.length == 2)
+        { 
+            sections[0]=x;
+                                }
+        else if (x.length ==1)
+                                {
+            sections[0]="0"+x;              
+        }
+        by_path[ctrlIndex]=sections.join(".")
+                
+        return  by_path
+    }
+    
+    function GetMatchingBy_Path (deviceBy_path, buildBy_path)
+    {
+        if (buildBy_path.slice(2,5).join(":") == deviceBy_path.split(":").slice(2,5).join(":"))
+            {
+                return "true"; 
+            }
+        else
+            {
+                return "false";
+            }
+                                
+    }
+    
+    function ConvertHashToArray (hashValues)
+    {   
+        //result= MergeArrayItemToString(hashValues)
+                    //results=result.split(":")
+                    return hashValues
+    }
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getEnvironmentConfiguration" result-type="string" api-version="6.0.0" id="a3388f56-fa64-4c87-8cc8-d3ef5f659aa5" version="0.0.0" allowed-operations="vfe" category-name="com.vmware.pso.vrealize.lcm.rest.lcops.environments">
+  <param n="host" t="string"><![CDATA[]]></param>
+  <param n="environment" t="string"><![CDATA[]]></param>
+  <param n="type" t="string"><![CDATA[]]></param>
+  <param n="username" t="string"><![CDATA[]]></param>
+  <param n="password" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+
+dbc.ensureNotNullOrEmpty(host, "host");
+dbc.ensureNotNullOrEmpty(environment, "environment");
+dbc.ensureNotNullOrEmpty(username, "username");
+dbc.ensureNotNullOrEmpty(password, "password");
+
+return main();
+
+function main() { 
+    var restHost = System.getModule("com.vmware.pso.vrealize.lcm.rest").getTransientRESTHost(host, username, password);
+    dbc.ensureNotNullOrEmpty(restHost,"restHost");
+
+	var headers = new Properties();
+	headers.put("Accept","application/json");
+	headers.put("Content-Type","application/json");
+	
+	var url = "lcm/lcops/api/environments/{environment}/configuration?type={type}";
+	
+	var method = "GET";
+    var content = null;
+	var inParametersValues = [environment, type]
+	
+	var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParametersValues, method, content, url, headers);
+	
+	System.debug(actionName + ": backup-configuration response '" + JSON.stringify(response) + "'");	
+	
+	return JSON.stringify(response);
+}]]></script>
+</dunes-script-module>

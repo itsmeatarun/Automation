@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="runRemoteScript" result-type="Properties" api-version="6.0.0" id="977f1ae5-106a-46fb-b9b5-f341f6035415" version="0.1.5" allowed-operations="evf" category-name="com.vmware.pso.remoteScript" memory-limit="512000000" timeout="1200">
+  <description><![CDATA[Runs script in Guest]]></description>
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="machinenames" t="Array/string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="script" t="string"><![CDATA[]]></param>
+  <param n="remoteuser" t="string"><![CDATA[]]></param>
+  <param n="remotepassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        #$inputsString = $inputs | ConvertTo-Json -Compress
+        #Write-Host "Inputs were $inputsString"
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $script = $inputs.script
+        [ValidateNotNullorEmpty()]
+        $remoteuser = $inputs.remoteuser
+        [ValidateNotNullorEmpty()]
+        $remotepassword = $inputs.remotepassword
+        [ValidateNotNullorEmpty()]
+        $vmNames = $inputs.machinenames
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    } 
+    try{
+        $vms = Get-vm -name $vmNames
+        $runnableVMs = $vms | ?{$_.ExtensionData.Guest.ToolsRunningStatus -eq "guestToolsRunning"}
+        if ($runnableVMs.Count -lt 1) {
+            $vm = $vms | ?{$_.PowerState -eq "PoweredOn"} | select -First 1
+            if ($vm.count -eq 0) {
+                throw "No VMs powered on in input VMs ($($vmNames -join ", "))"
+            }
+            Write-Host "WARNING: No VM with guestToolsRunning found. Attempting to invoke script in $($vm.Name) anyways."
+        } else {
+            $vm = $runnableVMs | Get-Random -Count 1
+            Write-Host "Invoking script in $($vm.Name)."
+            #Write-Host "Script: $script"
+        }
+        $result = Invoke-VMScript -VM $vm -ScriptText $script -GuestUser $remoteuser -GuestPassword $remotepassword -ToolsWaitSecs 600
+        Write-Host "Script completed with exit code: $($result.ExitCode)"
+        Write-Host "Script Logs:"
+        Write-Host "$($result.ScriptOutput)"
+    } catch {
+        Write-Host "Failed Executing VM Script. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+        return $output        
+    }
+    
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}
+    
+    if ( $result.ExitCode -ne 0 ) {
+        $output.add("status","failed")
+        $output.add("error","Script completed with exit code: $($result.ExitCode)`r`nOutput:`r`n$($result.ScriptOutput)")
+    } else {
+        $output.add("status","success")
+    }
+    return $output
+}
+]]></script>
+</dunes-script-module>

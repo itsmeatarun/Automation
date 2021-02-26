@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getADHostByContainerOU" result-type="AD:AdHost" api-version="6.0.0" id="8a0419e9-b8ea-4de1-9a88-470ce7f33aae" version="0.0.0" allowed-operations="evf" category-name="com.vmware.pso.wellsfargo">
+  <param n="vmContainerOu" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var ouContainers = vmContainerOu.split(",");
+var adHostName = "";
+var adHost;
+var initialCount = ouContainers.length - 4;
+for(var i = initialCount; i < ouContainers.length; i++)
+{
+    adHostName += "."+ouContainers[i].split("=")[1];
+}
+
+adHostName = adHostName.split(".").slice(1,adHostName.split(".").length).join(".");
+
+var hosts = Server.findAllForType("AD:AdHost");
+for( index in hosts )
+{
+    if(hosts[index].hostConfiguration.name == adHostName)
+        adHost = hosts[index];
+}
+if(adHost)
+    System.log("Found " + adHost.name + " host in inventory");
+else
+    System.log(adHostName + " is not found in the vRO inventory, Please add the AD host in the vRO inventory");
+    
+return adHost;]]></script>
+</dunes-script-module>

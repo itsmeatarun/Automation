@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="setvIDMIntegration" result-type="string" api-version="6.0.0" id="ee1d4ee3-68cb-4af2-845a-87edca5bd228" version="0.1.2" allowed-operations="vfe" category-name="com.vmware.pso.nsxt.rest.settings">
+  <param n="nsxtHost" t="string"><![CDATA[]]></param>
+  <param n="nsxtAdmin" t="string"><![CDATA[]]></param>
+  <param n="nsxtPassword" t="SecureString"><![CDATA[]]></param>
+  <param n="vIDM_Host" t="string"><![CDATA[vCenter Host]]></param>
+  <param n="vIDM_ClientID" t="string"><![CDATA[]]></param>
+  <param n="vIDM_ClientSecret" t="SecureString"><![CDATA[]]></param>
+  <param n="vIDM_Thumbprint" t="string"><![CDATA[]]></param>
+  <param n="usingExternalLB" t="boolean"><![CDATA[]]></param>
+  <param n="enablevIDM" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA["use strict";
+
+var actionName = arguments.callee.name.substr(6);
+System.debug("			Executing action: " + actionName);
+
+var dbc = System.getModule("com.vmware.pso.util.testing").DesignByContract();
+dbc.ensureNotNullOrEmpty(nsxtHost,"Input var: nsxtHost");
+dbc.ensureNotNullOrEmpty(nsxtAdmin,"Input var: nsxtAdmin");
+dbc.ensureNotNullOrEmpty(nsxtPassword,"Input var: nsxtPassword");
+dbc.ensureNotNullOrEmpty(vIDM_Host,"Input var: vIDM_Host");
+dbc.ensureNotNullOrEmpty(vIDM_ClientID,"Input var: vIDM_ClientID");
+dbc.ensureNotNullOrEmpty(vIDM_ClientSecret,"Input var: vIDM_ClientSecret");
+dbc.ensureNotNullOrEmpty(vIDM_Thumbprint,"Input var: vIDM_Thumbprint");
+dbc.ensureNotNullOrEmpty(usingExternalLB,"Input var: usingExternalLB");
+dbc.ensureNotNullOrEmpty(enablevIDM,"Input var: enablevIDM");
+
+var restHost = System.getModule("com.vmware.pso.rest.util").getTransientRESTHost(nsxtHost);
+
+var auth = System.getModule("com.vmware.pso.cryptojs").base64Encode(nsxtAdmin + ":" + nsxtPassword);
+var headers = new Properties();
+headers.put("Accept","application/json");
+headers.put("Content-Type","application/json");
+headers.put("Authorization","Basic " + auth);
+var url = "/api/v1/node/aaa/providers/vidm";
+
+var body = {
+  "lb_enable": usingExternalLB,
+  "vidm_enable": enablevIDM,
+  "host_name": vIDM_Host,
+  "thumbprint": vIDM_Thumbprint,
+  "client_id": vIDM_ClientID,
+  "client_secret": vIDM_ClientSecret,
+  "node_host_name": nsxtHost
+};
+
+var method = "PUT";
+var content = JSON.stringify(body);
+var inParamtersValues = null;
+var response = System.getModule("com.vmware.pso.rest.util").runRestApiCall(restHost, inParamtersValues, method, content, url, headers);
+
+return;]]></script>
+</dunes-script-module>

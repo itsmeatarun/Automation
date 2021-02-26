@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="7a348a06-7680-4cb7-965e-7b7cde23c058" editor-version="2.0" version="0.0.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>unlock vlcc2 sddc root</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="300.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <runtime>powercli:12-powershell-7.0</runtime>
+        <script encoded="false">function Handler($context, $inputs) {&#13;
+    $output = @{}&#13;
+&#13;
+    $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false&#13;
+&#13;
+    $viConnection = Connect-VIServer vlcc2-mwld-vc.ntec.wellsfargo.net -User administrator@vsphere.local -Password 'VMware12345!'&#13;
+    $vm = Get-VM -Name vlcc2-sddc -Server $viConnection  &#13;
+&#13;
+    $command = "/usr/sbin/pam_tally2 --reset --user root\n"&#13;
+    Execute-Command -vm $vm -command $command -sddcManagerGuestUser root -sddcManagerGuestPassword 'VMware12345!'&#13;
+&#13;
+    try { Disconnect-VIServer -Server $viConnection -Confirm:$false } catch {}&#13;
+&#13;
+    $output.add("status","success")&#13;
+    return $output&#13;
+}&#13;
+&#13;
+function Execute-Command {&#13;
+    [CmdletBinding()]&#13;
+    Param (&#13;
+        [parameter(Mandatory=$true,ValueFromPipeline=$true)]&#13;
+        [ValidateNotNullOrEmpty()]&#13;
+        [PSObject[]]$vm,&#13;
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]&#13;
+        [ValidateNotNullOrEmpty()]&#13;
+        [String]$command,&#13;
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]&#13;
+        [ValidateNotNullOrEmpty()]&#13;
+        [String]$sddcManagerGuestUser,&#13;
+        [parameter(Mandatory=$true,ValueFromPipeline=$false)]&#13;
+        [ValidateNotNullOrEmpty()]&#13;
+        [String]$sddcManagerGuestPassword&#13;
+    )&#13;
+&#13;
+    begin {&#13;
+    }&#13;
+&#13;
+    process {&#13;
+        $task = Invoke-VMScript -VM $vm -ScriptText $command -ScriptType Bash -GuestUser $sddcManagerGuestUser -GuestPassword $sddcManagerGuestPassword -ToolsWaitSecs 600 -RunAsync&#13;
+        &#13;
+        while ($task.State -eq "Running") {	Start-Sleep -Seconds 5 }&#13;
+        &#13;
+        Write-Host "Script completed with exit code: $($task.result.ExitCode)"&#13;
+        Write-Host "Script Logs:"&#13;
+        Write-Host "$($task.result.ScriptOutput)"   &#13;
+&#13;
+        if($($task.result.ExitCode) -gt 0) {&#13;
+            Write-Host "Error executing '$command'. Exited with code $($task.result.ExitCode)"&#13;
+            throw "Error executing '$command'. Exited with code $($task.result.ExitCode)"&#13;
+        }&#13;
+    }&#13;
+ &#13;
+    end {&#13;
+    }&#13;
+}</script>
+        <in-binding/>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="170.0"/>
+    </workflow-item>
+    <presentation/>
+</ns2:workflow>

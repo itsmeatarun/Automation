@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="copyFileToGuest" result-type="Properties" api-version="6.0.0" id="ada7c82c-6aec-49a9-a452-f404dab443e5" version="0.1.5" allowed-operations="vfe" category-name="com.vmware.pso.remoteScript" memory-limit="512000000" timeout="1200">
+  <description><![CDATA[Copies file to guest OS]]></description>
+  <runtime><![CDATA[powercli:11-powershell-6.2]]></runtime>
+  <param n="machinename" t="string"><![CDATA[]]></param>
+  <param n="vcfqdn" t="string"><![CDATA[]]></param>
+  <param n="vcuser" t="string"><![CDATA[]]></param>
+  <param n="vcpassword" t="SecureString"><![CDATA[]]></param>
+  <param n="fileAsString" t="string"><![CDATA[]]></param>
+  <param n="filename" t="string"><![CDATA[Optional. Use name with extension. If left blank, generated temp filename & type will be used.]]></param>
+  <param n="pathInGuest" t="string"><![CDATA[Local path to copy the fil inside the guest.]]></param>
+  <param n="remoteuser" t="string"><![CDATA[]]></param>
+  <param n="remotepassword" t="SecureString"><![CDATA[]]></param>
+  <param n="ignoreSSLCertificate" t="boolean"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $output = @{}
+    try{
+        #$inputsString = $inputs | ConvertTo-Json -Compress
+        #Write-Host "Inputs were $inputsString"
+        [ValidateNotNullorEmpty()]
+        $vcfqdn = $inputs.vcfqdn
+        [ValidateNotNullorEmpty()]
+        $vcuser = $inputs.vcuser
+        [ValidateNotNullorEmpty()]
+        $vcpassword = $inputs.vcpassword
+        [ValidateNotNullorEmpty()]
+        $fileAsString = $inputs.fileAsString
+        $filename = $inputs.filename
+        [ValidateNotNullorEmpty()]
+        $pathInGuest = $inputs.pathInGuest
+        [ValidateNotNullorEmpty()]
+        $remoteuser = $inputs.remoteuser
+        [ValidateNotNullorEmpty()]
+        $remotepassword = $inputs.remotepassword
+        [ValidateNotNullorEmpty()]
+        $vmName = $inputs.machinename
+        $ignoreSSLCertificate = $inputs.ignoreSSLCertificate
+    } catch {
+        Write-Host "Failed Processing Inputs. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        return $output
+    }
+    try {
+        if($ignoreSSLCertificate) {
+            $powerCLIConfig = Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+        }
+        Write-Host "Connecting to vCenter: $vcfqdn"
+        $viConnection = Connect-VIServer $vcfqdn -User $vcuser -Password $vcpassword
+    } catch {
+        Write-Host "Failed connecting to vCenter. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server * -Confirm:$false } catch {}
+        return $output        
+    } 
+    try{
+        $vm = Get-vm -name $vmName
+        if ($vm.ExtensionData.Guest.ToolsRunningStatus -ne "guestToolsRunning") {
+            $vm = $vms | ?{$_} | select -First 1
+            if ($vm.PowerState -ne "PoweredOn") {
+                throw "$($vm.Name) is not powered on. Exiting."
+            }
+            Write-Host "WARNING: No VM with guestToolsRunning found. Attempting to copy file to $($vm.Name) anyways."
+        } else {
+            Write-Host "Copying file to $($vm.Name)."
+        }
+
+        $tempFile = New-TemporaryFile
+        $null = Set-Content -Path $tempFile.FullName -Value $fileAsString
+
+        if ($vm.Guest.GuestFamily -eq "linuxGuest") {
+            $slash = "/"
+        } else {
+            $slash = "\"
+        }
+
+        if ($pathInGuest[-1] -ne $slash) {
+            $pathInGuest = $pathInGuest + $slash
+        }
+
+        if ($filename) {
+            $guestPath = $pathInGuest + $filename
+        } else {
+            $guestPath = $pathInGuest + ($tempFile.Name)
+        }
+
+        $null = Copy-VMGuestFile -VM $vm -Source $tempFile.FullName -Destination $guestPath -LocalToGuest -GuestUser $remoteuser -GuestPassword $remotepassword -ToolsWaitSecs 600
+        Write-Host "File copy completed successfully."
+    } catch {
+        Write-Host "Failed Executing VM Script. Exiting."
+        $output.add("status","failed")
+        $output.add("error",$_.Exception.Message)
+        try { Disconnect-VIServer -Server * -Confirm:$false } catch {}
+        return $output        
+    }
+
+    try { Disconnect-VIServer -Server * -Confirm:$false } catch {}
+    
+    $output.add("status","success")
+    $output.add("guestFilePath",$guestPath)
+    
+    return $output
+}
+]]></script>
+</dunes-script-module>
